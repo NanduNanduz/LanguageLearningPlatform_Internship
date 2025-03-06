@@ -32,10 +32,10 @@ export const login =async (req,res,next)=>{
 
   try {
     const isCorrect = await bcrypt.compare(req.body.password,user.password)
-    if (user.password === req.body.password) {
+    if (isCorrect) {
       const payload = { Email: user.email, password: user.password };
       const token = jwt.sign(payload,process.env.JWT_KEY);
-      return res.status(200).send({ user: user, token: token });
+      return res.status(200).send({ user: user, token: token }).json({message:"Login success"});
     } else {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
@@ -44,25 +44,3 @@ export const login =async (req,res,next)=>{
   }
 }
 
-//CHECKING AVAILABILITY OF EXISTING USERNAME AND EMIAL
-export const checkAvailability = async (req, res, next) => {
-    try {
-        const { username, email } = req.body;
-
-        // Check if the username exists
-        if (username) {
-            const existingUser = await userModel.findOne({ username });
-            if (existingUser) return res.status(400).json({ message: "Username already taken." });
-        }
-
-        // Check if the email exists
-        if (email) {
-            const existingEmail = await userModel.findOne({ email });
-            if (existingEmail) return res.status(400).json({ message: "Email already registered." });
-        }
-
-        res.status(200).json({ message: "Available" });
-    } catch (err) {
-        next(err);
-    }
-};
