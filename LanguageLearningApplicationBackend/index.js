@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 app.use(morgan('dev'));
 app.use(cors());
-db();
+db(); // calling db
 
 app.use('/auth', authRoutes); // Ensure the route prefix is correct
 
