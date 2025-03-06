@@ -1,7 +1,6 @@
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import createError from "../utils/createError.js";
 
 export const register =async (req,res , next)=>{
 
@@ -24,39 +23,28 @@ export const register =async (req,res , next)=>{
     }
 }
 
+//LOGIN FUNCTIONALITY
 export const login =async (req,res,next)=>{
-    try {
-        // Find the user in the database by username
-        const user= await userModel.findOne({username:req.body.username});
-        
-        if (!user) return next(createError(404,"User Not Found!"));
+    const user = await userModel.findOne({ email: req.body.Email });
+  if (!user) {
+    return res.status(400).json({ message: "not found" });
+  }
 
-        // Compare the entered password with the hashed password in the database (Async version)
-        const isCorrect = await bcrypt.compare(req.body.password, user.password);
-        if (!isCorrect) 
-            return next(createError(404,"Wrong password or username!"));
-
-
-        
-        //  Generate a JWT token with user ID & isSeller flag
-        const token = jwt.sign(
-            {   id:user._id, isSeller:user.isSeller, },  // Payload (Data stored in token)
-                process.env.JWT_KEY);  // Secret key from environment variables
-
-
-         // Destructure user data to exclude password before sending the response
-        const {password, ...userInfo}=user._doc;
-
-        //  Store JWT token in a **HTTP-only cookie** (prevents XSS attacks)
-        res.cookie("accessToken", token , { httpOnly:true,})
-            .status(200)
-            .send(userInfo);   // Send user info (without password) as response
-    } catch (err) {
-        next(err);
+  try {
+    const isCorrect = await bcrypt.compare(req.body.password,user.password)
+    if (user.password === req.body.password) {
+      const payload = { Email: user.email, password: user.password };
+      const token = jwt.sign(payload,process.env.JWT_KEY);
+      return res.status(200).send({ user: user, token: token });
+    } else {
+      return res.status(400).json({ message: "Invalid Credentials" });
     }
+  } catch (error) {
+    return res.status(500).json({ message: "Invalid Login" });
+  }
 }
 
-
+//CHECKING AVAILABILITY OF EXISTING USERNAME AND EMIAL
 export const checkAvailability = async (req, res, next) => {
     try {
         const { username, email } = req.body;
