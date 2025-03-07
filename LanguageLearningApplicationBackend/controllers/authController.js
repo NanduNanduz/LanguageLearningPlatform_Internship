@@ -127,3 +127,32 @@ export const verifyOtp = async (req, res, next) => {
 
     return res.status(200).json({ message: "OTP verified successfully." });
 }
+
+//NEW PASSWORD
+export const newPass = async(req,res,next)=>{
+    const { email, newPassword, newConfirmPassword } = req.body;
+
+    // Check if newPassword and newConfirmPassword match
+    if (newPassword !== newConfirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match." });
+    }
+
+    // Find the user by email
+    const user = await userModel.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: "User not found." });
+    }
+
+    try {
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 5);
+        
+        // Update the user's password
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.status(200).json({ message: "Password updated successfully." });
+    } catch (err) {
+        next(err);
+    }
+}
