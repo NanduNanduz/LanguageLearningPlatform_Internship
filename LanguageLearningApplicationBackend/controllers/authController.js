@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from 'nodemailer'; // Import nodemailer for sending emails
 import crypto from 'crypto'; // Import crypto for generating OTP
+
 //SIGNUP
 export const register = async (req, res, next) => {
     const { name, email, password, confirmPassword } = req.body;
@@ -45,7 +46,6 @@ export const register = async (req, res, next) => {
     }
 };
 
-
 //LOGIN FUNCTIONALITY
 export const login = async (req, res, next) => {
     const user = await userModel.findOne({ email: req.body.Email });
@@ -67,9 +67,8 @@ export const login = async (req, res, next) => {
     }
 }
 
+
 //RESET PASSWORD
-
-
 export const resetPassword = async (req, res, next) => {
     const { email } = req.body;
 
@@ -87,7 +86,6 @@ export const resetPassword = async (req, res, next) => {
     await emailEntry.save(); // Save the OTP and email to the database
 
     // Send OTP via email
-
     const transporter = nodemailer.createTransport({
         service: 'gmail', // Use your email service
         auth: {
@@ -111,5 +109,21 @@ export const resetPassword = async (req, res, next) => {
     });
 }
 
+//VERIFY OTP
 export const verifyOtp = async (req, res, next) => {
+    const { email, otp } = req.body;
+
+    // Check if the OTP and email exist in the database
+    const emailEntry = await EmailModel.findOne({ email, otp });
+    if (!emailEntry) {
+        return res.status(400).json({ message: "Invalid OTP or email." });
+    }
+
+    // Check if the OTP is still valid
+    const isExpired = new Date() > emailEntry.expiresAt;
+    if (isExpired) {
+        return res.status(400).json({ message: "OTP has expired." });
+    }
+
+    return res.status(200).json({ message: "OTP verified successfully." });
 }
