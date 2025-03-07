@@ -12,7 +12,7 @@ const emailSchema = new mongoose.Schema({
     },
     expiresAt: {
         type: Date,
-        default: () => new Date(Date.now() + 2 * 60 * 1000), // 2 minutes from now
+        default: () => new Date(Date.now() + 3 * 60 * 1000), // 3 minutes from now
         index: { expires: 0 }
     }
 });
