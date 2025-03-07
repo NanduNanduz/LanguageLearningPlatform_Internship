@@ -1,7 +1,10 @@
 import userModel from "../models/userModel.js";
+import EmailModel from "../models/EmailModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import nodemailer from 'nodemailer'; // Import nodemailer for sending emails
+import crypto from 'crypto'; // Import crypto for generating OTP
+//SIGNUP
 export const register = async (req, res, next) => {
     const { name, email, password, confirmPassword } = req.body;
 
@@ -62,4 +65,51 @@ export const login = async (req, res, next) => {
     } catch (error) {
         return res.status(500).json({ message: "Invalid Login" });
     }
+}
+
+//RESET PASSWORD
+
+
+export const resetPassword = async (req, res, next) => {
+    const { email } = req.body;
+
+    // Check if the email exists in the database
+    const user = await userModel.findOne({ email });
+    if (!user) {
+        return res.status(404).json({ message: "Email not found." });
+    }
+
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit OTP
+
+    // Store OTP in the database
+    const emailEntry = new EmailModel({ email, otp });
+    await emailEntry.save(); // Save the OTP and email to the database
+
+    // Send OTP via email
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail', // Use your email service
+        auth: {
+            user: process.env.EMAIL_USER, // Your email
+            pass: process.env.EMAIL_PASS, // Your email password
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Password Reset OTP',
+        text: `Your OTP for password reset is: ${otp}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return res.status(500).json({ message: "Error sending OTP." });
+        }
+        return res.status(200).json({ message: "OTP sent successfully." });
+    });
+}
+
+export const verifyOtp = async (req, res, next) => {
 }
