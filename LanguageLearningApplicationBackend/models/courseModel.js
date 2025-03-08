@@ -47,6 +47,7 @@ const CourseSchema = new mongoose.Schema(
     videos: [
       {
         videoTitle: { type: String, required: true },
+        videoThumbnail :{type : String},
         videoUrl: { type: String, required: true }, // Stored in Cloudinary/AWS S3
       },
     ],
@@ -83,6 +84,4 @@ const CourseSchema = new mongoose.Schema(
   { timestamps: true } // Auto-adds createdAt and updatedAt fields
 );
 
-const Course = mongoose.model("Course", CourseSchema);
-
-module.exports = Course;
+module.exports = mongoose.model('Course',CourseSchema);
