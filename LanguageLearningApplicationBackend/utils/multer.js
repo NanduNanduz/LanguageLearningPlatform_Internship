@@ -38,3 +38,20 @@ export const deleteLocalFiles = (files) => {
     });
   });
 };
+
+export const deleteLocalFilez = (files) => {
+  if (!files || !Array.isArray(files)) return;
+  
+  files.forEach((file) => {
+    if (file?.path) {
+      const filePath = path.resolve(file.path);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(`Failed to delete file: ${filePath}`, err);
+        } else {
+          console.log(`Deleted local file: ${filePath}`);
+        }
+      });
+    }
+  });
+};
