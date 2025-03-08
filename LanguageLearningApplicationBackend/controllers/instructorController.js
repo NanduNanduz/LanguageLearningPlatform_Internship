@@ -1,0 +1,1 @@
+import courseModel from "../models/courseModel";
