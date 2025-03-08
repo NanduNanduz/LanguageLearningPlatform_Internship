@@ -1,6 +1,6 @@
 import courseModel from "../models/courseModel.js";
 import cloudinary from "cloudinary";
-import { deleteLocalFiles } from "../utils/multer.js";
+import { deleteLocalFiles, deleteLocalFilez } from "../utils/multer.js";
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -119,3 +119,119 @@ export const createCourse = async (req, res) => {
   }
 };
 
+//Deleting videos inside a course
+export const deleteVideoFromCourse = async (req, res) => {
+  try {
+    const { courseId, videoId } = req.params;
+
+    // Find the course by ID
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // Find the video inside the course
+    const videoIndex = course.videos.findIndex(video => video._id.toString() === videoId);
+    if (videoIndex === -1) {
+      return res.status(404).json({ success: false, message: "Video not found in this course" });
+    }
+
+    // Extract video details
+    const { videoUrl, videoThumbnail } = course.videos[videoIndex];
+
+    // Extract public_id from Cloudinary URLs
+    const extractPublicId = (url) => {
+      const parts = url.split("/");
+      return parts[parts.length - 1].split(".")[0]; // Get the filename without extension
+    };
+
+    const videoPublicId = extractPublicId(videoUrl);
+    const thumbnailPublicId = extractPublicId(videoThumbnail);
+
+    // Delete video and thumbnail from Cloudinary
+    await cloudinary.v2.uploader.destroy(videoPublicId, { resource_type: "video" });
+    await cloudinary.v2.uploader.destroy(thumbnailPublicId, { resource_type: "image" });
+
+    // Remove video from the videos array
+    course.videos.splice(videoIndex, 1);
+
+    // Save updated course
+    await course.save();
+
+    res.status(200).json({ success: true, message: "Video deleted successfully", course });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateVideoInCourse = async (req, res) => {
+  const { courseId, videoId } = req.params;
+  const newVideoTitle = req.body?.newVideoTitle;
+  const videoThumbnail = req.files?.videoThumbnail?.[0]; // Get the first file
+
+  try {
+    console.log(`Updating video in course: ${courseId}, Video: ${videoId}`);
+
+    // Validate IDs
+    if (!courseId.match(/^[0-9a-fA-F]{24}$/) || !videoId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ success: false, message: "Invalid courseId or videoId" });
+    }
+
+    // Find the course
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // Find the video inside the course
+    const videoIndex = course.videos.findIndex((v) => v._id.toString() === videoId);
+    if (videoIndex === -1) {
+      return res.status(404).json({ success: false, message: "Video not found in course" });
+    }
+
+    // Update video title if provided
+    if (newVideoTitle) {
+      course.videos[videoIndex].videoTitle = newVideoTitle;
+      console.log("Video title updated");
+    }
+
+    // Upload and update new thumbnail if provided
+    if (videoThumbnail && videoThumbnail.path) {
+      console.log("Uploading new thumbnail...");
+
+      // Upload to Cloudinary
+      const thumbnailUpload = await cloudinary.v2.uploader.upload(videoThumbnail.path, {
+        folder: "course_video_thumbnails",
+      });
+
+      // ✅ Delete old thumbnail from Cloudinary if it exists
+      if (course.videos[videoIndex].videoThumbnail) {
+        const oldThumbnailPublicId = course.videos[videoIndex].videoThumbnail
+          .split("/")
+          .pop()
+          .split(".")[0];
+
+        await cloudinary.v2.uploader.destroy(`course_video_thumbnails/${oldThumbnailPublicId}`);
+        console.log("Old thumbnail deleted from Cloudinary");
+      }
+
+      // ✅ Update the video thumbnail URL in the course
+      course.videos[videoIndex].videoThumbnail = thumbnailUpload.secure_url;
+      console.log("New Thumbnail uploaded");
+
+      // ✅ Delete the local uploaded file
+      deleteLocalFilez([videoThumbnail]);
+    }
+
+    // Mark the videos array as modified
+    course.markModified("videos");
+
+    // Save updated course
+    await course.save();
+
+    res.status(200).json({ success: true, message: "Video updated successfully", course });
+  } catch (error) {
+    console.error("Error updating video:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
