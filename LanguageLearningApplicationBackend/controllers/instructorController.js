@@ -45,6 +45,16 @@ export const createCourse = async (req, res, next) => {
     }
 };
 
+export const getCourseDetails = async (req,res,next) => {
+    try {
+        const courseId = req.params.id;
+        const course = await courseModel.findById(courseId)
+        res.json(course);
+        } catch (error) {
+            res.status(404).json({ success: false, message: "Course not found" });
+            }
+}
+
 export const deleteCourse = async (req, res, next) => {
     try {
         const courseId = req.params.id; // Extract course ID from request parameters
@@ -71,3 +81,31 @@ export const deleteCourse = async (req, res, next) => {
     }
 };
 
+export const editCourseDetails = async (req, res, next) => {
+    try {
+        const courseId = req.params.id; // Extract course ID from request parameters
+        const updatedData = req.body; // Get updated data from request body
+
+        // Find the course by ID and update it
+        const updatedCourse = await courseModel.findByIdAndUpdate(courseId, updatedData, { new: true });
+
+        if (!updatedCourse) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Course details updated successfully",
+            course: updatedCourse,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
