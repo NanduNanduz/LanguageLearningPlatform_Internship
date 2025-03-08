@@ -1,5 +1,5 @@
 import userModel from "../models/userModel.js";
-import EmailModel from "../models/EmailModel.js";
+import OtpModel from "../models/OtpModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from 'nodemailer'; // Import nodemailer for sending emails
@@ -82,7 +82,7 @@ export const resetPassword = async (req, res, next) => {
     const otp = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit OTP
 
     // Store OTP in the database
-    const emailEntry = new EmailModel({ email, otp });
+    const emailEntry = new OtpModel({ email, otp });
     await emailEntry.save(); // Save the OTP and email to the database
 
     // Send OTP via email
@@ -114,7 +114,7 @@ export const verifyOtp = async (req, res, next) => {
     const { email, otp } = req.body;
 
     // Check if the OTP and email exist in the database
-    const emailEntry = await EmailModel.findOne({ email, otp });
+    const emailEntry = await OtpModel.findOne({ email, otp });
     if (!emailEntry) {
         return res.status(400).json({ message: "Invalid OTP or email." });
     }
