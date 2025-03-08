@@ -1,42 +1,40 @@
 import multer from "multer";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from "cloudinary";
+import fs from "fs";
+import path from "path";
 
-// Configure Cloudinary
-cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Ensure the uploads folder exists
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-// Storage for course thumbnails
-const courseThumbnailStorage = new CloudinaryStorage({
-  cloudinary: cloudinary.v2,
-  params: {
-    folder: "Learning Platform/Thumbnails", // Course thumbnails
-    resource_type: "image",
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir); // Ensure files are saved in the correct folder
   },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
 });
 
-// Storage for video thumbnails
-const videoThumbnailStorage = new CloudinaryStorage({
-  cloudinary: cloudinary.v2,
-  params: {
-    folder: "Learning Platform/Video Thumbnails", // Video thumbnails
-    resource_type: "image",
-  },
-});
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type"), false);
+  }
+};
 
-// Storage for videos
-const videoStorage = new CloudinaryStorage({
-  cloudinary: cloudinary.v2,
-  params: {
-    folder: "Learning Platform/Videos", // Video files
-    resource_type: "video",
-  },
-});
+// Multer Upload Config
+export const upload = multer({ storage, fileFilter });
 
-// Multer Uploads
-export const uploadCourseThumbnail = multer({ storage: courseThumbnailStorage });
-export const uploadVideoThumbnail = multer({ storage: videoThumbnailStorage });
-export const uploadVideo = multer({ storage: videoStorage });
+// Utility function to delete files after upload
+export const deleteLocalFiles = (files) => {
+  files.forEach((file) => {
+    const filePath = path.join(uploadDir, file.filename);
+    fs.unlink(filePath, (err) => {
+      if (err) console.error(`Error deleting file: ${filePath}`, err);
+      else console.log(`Deleted file: ${filePath}`);
+    });
+  });
+};
