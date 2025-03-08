@@ -8,42 +8,117 @@ cloudinary.v2.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const createCourse = async (req, res, next) => {
+// Create Course (with optional videos & thumbnails)
+export const createCourse = async (req, res) => {
     try {
-        const { title, description, price, category, thumbnail, videos, instructorId, resources = [] } = req.body;
+        const { title, description, price, category, instructorId, videos } = req.body;
 
-        // Create a new course instance
+        if (!instructorId) {
+            return res.status(400).json({ success: false, message: "Instructor ID is required!" });
+        }
+
+        const thumbnailUrl = req.file ? req.file.path : "";
+
+        let uploadedVideos = [];
+
+        if (videos && videos.length > 0) {
+            for (let video of videos) {
+                const videoUpload = await cloudinary.uploader.upload(video.path, {
+                    folder: `Learning Platform/${instructorId}/courses/videos`,
+                    resource_type: "video",
+                });
+
+                const thumbnailUpload = await cloudinary.uploader.upload(video.thumbnail, {
+                    folder: `Learning Platform/${instructorId}/courses/thumbnails`,
+                });
+
+                uploadedVideos.push({
+                    videoTitle: video.title,
+                    videoThumbnail: thumbnailUpload.secure_url,
+                    videoUrl: videoUpload.secure_url,
+                });
+            }
+        }
+
         const newCourse = new courseModel({
             title,
             description,
             price,
             category,
-            thumbnail,
             instructorId,
-            videos,
-            resources,
+            thumbnail: thumbnailUrl,
+            videos: uploadedVideos,
         });
 
-        // Save the course to the database
         await newCourse.save();
 
-        // Create a folder in Cloudinary with the instructorId
-        await cloudinary.v2.api.create_folder(`Learning Platform/${newCourse.instructorId}`);
-
-        // Send success response
         res.status(201).json({
             success: true,
-            message: "Course created successfully",
+            message: "Course created successfully!",
             course: newCourse,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Server error",
-            error: error.message,
-        });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// Upload Videos (after course creation)
+export const uploadVideos = async (req, res) => {
+    try {
+      const { courseId } = req.body;
+  
+      if (!courseId) {
+        return res.status(400).json({ success: false, message: "Course ID is required!" });
+      }
+  
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ success: false, message: "Course not found!" });
+      }
+  
+      if (!req.files || !req.files.video || !req.files.thumbnail) {
+        return res.status(400).json({ success: false, message: "Video and thumbnail are required!" });
+      }
+  
+      let uploadedVideos = [];
+  
+      for (let i = 0; i < req.files.video.length; i++) {
+        // Upload video
+        const videoUpload = await cloudinary.v2.uploader.upload(req.files.video[i].path, {
+          folder: `Learning Platform/Videos`,
+          resource_type: "video",
+        });
+  
+        // Upload thumbnail
+        const thumbnailUpload = await cloudinary.v2.uploader.upload(req.files.thumbnail[i].path, {
+          folder: `Learning Platform/Thumbnails`,
+        });
+  
+        uploadedVideos.push({
+          videoTitle: `Video ${i + 1}`,
+          videoThumbnail: thumbnailUpload.secure_url,
+          videoUrl: videoUpload.secure_url,
+        });
+      }
+  
+      // Push uploaded videos into course
+      course.videos.push(...uploadedVideos);
+      await course.save();
+  
+      // ✅ Fix response to avoid `[object Object]` issue
+      res.status(200).json({
+        success: true,
+        message: "Videos uploaded successfully!",
+        videos: uploadedVideos, // This will be properly formatted
+      });
+  
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  };
+  
+  
 
 export const getCourseDetails = async (req,res,next) => {
     try {
