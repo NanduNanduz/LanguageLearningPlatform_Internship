@@ -45,6 +45,29 @@ export const createCourse = async (req, res, next) => {
     }
 };
 
-export const deleteCourse = async (req,res,next) =>{
-    
-}
+export const deleteCourse = async (req, res, next) => {
+    try {
+        const courseId = req.params.id; // Extract course ID from request parameters
+
+        const deletedCourse = await courseModel.findByIdAndDelete(courseId); // Delete the course
+
+        if (!deletedCourse) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Course deleted successfully",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
+};
+
