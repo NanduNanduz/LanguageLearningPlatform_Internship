@@ -40,7 +40,7 @@ const CourseSchema = new mongoose.Schema(
       required: [true, "Course thumbnail is required"], // Image stored in Cloudinary/AWS S3
     },
     instructorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User", // Reference to User model (Instructor)
       required: true,
     },
