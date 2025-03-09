@@ -35,7 +35,7 @@ const userSchema = mongoose.Schema(
       ref:'Course'
     }],
     mobile:{type:Number},
-    profilePicture: { type: String },
+    profilePicture: { type: String, default:"" },
   },
   { timestamps: true }
 );
