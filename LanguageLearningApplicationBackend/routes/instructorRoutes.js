@@ -39,7 +39,7 @@ router.put(
   updateVideoInCourse
 );
   
-  
+
   
 
 export default router;
