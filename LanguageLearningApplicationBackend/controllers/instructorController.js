@@ -42,13 +42,33 @@ export const editCourseDetails = async (req, res) => {
   try {
     const courseId = req.params.id;
     const updatedData = req.body;
+    const newThumbnail = req.files?.thumbnail?.[0]; // Extract file from array
 
-    const updatedCourse = await courseModel.findByIdAndUpdate(courseId, updatedData, { new: true });
-    if (!updatedCourse) {
+    // Find the course
+    const course = await courseModel.findById(courseId);
+    if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
+    // If a new thumbnail is provided, upload it to Cloudinary
+    if (newThumbnail) {
+      // Upload new thumbnail to Cloudinary
+      const thumbnailUpload = await cloudinary.v2.uploader.upload(newThumbnail.path, {
+        folder: "course_thumbnails",
+      });
+
+      // **Do NOT delete the old thumbnail from Cloudinary**
+      // Just update the course model with the new thumbnail URL
+      updatedData.thumbnail = thumbnailUpload.secure_url;
+
+      // Delete the locally uploaded file
+      deleteLocalFiles([newThumbnail]);
+    }
+
+    // Update the course details
+    const updatedCourse = await courseModel.findByIdAndUpdate(courseId, updatedData, { new: true });
     res.status(200).json({ success: true, message: "Course details updated", course: updatedCourse });
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
