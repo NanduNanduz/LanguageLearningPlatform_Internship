@@ -27,7 +27,7 @@ router.post(
   );
 router.delete("/delete-course/:id", deleteCourse); //deletingCourse
 router.get("/courseDetails/:id", getCourseDetails); //CourseDetails
-router.put("/editCourse/:id", editCourseDetails); //editCourse
+router.put("/editCourse/:id",upload.fields([{name:"thumbnail", maxCount:1}]),editCourseDetails); //editCourse
 router.delete("/delete-video/:courseId/:videoId", deleteVideoFromCourse); //Delete video inside a course
 router.put(
   "/updateVideo/:courseId/:videoId",
