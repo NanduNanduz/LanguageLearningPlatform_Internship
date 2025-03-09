@@ -26,9 +26,13 @@ router.post(
     createCourse
   );
 router.delete("/delete-course/:id", deleteCourse); //deletingCourse
+
 router.get("/courseDetails/:id", getCourseDetails); //CourseDetails
+
 router.put("/editCourse/:id",upload.fields([{name:"thumbnail", maxCount:1}]),editCourseDetails); //editCourse
+
 router.delete("/delete-video/:courseId/:videoId", deleteVideoFromCourse); //Delete video inside a course
+
 router.put(
   "/updateVideo/:courseId/:videoId",
   upload.fields([{ name: "videoThumbnail", maxCount: 1 }]), // updating title and thumbnail of a video
