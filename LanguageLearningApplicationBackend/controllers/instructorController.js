@@ -164,6 +164,7 @@ export const deleteVideoFromCourse = async (req, res) => {
   }
 };
 
+//editing videos inside a course
 export const updateVideoInCourse = async (req, res) => {
   const { courseId, videoId } = req.params;
   const newVideoTitle = req.body?.newVideoTitle;
