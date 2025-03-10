@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
 
 const CourseSchema = new mongoose.Schema(
   {
@@ -84,4 +85,4 @@ const CourseSchema = new mongoose.Schema(
   { timestamps: true } // Auto-adds createdAt and updatedAt fields
 );
 
-module.exports = mongoose.model('Course',CourseSchema);
+export default mongoose.model('Course',CourseSchema);
