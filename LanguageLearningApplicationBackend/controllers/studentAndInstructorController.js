@@ -13,7 +13,7 @@ cloudinary.v2.config({
 export const additionalDetails = async (req, res) => {
   try {
     const { id } = req.params;
-    const { bio, github, linkedIn, twitter, mobile } = req.body;
+    const { bio, github, linkedIn, twitter, mobile, qualification } = req.body;
 
     console.log("Received Request:", req.body);
     console.log("Received File:", req.file);
@@ -30,6 +30,7 @@ export const additionalDetails = async (req, res) => {
     if (linkedIn) user.socialLinks.linkedIn = linkedIn;
     if (twitter) user.socialLinks.twitter = twitter;
     if (mobile) user.mobile = mobile;
+    if (qualification) user.qualification = qualification;
 
     // Upload profile picture to Cloudinary if provided
     if (req.file) {
