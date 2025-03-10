@@ -48,7 +48,7 @@ export const register = async (req, res, next) => {
 
 //LOGIN FUNCTIONALITY
 export const login = async (req, res, next) => {
-  const user = await userModel.findOne({ email: req.body.Email });
+  const user = await userModel.findOne({ email: req.body.email });
   if (!user) {
     return res.status(400).json({ message: "not found" });
   }
