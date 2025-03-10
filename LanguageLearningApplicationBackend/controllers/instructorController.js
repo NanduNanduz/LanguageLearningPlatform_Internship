@@ -1,6 +1,5 @@
 import courseModel from "../models/courseModel.js";
 import cloudinary from "cloudinary";
-import { deleteLocalFiles, deleteLocalFilez } from "../utils/multer.js";
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -117,7 +116,6 @@ export const createCourse = async (req, res) => {
       };
     }));
 
-    deleteLocalFiles([...req.files.thumbnail, ...req.files.videoThumbnails, ...req.files.videos]);
 
     // Create course object
     const newCourse = new courseModel({
