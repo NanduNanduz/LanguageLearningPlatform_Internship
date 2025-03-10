@@ -56,12 +56,10 @@ export const editCourseDetails = async (req, res) => {
         folder: "course_thumbnails",
       });
 
-      // **Do NOT delete the old thumbnail from Cloudinary**
       // Just update the course model with the new thumbnail URL
       updatedData.thumbnail = thumbnailUpload.secure_url;
 
-      // Delete the locally uploaded file
-      deleteLocalFiles([newThumbnail]);
+      
     }
 
     // Update the course details
@@ -238,8 +236,7 @@ export const updateVideoInCourse = async (req, res) => {
       course.videos[videoIndex].videoThumbnail = thumbnailUpload.secure_url;
       console.log("New Thumbnail uploaded");
 
-      // ✅ Delete the local uploaded file
-      deleteLocalFilez([videoThumbnail]);
+  
     }
 
     // Mark the videos array as modified
