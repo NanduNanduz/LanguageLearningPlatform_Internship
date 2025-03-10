@@ -7,18 +7,35 @@ const userSchema = mongoose.Schema(
     password: { type: String, required: true },
     role: { 
       type: String,
-      enum:['user','instructor','admin'],  
-      default: 'user' 
+      enum:['student','instructor','admin'],  
+      default: 'student' 
     },
     createdAt: { type: Date, default: Date.now },
     blocked:{type:String, enum:['yes','no'],default:'no'},
-    mobile:{type:Number},
-    subscription: {
+    bio : {
       type: String,
-      enum: ['free', 'premium'],
-      default: 'free',
+      default: '',
+      maxlength : 500
     },
-    profilePicture: { type: String },
+    socialLinks :{
+      github :{type:String, default:""},
+      linkedIn :{type:String, default:""},
+      twitter :{type:String, default:""}
+    },
+    enrolledCourses :[{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Course'
+    }],
+    courseCreated :[{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Course'
+    }],
+    favourites :[{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Course'
+    }],
+    mobile:{type:Number},
+    profilePicture: { type: String, default:"" },
   },
   { timestamps: true }
 );

@@ -40,13 +40,14 @@ const CourseSchema = new mongoose.Schema(
       required: [true, "Course thumbnail is required"], // Image stored in Cloudinary/AWS S3
     },
     instructorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "User", // Reference to User model (Instructor)
       required: true,
     },
     videos: [
       {
         videoTitle: { type: String, required: true },
+        videoThumbnail :{type : String},
         videoUrl: { type: String, required: true }, // Stored in Cloudinary/AWS S3
       },
     ],
@@ -83,6 +84,4 @@ const CourseSchema = new mongoose.Schema(
   { timestamps: true } // Auto-adds createdAt and updatedAt fields
 );
 
-const Course = mongoose.model("Course", CourseSchema);
-
-module.exports = Course;
+module.exports = mongoose.model('Course',CourseSchema);
