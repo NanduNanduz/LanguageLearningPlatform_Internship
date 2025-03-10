@@ -1,6 +1,5 @@
 import userModel from "../models/userModel.js";
 import cloudinary from "cloudinary";
-import { deleteLocalFilez} from "../utils/multer.js";
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -41,8 +40,7 @@ export const additionalDetails = async (req, res) => {
       user.profilePicture = result.secure_url;
       console.log("Profile Picture Uploaded:", result.secure_url);
 
-      // Delete local file after upload
-      deleteLocalFilez([req.file]);
+      
     }
 
     // Save updated user details
