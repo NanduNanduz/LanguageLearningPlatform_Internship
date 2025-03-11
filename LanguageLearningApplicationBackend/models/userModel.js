@@ -30,6 +30,13 @@ const userSchema = mongoose.Schema(
       type:mongoose.Schema.Types.ObjectId,
       ref:'Course'
     }],
+    certificates: [
+      {
+        courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+        certificateUrl: { type: String },
+        issuedAt: { type: Date, default: Date.now },
+      },
+    ],
     favourites :[{
       type:mongoose.Schema.Types.ObjectId,
       ref:'Course'

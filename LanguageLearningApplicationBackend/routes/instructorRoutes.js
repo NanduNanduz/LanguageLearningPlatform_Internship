@@ -6,7 +6,8 @@ import {
   createCourse,
   deleteVideoFromCourse,
   updateVideoInCourse,
-  addVideosAndResources
+  addVideosAndResources,
+  issueCertificate
 } from "../controllers/instructorController.js";
 
 import { upload } from "../utils/multer.js";
@@ -50,5 +51,6 @@ router.post(
   addVideosAndResources
 );
   
+router.post("/issueCertificate/:userId/:courseId", issueCertificate);
 
 export default router;

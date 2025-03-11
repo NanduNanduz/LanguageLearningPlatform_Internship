@@ -1,5 +1,8 @@
 import courseModel from "../models/courseModel.js";
 import cloudinary from "cloudinary";
+import userModel from "../models/userModel.js";
+import streamifier from "streamifier";
+import PDFDocument from "pdfkit";
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -256,7 +259,7 @@ export const updateVideoInCourse = async (req, res) => {
   }
 };
 
-
+//adding videos and assignments as pdf after creating course
 export const addVideosAndResources = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -335,6 +338,94 @@ export const addVideosAndResources = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Videos and resources added successfully", course });
   } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//generating certificate
+export const generateCertificate = async (userName, courseTitle) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ size: "A4", margin: 50 });
+      let buffers = [];
+
+      // Collect PDF chunks
+      doc.on("data", (chunk) => buffers.push(chunk));
+      doc.on("end", async () => {
+        const pdfBuffer = Buffer.concat(buffers);
+
+        // Upload to Cloudinary
+        const uploadStream = cloudinary.v2.uploader.upload_stream(
+          { resource_type: "raw", folder: "certificates", format: "pdf" },
+          (error, result) => {
+            if (error) {
+              console.error("Cloudinary upload error:", error);
+              return reject(error);
+            }
+            resolve(result.secure_url); // Return the certificate URL
+          }
+        );
+
+        // Convert buffer to readable stream and upload
+        streamifier.createReadStream(pdfBuffer).pipe(uploadStream);
+      });
+
+      // Generate Certificate Content
+      doc.fontSize(24).text("Certificate of Completion", { align: "center" }).moveDown();
+      doc.fontSize(18).text("This is to certify that", { align: "center" }).moveDown();
+      doc.fontSize(22).text(`${userName}`, { align: "center", underline: true }).moveDown();
+      doc.fontSize(18).text("has successfully completed", { align: "center" }).moveDown();
+      doc.fontSize(20).text(courseTitle, { align: "center", underline: true }).moveDown();
+      doc.fontSize(14).text("Issued on: " + new Date().toDateString(), { align: "center" }).moveDown();
+      
+      // Finalize PDF document
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+//certificate issue
+export const issueCertificate = async (req, res) => {
+  const { userId, courseId } = req.params;
+
+  try {
+    // Find user and course
+    const user = await userModel.findById(userId);
+    const course = await courseModel.findById(courseId);
+    if (!user || !course) {
+      return res.status(404).json({ success: false, message: "User or Course not found" });
+    }
+
+    // Generate and upload certificate (returns Cloudinary URL)
+    const certificateUrl = await generateCertificate(user.name, course.title);
+
+    // Store certificate details in the user's document
+    const userCertificate = { courseId, certificateUrl };
+    if (!user.certificates) {
+      user.certificates = [];
+    }
+    user.certificates.push(userCertificate);
+
+    // Store certificate details in the course's document
+    const courseCertificate = { userId, certificateUrl };
+    if (!course.issuedCertificates) {
+      course.issuedCertificates = [];
+    }
+    course.completedStudents.push(courseCertificate);
+
+    // Save both models
+    await user.save();
+    await course.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Certificate issued successfully",
+      certificateUrl,
+    });
+  } catch (error) {
+    console.error("Error issuing certificate:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
