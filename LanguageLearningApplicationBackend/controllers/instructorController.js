@@ -56,12 +56,10 @@ export const editCourseDetails = async (req, res) => {
         folder: "course_thumbnails",
       });
 
-      // **Do NOT delete the old thumbnail from Cloudinary**
       // Just update the course model with the new thumbnail URL
       updatedData.thumbnail = thumbnailUpload.secure_url;
 
-      // Delete the locally uploaded file
-      deleteLocalFiles([newThumbnail]);
+      
     }
 
     // Update the course details
@@ -76,21 +74,10 @@ export const editCourseDetails = async (req, res) => {
 // Adding new course and uploading video with it
 export const createCourse = async (req, res) => {
   try {
-    const { title, description,price ,category, instructorId } = req.body;
+    const { title, description, price, category, instructorId } = req.body;
 
-    // Parse videos metadata (JSON)
-    let videosArray = [];
-    if (req.body.videos) {
-      try {
-        videosArray = JSON.parse(req.body.videos);
-      } catch (error) {
-        return res.status(400).json({ success: false, message: "Invalid JSON format in videos field" });
-      }
-    }
-
-    // Check if required files are provided
-    if (!req.files || !req.files.thumbnail || !req.files.videos || !req.files.videoThumbnails) {
-      return res.status(400).json({ success: false, message: "Missing required files" });
+    if (!req.files || !req.files.thumbnail) {
+      return res.status(400).json({ success: false, message: "Course thumbnail is required" });
     }
 
     // Upload course thumbnail
@@ -98,26 +85,41 @@ export const createCourse = async (req, res) => {
       folder: "course_thumbnails",
     });
 
-    // Upload videos and their thumbnails
-    const videoUploads = await Promise.all(videosArray.map(async (video, index) => {
-      const videoThumbnailUpload = await cloudinary.v2.uploader.upload(req.files.videoThumbnails[index].path, {
-        folder: "course_video_thumbnails",
-      });
+    let videoUploads = []; 
 
-      const videoUpload = await cloudinary.v2.uploader.upload(req.files.videos[index].path, {
-        folder: "course_videos",
-        resource_type: "video",
-      });
+    // Convert videoTitle to an array if it's a single string
+    let videoTitles = req.body.videoTitle;
+    if (typeof videoTitles === "string") {
+      videoTitles = [videoTitles]; // Convert to array
+    }
 
-      return {
-        videoTitle: video.videoTitle,
-        videoThumbnail: videoThumbnailUpload.secure_url,
-        videoUrl: videoUpload.secure_url,
-      };
-    }));
+    if (req.files.videos && req.files.videos.length > 0) {
+      if (!Array.isArray(videoTitles) || videoTitles.length !== req.files.videos.length) {
+        return res.status(400).json({ success: false, message: "Each video must have a corresponding title" });
+      }
 
+      if (!req.files.videoThumbnails || req.files.videoThumbnails.length !== req.files.videos.length) {
+        return res.status(400).json({ success: false, message: "Each video must have a corresponding thumbnail" });
+      }
 
-    // Create course object
+      videoUploads = await Promise.all(req.files.videos.map(async (videoFile, index) => {
+        const videoThumbnailUpload = await cloudinary.v2.uploader.upload(req.files.videoThumbnails[index].path, {
+          folder: "course_video_thumbnails",
+        });
+
+        const videoUpload = await cloudinary.v2.uploader.upload(videoFile.path, {
+          folder: "course_videos",
+          resource_type: "video",
+        });
+
+        return {
+          videoTitle: videoTitles[index] || "Untitled Video", 
+          videoThumbnail: videoThumbnailUpload.secure_url,
+          videoUrl: videoUpload.secure_url,
+        };
+      }));
+    }
+
     const newCourse = new courseModel({
       title,
       price,
@@ -126,9 +128,9 @@ export const createCourse = async (req, res) => {
       thumbnail: thumbnailUpload.secure_url,
       instructorId,
       videos: videoUploads,
+      status: "Pending", 
     });
 
-    // Save course to database
     await newCourse.save();
 
     res.status(201).json({ success: true, course: newCourse });
@@ -238,8 +240,7 @@ export const updateVideoInCourse = async (req, res) => {
       course.videos[videoIndex].videoThumbnail = thumbnailUpload.secure_url;
       console.log("New Thumbnail uploaded");
 
-      // ✅ Delete the local uploaded file
-      deleteLocalFilez([videoThumbnail]);
+
     }
 
     // Mark the videos array as modified
@@ -251,6 +252,89 @@ export const updateVideoInCourse = async (req, res) => {
     res.status(200).json({ success: true, message: "Video updated successfully", course });
   } catch (error) {
     console.error("Error updating video:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+export const addVideosAndResources = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    let { videoTitle, resourceName } = req.body;
+
+    // Find the course
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    let videoUploads = [];
+    let resourceUploads = [];
+
+    // Convert videoTitle to an array if it's a single string
+    if (typeof videoTitle === "string") {
+      videoTitle = [videoTitle];
+    }
+
+    // Convert resourceName to an array if it's a single string
+    if (typeof resourceName === "string") {
+      resourceName = [resourceName];
+    }
+
+    // Upload videos (if provided)
+    if (req.files.videos && req.files.videos.length > 0) {
+      if (!Array.isArray(videoTitle) || videoTitle.length !== req.files.videos.length) {
+        return res.status(400).json({ success: false, message: "Each video must have a corresponding title" });
+      }
+
+      if (!req.files.videoThumbnails || req.files.videoThumbnails.length !== req.files.videos.length) {
+        return res.status(400).json({ success: false, message: "Each video must have a corresponding thumbnail" });
+      }
+
+      videoUploads = await Promise.all(req.files.videos.map(async (videoFile, index) => {
+        const videoThumbnailUpload = await cloudinary.v2.uploader.upload(req.files.videoThumbnails[index].path, {
+          folder: "course_video_thumbnails",
+        });
+
+        const videoUpload = await cloudinary.v2.uploader.upload(videoFile.path, {
+          folder: "course_videos",
+          resource_type: "video",
+        });
+
+        return {
+          videoTitle: videoTitle[index] || "Untitled Video",
+          videoThumbnail: videoThumbnailUpload.secure_url,
+          videoUrl: videoUpload.secure_url,
+        };
+      }));
+    }
+
+    // Upload resources (PDFs) (if provided)
+    if (req.files.resources && req.files.resources.length > 0) {
+      if (!Array.isArray(resourceName) || resourceName.length !== req.files.resources.length) {
+        return res.status(400).json({ success: false, message: "Each resource must have a corresponding name" });
+      }
+
+      resourceUploads = await Promise.all(req.files.resources.map(async (pdfFile, index) => {
+        const pdfUpload = await cloudinary.v2.uploader.upload(pdfFile.path, {
+          folder: "course_resources",
+          resource_type: "raw",
+        });
+
+        return {
+          resourceName: resourceName[index] || "Unnamed Resource",
+          resourceUrl: pdfUpload.secure_url,
+        };
+      }));
+    }
+
+    // Update the course with new videos and resources
+    course.videos.push(...videoUploads);
+    course.resources.push(...resourceUploads);
+    await course.save();
+
+    res.status(200).json({ success: true, message: "Videos and resources added successfully", course });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
