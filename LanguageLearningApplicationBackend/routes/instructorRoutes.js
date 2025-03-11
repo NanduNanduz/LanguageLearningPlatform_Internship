@@ -5,7 +5,8 @@ import {
   editCourseDetails,
   createCourse,
   deleteVideoFromCourse,
-  updateVideoInCourse
+  updateVideoInCourse,
+  addVideosAndResources
 } from "../controllers/instructorController.js";
 
 import { upload } from "../utils/multer.js";
@@ -39,7 +40,15 @@ router.put(
   updateVideoInCourse
 );
   
-
+router.post(
+  "/video-resources/:courseId",
+  upload.fields([
+    { name: "videos", maxCount: 10 }, 
+    { name: "videoThumbnails", maxCount: 10 }, 
+    { name: "resources", maxCount: 10 } 
+  ]),
+  addVideosAndResources
+);
   
 
 export default router;
