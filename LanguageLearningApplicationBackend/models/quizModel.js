@@ -28,5 +28,5 @@ const QuizSchema = new mongoose.Schema(
   { timestamps: true } // Auto-adds createdAt and updatedAt fields
 );
 
-const Quiz = mongoose.model("Quiz", QuizSchema);
-module.exports = Quiz;
+export default mongoose.model("Quiz", QuizSchema);
+
