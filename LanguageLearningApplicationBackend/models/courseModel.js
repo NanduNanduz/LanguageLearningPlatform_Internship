@@ -70,6 +70,13 @@ const CourseSchema = new mongoose.Schema(
         ref: "User", // References the User model (Students)
       },
     ],
+    completedStudents: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        certificateUrl: { type: String }, 
+        issuedAt: { type: Date, default: Date.now },
+      },
+    ],
     reviews: [
       {
         type: mongoose.Schema.Types.ObjectId,
