@@ -346,7 +346,7 @@ export const addVideosAndResources = async (req, res) => {
 export const generateCertificate = async (userName, courseTitle) => {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ size: "A4", margin: 50 });
+      const doc = new PDFDocument({ size: [842, 595], margin: 50 }); // Landscape A4
       let buffers = [];
 
       // Collect PDF chunks
@@ -370,14 +370,73 @@ export const generateCertificate = async (userName, courseTitle) => {
         streamifier.createReadStream(pdfBuffer).pipe(uploadStream);
       });
 
-      // Generate Certificate Content
-      doc.fontSize(24).text("Certificate of Completion", { align: "center" }).moveDown();
-      doc.fontSize(18).text("This is to certify that", { align: "center" }).moveDown();
-      doc.fontSize(22).text(`${userName}`, { align: "center", underline: true }).moveDown();
-      doc.fontSize(18).text("has successfully completed", { align: "center" }).moveDown();
-      doc.fontSize(20).text(courseTitle, { align: "center", underline: true }).moveDown();
-      doc.fontSize(14).text("Issued on: " + new Date().toDateString(), { align: "center" }).moveDown();
-      
+      // Background Gradient (light blue to white)
+      const gradient = doc.linearGradient(0, 0, 842, 595);
+      gradient.stop(0, "#dfe9f3").stop(1, "#ffffff"); // Light blue to white
+      doc.rect(0, 0, 842, 595).fill(gradient);
+
+      // Border Design
+      doc.rect(20, 20, 802, 555).lineWidth(8).stroke("#003366"); // Dark blue border
+
+      // Decorative Lines
+      doc.moveTo(50, 80).lineTo(792, 80).lineWidth(3).stroke("#003366"); // Top line
+      doc.moveTo(50, 515).lineTo(792, 515).lineWidth(3).stroke("#003366"); // Bottom line
+
+
+      // Certificate Title
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(34)
+        .fillColor("#003366")
+        .text("Certificate of Completion", 0, 110, { align: "center" });
+
+      // Subtitle
+      doc
+        .font("Helvetica")
+        .fontSize(18)
+        .fillColor("#333")
+        .text("This is to certify that", 0, 170, { align: "center" });
+
+      // User's Name
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(26)
+        .fillColor("#0056b3")
+        .text(userName, 0, 210, { align: "center", underline: true });
+
+      // Course Title
+      doc
+        .font("Helvetica")
+        .fontSize(18)
+        .fillColor("#333")
+        .text("has successfully completed the course", 0, 260, { align: "center" });
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(22)
+        .fillColor("#d9534f")
+        .text(courseTitle, 0, 300, { align: "center", underline: true });
+
+      // Issue Date
+      doc
+        .font("Helvetica")
+        .fontSize(14)
+        .fillColor("#555")
+        .text("Issued on: " + new Date().toDateString(), 0, 350, { align: "center" });
+
+      // Signature Placeholder
+      doc
+        .moveTo(250, 450)
+        .lineTo(400, 450)
+        .lineWidth(2)
+        .stroke();
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(14)
+        .text("Authorized Signature", 250, 460, { align: "right" });
+
+
       // Finalize PDF document
       doc.end();
     } catch (error) {
