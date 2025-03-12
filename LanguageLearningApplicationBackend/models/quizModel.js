@@ -33,6 +33,14 @@ const QuizSchema = new mongoose.Schema(
         ref: "Submission",
       },
     ],
+    studentProgress: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        attempts: { type: Number, default: 0 }, // Number of attempts
+        highestScore: { type: Number, default: 0 }, // Best attempt score
+        passed: { type: Boolean, default: false }, // Whether the student passed
+      },
+    ],
   },
   { timestamps: true }
 );

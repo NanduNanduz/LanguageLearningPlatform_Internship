@@ -5,6 +5,7 @@ import streamifier from "streamifier";
 import PDFDocument from "pdfkit";
 import Quiz from "../models/quizModel.js";
 
+
 // Configure Cloudinary
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -464,26 +465,37 @@ export const issueCertificate = async (req, res) => {
     // Find user and course
     const user = await userModel.findById(userId);
     const course = await courseModel.findById(courseId);
+
     if (!user || !course) {
       return res.status(404).json({ success: false, message: "User or Course not found" });
+    }
+
+    // Check if the user has completed the course
+    const student = course.studentsEnrolled.find((s) => s.userId.toString() === userId);
+    if (!student || !student.isCompleted) {
+      return res.status(400).json({ success: false, message: "Course not yet completed" });
+    }
+
+    // Prevent duplicate certificate issuance
+    const existingCertificate = user.certificates.find(
+      (cert) => cert.courseId.toString() === courseId
+    );
+    if (existingCertificate) {
+      return res.status(200).json({
+        success: true,
+        message: "Certificate already issued",
+        certificateUrl: existingCertificate.certificateUrl,
+      });
     }
 
     // Generate and upload certificate (returns Cloudinary URL)
     const certificateUrl = await generateCertificate(user.name, course.title);
 
     // Store certificate details in the user's document
-    const userCertificate = { courseId, certificateUrl };
-    if (!user.certificates) {
-      user.certificates = [];
-    }
-    user.certificates.push(userCertificate);
+    user.certificates.push({ courseId, certificateUrl });
 
     // Store certificate details in the course's document
-    const courseCertificate = { userId, certificateUrl };
-    if (!course.issuedCertificates) {
-      course.issuedCertificates = [];
-    }
-    course.completedStudents.push(courseCertificate);
+    course.completedStudents.push({ userId, certificateUrl });
 
     // Save both models
     await user.save();
@@ -494,11 +506,13 @@ export const issueCertificate = async (req, res) => {
       message: "Certificate issued successfully",
       certificateUrl,
     });
+
   } catch (error) {
     console.error("Error issuing certificate:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 //Create Quiz
 export const createQuizQuestions = async (req, res) => {
@@ -579,3 +593,100 @@ export const createQuizQuestions = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+//getting the quiz of a course
+export const getQuizzesByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const quizzes = await Quiz.find({ courseId }).populate("courseId", "title");
+
+    if (!quizzes.length) {
+      return res.status(404).json({ success: false, message: "No quizzes found for this course" });
+    }
+
+    res.status(200).json({ success: true, quizzes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Edit quiz details (title, maxAttempts, passingScore, etc.) and add new questions
+export const editQuiz = async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const { maxAttempts, passingScore, timeLimit } = req.body;
+
+    let questions = [];
+    if (Array.isArray(req.body.questions)) {
+      questions = req.body.questions.map((q) => ({
+        questionText: q.questionText,
+        options: q.options.map((opt) => ({ text: opt })),
+        correctAnswerIndex: q.correctAnswerIndex,
+      }));
+    }
+
+    const updatedQuiz = await Quiz.findByIdAndUpdate(
+      quizId,
+      {
+        $set: { maxAttempts, passingScore, timeLimit }, // Update quiz details
+        $push: { questions: { $each: questions } }, // Add new questions
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedQuiz) {
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Quiz updated successfully", quiz: updatedQuiz });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Edit an individual question in an existing quiz
+export const editQuizQuestion = async (req, res) => {
+  try {
+    const { quizId, questionId } = req.params;
+
+    // Log the received form-data
+    console.log("Form Data Received:", req.body);
+
+    const { questionText, option1, option2, option3, option4, correctAnswer } = req.body;
+
+    if (!questionText || !option1 || !option2 || !option3 || !option4 || correctAnswer === undefined) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    // Find the quiz
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    // Find the question inside the quiz
+    const questionIndex = quiz.questions.findIndex(q => q._id.toString() === questionId);
+    if (questionIndex === -1) {
+      return res.status(404).json({ success: false, message: "Question not found in quiz" });
+    }
+
+    // Convert options to required format
+    const optionsArray = [{ text: option1 }, { text: option2 }, { text: option3 }, { text: option4 }];
+
+    // Update the question
+    quiz.questions[questionIndex].questionText = questionText;
+    quiz.questions[questionIndex].options = optionsArray;
+    quiz.questions[questionIndex].correctAnswerIndex = parseInt(correctAnswer);
+
+    // Save the updated quiz
+    await quiz.save();
+
+    res.status(200).json({ success: true, message: "Question updated successfully", quiz });
+  } catch (error) {
+    console.error("Error updating quiz question:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+

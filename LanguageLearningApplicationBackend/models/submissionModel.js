@@ -19,6 +19,10 @@ const SubmissionSchema = new mongoose.Schema(
       type: Number, // Percentage score
       required: true,
     },
+    correctAnswersCount: {
+      type: Number, // Stores how many answers were correct
+      required: true,
+    },
     passed: {
       type: Boolean,
       required: true,
@@ -26,6 +30,14 @@ const SubmissionSchema = new mongoose.Schema(
     attemptNumber: {
       type: Number,
       required: true,
+    },
+    timeTaken: {
+      type: Number, // Time in seconds
+      default: null, // Optional field
+    },
+    isBestAttempt: {
+      type: Boolean, // Marks if this is the highest-scoring attempt
+      default: false,
     },
   },
   { timestamps: true }
