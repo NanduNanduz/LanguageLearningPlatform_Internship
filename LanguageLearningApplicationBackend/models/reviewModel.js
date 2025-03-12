@@ -27,4 +27,4 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true } // Auto adds createdAt & updatedAt
 );
 
-module.exports = mongoose.model("Review", reviewSchema);
+export default mongoose.model("Review", reviewSchema);

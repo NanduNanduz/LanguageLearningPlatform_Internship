@@ -3,6 +3,8 @@ import cloudinary from "cloudinary";
 import userModel from "../models/userModel.js";
 import streamifier from "streamifier";
 import PDFDocument from "pdfkit";
+import Quiz from "../models/quizModel.js";
+
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -346,7 +348,7 @@ export const addVideosAndResources = async (req, res) => {
 export const generateCertificate = async (userName, courseTitle) => {
   return new Promise((resolve, reject) => {
     try {
-      const doc = new PDFDocument({ size: "A4", margin: 50 });
+      const doc = new PDFDocument({ size: [842, 595], margin: 50 }); // Landscape A4
       let buffers = [];
 
       // Collect PDF chunks
@@ -370,14 +372,81 @@ export const generateCertificate = async (userName, courseTitle) => {
         streamifier.createReadStream(pdfBuffer).pipe(uploadStream);
       });
 
-      // Generate Certificate Content
-      doc.fontSize(24).text("Certificate of Completion", { align: "center" }).moveDown();
-      doc.fontSize(18).text("This is to certify that", { align: "center" }).moveDown();
-      doc.fontSize(22).text(`${userName}`, { align: "center", underline: true }).moveDown();
-      doc.fontSize(18).text("has successfully completed", { align: "center" }).moveDown();
-      doc.fontSize(20).text(courseTitle, { align: "center", underline: true }).moveDown();
-      doc.fontSize(14).text("Issued on: " + new Date().toDateString(), { align: "center" }).moveDown();
-      
+      // Background Gradient (light blue to white)
+      const gradient = doc.linearGradient(0, 0, 842, 595);
+      gradient.stop(0, "#dfe9f3").stop(1, "#ffffff"); // Light blue to white
+      doc.rect(0, 0, 842, 595).fill(gradient);
+
+      // Border Design
+      doc.rect(20, 20, 802, 555).lineWidth(8).stroke("#003366"); // Dark blue border
+
+      // Decorative Lines
+      doc.moveTo(50, 80).lineTo(792, 80).lineWidth(3).stroke("#003366"); // Top line
+      doc.moveTo(50, 515).lineTo(792, 515).lineWidth(3).stroke("#003366"); // Bottom line
+
+
+      // Certificate Title
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(34)
+        .fillColor("#003366")
+        .text("Certificate of Completion", 0, 110, { align: "center" });
+
+      // Subtitle
+      doc
+        .font("Helvetica")
+        .fontSize(18)
+        .fillColor("#333")
+        .text("This is to certify that", 0, 170, { align: "center" });
+
+      // User's Name
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(26)
+        .fillColor("#0056b3")
+        .text(userName, 0, 210, { align: "center", underline: true });
+
+      // Course Title
+      doc
+        .font("Helvetica")
+        .fontSize(18)
+        .fillColor("#333")
+        .text("has successfully completed the course", 0, 260, { align: "center" });
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(22)
+        .fillColor("#d9534f")
+        .text(courseTitle, 0, 300, { align: "center", underline: true });
+
+      // Issue Date
+      doc
+        .font("Helvetica")
+        .fontSize(14)
+        .fillColor("#555")
+        .text("Issued on: " + new Date().toDateString(), 0, 350, { align: "center" });
+
+      // Signature Placeholder
+      doc
+        .moveTo(250, 450)
+        .lineTo(400, 450)
+        .lineWidth(2)
+        .stroke();
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(14)
+        .text("Authorized Signature", 250, 460, { align: "center" });
+
+
+      doc
+        .font("Helvetica-Bold")
+        .fontSize(12)
+        .fillColor("#fff")
+        .text("Official Seal", 670, 390, { align: "right" });
+
+
+
       // Finalize PDF document
       doc.end();
     } catch (error) {
@@ -394,26 +463,37 @@ export const issueCertificate = async (req, res) => {
     // Find user and course
     const user = await userModel.findById(userId);
     const course = await courseModel.findById(courseId);
+
     if (!user || !course) {
       return res.status(404).json({ success: false, message: "User or Course not found" });
+    }
+
+    // Check if the user has completed the course
+    const student = course.studentsEnrolled.find((s) => s.userId.toString() === userId);
+    if (!student || !student.isCompleted) {
+      return res.status(400).json({ success: false, message: "Course not yet completed" });
+    }
+
+    // Prevent duplicate certificate issuance
+    const existingCertificate = user.certificates.find(
+      (cert) => cert.courseId.toString() === courseId
+    );
+    if (existingCertificate) {
+      return res.status(200).json({
+        success: true,
+        message: "Certificate already issued",
+        certificateUrl: existingCertificate.certificateUrl,
+      });
     }
 
     // Generate and upload certificate (returns Cloudinary URL)
     const certificateUrl = await generateCertificate(user.name, course.title);
 
     // Store certificate details in the user's document
-    const userCertificate = { courseId, certificateUrl };
-    if (!user.certificates) {
-      user.certificates = [];
-    }
-    user.certificates.push(userCertificate);
+    user.certificates.push({ courseId, certificateUrl });
 
     // Store certificate details in the course's document
-    const courseCertificate = { userId, certificateUrl };
-    if (!course.issuedCertificates) {
-      course.issuedCertificates = [];
-    }
-    course.completedStudents.push(courseCertificate);
+    course.completedStudents.push({ userId, certificateUrl });
 
     // Save both models
     await user.save();
@@ -424,8 +504,187 @@ export const issueCertificate = async (req, res) => {
       message: "Certificate issued successfully",
       certificateUrl,
     });
+
   } catch (error) {
     console.error("Error issuing certificate:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+//Create Quiz
+export const createQuizQuestions = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    console.log("Form Data Received:", req.body); // Debugging
+
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // Extract questions from form-data
+    const questionTexts = req.body.questionText;
+    const option1 = req.body.option1;
+    const option2 = req.body.option2;
+    const option3 = req.body.option3;
+    const option4 = req.body.option4;
+    const correctAnswers = req.body.correctAnswer;
+
+    if (
+      !questionTexts ||
+      !option1 ||
+      !option2 ||
+      !option3 ||
+      !option4 ||
+      !correctAnswers
+    ) {
+      return res.status(400).json({ success: false, message: "Invalid data format" });
+    }
+
+    const questions = [];
+    const numQuestions = Array.isArray(questionTexts) ? questionTexts.length : 1;
+
+    for (let i = 0; i < numQuestions; i++) {
+      const questionText = Array.isArray(questionTexts) ? questionTexts[i] : questionTexts;
+      const options = [
+        { text: Array.isArray(option1) ? option1[i] : option1 },
+        { text: Array.isArray(option2) ? option2[i] : option2 },
+        { text: Array.isArray(option3) ? option3[i] : option3 },
+        { text: Array.isArray(option4) ? option4[i] : option4 },
+      ];
+      const correctAnswerIndex = parseInt(Array.isArray(correctAnswers) ? correctAnswers[i] : correctAnswers, 10);
+
+      if (!questionText || options.some((opt) => !opt.text) || isNaN(correctAnswerIndex)) {
+        return res.status(400).json({ success: false, message: `Invalid data for question ${i + 1}` });
+      }
+
+      questions.push({ questionText, options, correctAnswerIndex });
+    }
+
+    if (questions.length === 0) {
+      return res.status(400).json({ success: false, message: "At least one question is required" });
+    }
+
+    let quiz = await Quiz.findOne({ courseId });
+
+    if (!quiz) {
+      quiz = new Quiz({ courseId, questions });
+    } else {
+      quiz.questions.push(...questions);
+    }
+
+    await quiz.save();
+
+    if (!course.quizzes.includes(quiz._id)) {
+      course.quizzes.push(quiz._id);
+      await course.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Questions added successfully to quiz",
+      quiz,
+    });
+  } catch (error) {
+    console.error("Error creating quiz:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//getting the quiz of a course
+export const getQuizzesByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const quizzes = await Quiz.find({ courseId }).populate("courseId", "title");
+
+    if (!quizzes.length) {
+      return res.status(404).json({ success: false, message: "No quizzes found for this course" });
+    }
+
+    res.status(200).json({ success: true, quizzes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Edit quiz details (title, maxAttempts, passingScore, etc.) and add new questions
+export const editQuiz = async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const { maxAttempts, passingScore, timeLimit } = req.body;
+
+    let questions = [];
+    if (Array.isArray(req.body.questions)) {
+      questions = req.body.questions.map((q) => ({
+        questionText: q.questionText,
+        options: q.options.map((opt) => ({ text: opt })),
+        correctAnswerIndex: q.correctAnswerIndex,
+      }));
+    }
+
+    const updatedQuiz = await Quiz.findByIdAndUpdate(
+      quizId,
+      {
+        $set: { maxAttempts, passingScore, timeLimit }, // Update quiz details
+        $push: { questions: { $each: questions } }, // Add new questions
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedQuiz) {
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Quiz updated successfully", quiz: updatedQuiz });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Edit an individual question in an existing quiz
+export const editQuizQuestion = async (req, res) => {
+  try {
+    const { quizId, questionId } = req.params;
+
+    // Log the received form-data
+    console.log("Form Data Received:", req.body);
+
+    const { questionText, option1, option2, option3, option4, correctAnswer } = req.body;
+
+    if (!questionText || !option1 || !option2 || !option3 || !option4 || correctAnswer === undefined) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+
+    // Find the quiz
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    // Find the question inside the quiz
+    const questionIndex = quiz.questions.findIndex(q => q._id.toString() === questionId);
+    if (questionIndex === -1) {
+      return res.status(404).json({ success: false, message: "Question not found in quiz" });
+    }
+
+    // Convert options to required format
+    const optionsArray = [{ text: option1 }, { text: option2 }, { text: option3 }, { text: option4 }];
+
+    // Update the question
+    quiz.questions[questionIndex].questionText = questionText;
+    quiz.questions[questionIndex].options = optionsArray;
+    quiz.questions[questionIndex].correctAnswerIndex = parseInt(correctAnswer);
+
+    // Save the updated quiz
+    await quiz.save();
+
+    res.status(200).json({ success: true, message: "Question updated successfully", quiz });
+  } catch (error) {
+    console.error("Error updating quiz question:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+

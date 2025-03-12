@@ -7,10 +7,14 @@ import {
   deleteVideoFromCourse,
   updateVideoInCourse,
   addVideosAndResources,
-  issueCertificate
+  issueCertificate,
+  createQuizQuestions,
+  editQuiz,
+  editQuizQuestion,
+  getQuizzesByCourse
 } from "../controllers/instructorController.js";
 
-import { upload } from "../utils/multer.js";
+import { upload , parseFormData} from "../utils/multer.js";
 
 const router = express.Router();
 
@@ -41,7 +45,7 @@ router.put(
   updateVideoInCourse
 );
   
-router.post(
+router.post(                        
   "/video-resources/:courseId",
   upload.fields([
     { name: "videos", maxCount: 10 }, 
@@ -49,8 +53,20 @@ router.post(
     { name: "resources", maxCount: 10 } 
   ]),
   addVideosAndResources
-);
+);                                     //Adding videos and resources to a course
   
-router.post("/issueCertificate/:userId/:courseId", issueCertificate);
+router.post("/issueCertificate/:userId/:courseId", issueCertificate);   //certificate issueing
+
+router.post("/createQuiz/:courseId",parseFormData,createQuizQuestions); // create new quiz
+
+// Route to update quiz details and add new questions
+router.put("/editQuiz/:quizId", editQuiz);
+
+// Route to edit a specific question inside a quiz
+router.put("/editQuestion/:quizId/:questionId",parseFormData, editQuizQuestion);
+
+//getting quiz of a course
+router.get("/quiz/:courseId", getQuizzesByCourse);
+
 
 export default router;

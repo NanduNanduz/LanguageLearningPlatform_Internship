@@ -1,32 +1,48 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const QuizSchema = new mongoose.Schema(
   {
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Course", // Links the quiz to a specific course
+      ref: "Course", // Links quiz to a course
       required: true,
     },
     questions: [
       {
         questionText: { type: String, required: true },
-        options: [{ type: String, required: true }], // Multiple-choice options
+        options: [
+          { text: { type: String, required: true } } // Multiple options per question
+        ],
+        correctAnswerIndex: { type: Number, required: true }, // Index of the correct option
       },
     ],
-    correctAnswers: [{ type: Number, required: true }], // Index positions of correct options
     maxAttempts: {
       type: Number,
-      default: 3, // Default max attempts per quiz
+      default: 3, // Max quiz attempts per student
+    },
+    passingScore: {
+      type: Number,
+      default: 50, // Percentage required to pass
+    },
+    timeLimit: {
+      type: Number, // Time in minutes (optional)
     },
     submissions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Submission", // References student quiz submissions
+        ref: "Submission",
+      },
+    ],
+    studentProgress: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        attempts: { type: Number, default: 0 }, // Number of attempts
+        highestScore: { type: Number, default: 0 }, // Best attempt score
+        passed: { type: Boolean, default: false }, // Whether the student passed
       },
     ],
   },
-  { timestamps: true } // Auto-adds createdAt and updatedAt fields
+  { timestamps: true }
 );
 
-const Quiz = mongoose.model("Quiz", QuizSchema);
-module.exports = Quiz;
+export default mongoose.model("Quiz", QuizSchema);

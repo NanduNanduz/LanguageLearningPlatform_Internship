@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const CourseSchema = new mongoose.Schema(
   {
     title: {
@@ -18,37 +17,34 @@ const CourseSchema = new mongoose.Schema(
       default: 0, // Free courses have price 0
     },
     category: {
-        type: String,
-        enum: [
-          // **Indian Languages**
-          "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati", 
-          "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili", 
-          "Santali", "Kashmiri", "Konkani", "Sindhi", "Dogri", "Manipuri", 
-          "Bodo", "Sanskrit", "Nepali",
-          
-          // **Commonly Used Global Languages**
-          "English", "Spanish", "French", "German", "Portuguese", "Mandarin Chinese", 
-          "Cantonese", "Japanese", "Korean", "Russian", "Italian", "Turkish", 
-          "Dutch", "Polish", "Greek", "Hebrew", "Arabic", "Persian (Farsi)", 
-          "Thai", "Vietnamese", "Malay", "Swedish", "Danish", "Finnish", 
-          "Norwegian", "Hungarian", "Czech", "Slovak", "Romanian", "Ukrainian",
-          "Filipino (Tagalog)", "Swahili"
-        ],
-        required: [true, "Course category is required"],
+      type: String,
+      enum: [
+        "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati",
+        "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili",
+        "Santali", "Kashmiri", "Konkani", "Sindhi", "Dogri", "Manipuri",
+        "Bodo", "Sanskrit", "Nepali",
+        "English", "Spanish", "French", "German", "Portuguese", "Mandarin Chinese",
+        "Cantonese", "Japanese", "Korean", "Russian", "Italian", "Turkish",
+        "Dutch", "Polish", "Greek", "Hebrew", "Arabic", "Persian (Farsi)",
+        "Thai", "Vietnamese", "Malay", "Swedish", "Danish", "Finnish",
+        "Norwegian", "Hungarian", "Czech", "Slovak", "Romanian", "Ukrainian",
+        "Filipino (Tagalog)", "Swahili"
+      ],
+      required: [true, "Course category is required"],
     },
     thumbnail: {
       type: String,
       required: [true, "Course thumbnail is required"], // Image stored in Cloudinary/AWS S3
     },
     instructorId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User", // Reference to User model (Instructor)
       required: true,
     },
     videos: [
       {
         videoTitle: { type: String, required: true },
-        videoThumbnail :{type : String},
+        videoThumbnail: { type: String },
         videoUrl: { type: String, required: true }, // Stored in Cloudinary/AWS S3
       },
     ],
@@ -66,30 +62,40 @@ const CourseSchema = new mongoose.Schema(
     ],
     studentsEnrolled: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // References the User model (Students)
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        completedVideos: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed video IDs
+        completedResources: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed resources
+        quizScores: [
+          {
+            quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" },
+            score: Number,
+            passed: Boolean,
+          },
+        ],
+        progressPercentage: { type: Number, default: 0 },
+        isCompleted: { type: Boolean, default: false }, // Stores course completion date
       },
     ],
     completedStudents: [
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        certificateUrl: { type: String }, 
+        certificateUrl: { type: String },
         issuedAt: { type: Date, default: Date.now },
       },
     ],
     reviews: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Review", // References the Review model
+        ref: "Review",
       },
     ],
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],
-      default: "Pending", // Courses require admin approval before publishing
+      default: "Pending",
     },
   },
   { timestamps: true } // Auto-adds createdAt and updatedAt fields
 );
 
-export default mongoose.model('Course',CourseSchema);
+export default mongoose.model("Course", CourseSchema);

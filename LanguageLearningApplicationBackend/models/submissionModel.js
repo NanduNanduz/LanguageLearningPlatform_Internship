@@ -1,29 +1,46 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const SubmissionSchema = new mongoose.Schema(
   {
-    studentId: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Links submission to a student
+      ref: "User",
       required: true,
     },
     quizId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Quiz", // Links submission to a quiz
+      ref: "Quiz",
       required: true,
     },
-    answers: [{ type: Number, required: true }], // Student's selected answer indices
+    selectedAnswers: [
+      { type: Number, required: true }, // Stores the index of the chosen answer
+    ],
     score: {
-      type: Number,
-      default: 0, // Will be calculated based on correct answers
+      type: Number, // Percentage score
+      required: true,
     },
-    timestamp: {
-      type: Date,
-      default: Date.now, // Records when the quiz was submitted
+    correctAnswersCount: {
+      type: Number, // Stores how many answers were correct
+      required: true,
+    },
+    passed: {
+      type: Boolean,
+      required: true,
+    },
+    attemptNumber: {
+      type: Number,
+      required: true,
+    },
+    timeTaken: {
+      type: Number, // Time in seconds
+      default: null, // Optional field
+    },
+    isBestAttempt: {
+      type: Boolean, // Marks if this is the highest-scoring attempt
+      default: false,
     },
   },
   { timestamps: true }
 );
 
-const Submission = mongoose.model("Submission", SubmissionSchema);
-module.exports = Submission;
+export default mongoose.model("Submission", SubmissionSchema);
