@@ -23,5 +23,7 @@ const fileFilter = (req, file, cb) => {
 // Multer Upload Config
 export const upload = multer({ storage, fileFilter });
 
+export const parseFormData = upload.none();
+
 
 

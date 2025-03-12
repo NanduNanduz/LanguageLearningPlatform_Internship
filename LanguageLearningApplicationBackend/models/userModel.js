@@ -44,6 +44,7 @@ const userSchema = mongoose.Schema(
     mobile:{type:Number},
     profilePicture: { type: String, default:"" },
     qualification:{type:String,default:""},
+    quizSubmissions:[{type:mongoose.Schema.Types.ObjectId, ref:"Submission"}],
   },
   { timestamps: true }
 );

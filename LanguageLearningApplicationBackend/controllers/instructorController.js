@@ -3,6 +3,7 @@ import cloudinary from "cloudinary";
 import userModel from "../models/userModel.js";
 import streamifier from "streamifier";
 import PDFDocument from "pdfkit";
+import Quiz from "../models/quizModel.js";
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -495,6 +496,86 @@ export const issueCertificate = async (req, res) => {
     });
   } catch (error) {
     console.error("Error issuing certificate:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//Create Quiz
+export const createQuizQuestions = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    console.log("Form Data Received:", req.body); // Debugging
+
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // Extract questions from form-data
+    const questionTexts = req.body.questionText;
+    const option1 = req.body.option1;
+    const option2 = req.body.option2;
+    const option3 = req.body.option3;
+    const option4 = req.body.option4;
+    const correctAnswers = req.body.correctAnswer;
+
+    if (
+      !questionTexts ||
+      !option1 ||
+      !option2 ||
+      !option3 ||
+      !option4 ||
+      !correctAnswers
+    ) {
+      return res.status(400).json({ success: false, message: "Invalid data format" });
+    }
+
+    const questions = [];
+    const numQuestions = Array.isArray(questionTexts) ? questionTexts.length : 1;
+
+    for (let i = 0; i < numQuestions; i++) {
+      const questionText = Array.isArray(questionTexts) ? questionTexts[i] : questionTexts;
+      const options = [
+        { text: Array.isArray(option1) ? option1[i] : option1 },
+        { text: Array.isArray(option2) ? option2[i] : option2 },
+        { text: Array.isArray(option3) ? option3[i] : option3 },
+        { text: Array.isArray(option4) ? option4[i] : option4 },
+      ];
+      const correctAnswerIndex = parseInt(Array.isArray(correctAnswers) ? correctAnswers[i] : correctAnswers, 10);
+
+      if (!questionText || options.some((opt) => !opt.text) || isNaN(correctAnswerIndex)) {
+        return res.status(400).json({ success: false, message: `Invalid data for question ${i + 1}` });
+      }
+
+      questions.push({ questionText, options, correctAnswerIndex });
+    }
+
+    if (questions.length === 0) {
+      return res.status(400).json({ success: false, message: "At least one question is required" });
+    }
+
+    let quiz = await Quiz.findOne({ courseId });
+
+    if (!quiz) {
+      quiz = new Quiz({ courseId, questions });
+    } else {
+      quiz.questions.push(...questions);
+    }
+
+    await quiz.save();
+
+    if (!course.quizzes.includes(quiz._id)) {
+      course.quizzes.push(quiz._id);
+      await course.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Questions added successfully to quiz",
+      quiz,
+    });
+  } catch (error) {
+    console.error("Error creating quiz:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
