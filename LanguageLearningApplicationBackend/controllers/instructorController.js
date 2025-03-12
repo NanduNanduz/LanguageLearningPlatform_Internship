@@ -438,7 +438,6 @@ export const generateCertificate = async (userName, courseTitle) => {
         .fontSize(14)
         .text("Authorized Signature", 250, 460, { align: "center" });
 
-        doc.image("./uploads/signature.png", 250, 420, { width: 120 });
 
       doc
         .font("Helvetica-Bold")
@@ -446,7 +445,6 @@ export const generateCertificate = async (userName, courseTitle) => {
         .fillColor("#fff")
         .text("Official Seal", 670, 390, { align: "right" });
 
-        doc.image("./uploads/preview.jpg", 650, 420, { width: 100 }); // Replace with actual seal image
 
 
       // Finalize PDF document
