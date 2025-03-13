@@ -21,6 +21,8 @@ const Login = ({onClose}) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [forgotOpen, setForgotOpen] = useState(false);
   const [otpOpen, setOtpOpen] = useState(false);
+  const [newpassword,setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [resetOpen, setResetOpen] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [message,setMessage] = useState("")
@@ -107,10 +109,19 @@ const Login = ({onClose}) => {
         }
   };
 
-  const handleResetPassword = () => {
-    alert("Password reset successful");
-    setResetOpen(false);
-    navigate("/login");
+  const handleResetPassword = async () => {
+    try {
+      await axios.post("http://localhost:3000/auth/newPass", {
+        email: formData.email,
+        newPassword:newpassword,
+        newConfirmPassword : confirmPassword
+      });
+      alert("Password reset successful");
+      setResetOpen(false);
+      navigate("/login");
+    } catch (error) {
+      alert(error.response?.data?.message || "Password reset failed");
+    }
   };
 
   return (
@@ -292,6 +303,9 @@ const Login = ({onClose}) => {
                 width: "100%",
               }}
             >
+              {message && (
+            <div className="message text-center text-danger">{message}</div>
+          )}
               <Button
                 variant="contained"
                 fullWidth
@@ -442,6 +456,7 @@ const Login = ({onClose}) => {
             <TextField
               label="New Password"
               type="password"
+              onChange={(e)=>{setNewPassword(e.target.value)}}
               variant="outlined"
               fullWidth
               required
@@ -450,6 +465,7 @@ const Login = ({onClose}) => {
             <TextField
               label="Confirm New Password"
               type="password"
+              onChange={(e)=>{setConfirmPassword(e.target.value)}}
               variant="outlined"
               fullWidth
               required

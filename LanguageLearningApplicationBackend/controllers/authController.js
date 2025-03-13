@@ -72,41 +72,49 @@ export const login = async (req, res, next) => {
 export const resetPassword = async (req, res, next) => {
   const { email } = req.body;
 
-  // Check if the email exists in the database
-  const user = await userModel.findOne({ email });
-  if (!user) {
-    return res.status(404).json({ message: "Email not found." });
-  }
-
-  // Generate OTP
-  const otp = crypto.randomInt(100000, 999999).toString(); // Generate a 6-digit OTP
-
-  // Store OTP in the database
-  const emailEntry = new OtpModel({ email, otp });
-  await emailEntry.save(); // Save the OTP and email to the database
-
-  // Send OTP via email
-  const transporter = nodemailer.createTransport({
-    service: "gmail", // Use your email service
-    auth: {
-      user: process.env.EMAIL_USER, // Your email
-      pass: process.env.EMAIL_PASS, // Your email password
-    },
-  });
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "Password Reset OTP",
-    text: `Your OTP for password reset is: ${otp}`,
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return res.status(500).json({ message: "Error sending OTP." });
+  try {
+    // Check if the email exists in the database
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email not found." });
     }
-    return res.status(200).json({ message: "OTP sent successfully." });
-  });
+
+    // Delete any existing OTP for this email
+    await OtpModel.deleteMany({ email });
+
+    // Generate a new OTP
+    const otp = crypto.randomInt(100000, 999999).toString(); // 6-digit OTP
+
+    // Store new OTP in the database
+    const emailEntry = new OtpModel({ email, otp, expiresAt: new Date(Date.now() + 10 * 60 * 1000) }); // Expires in 10 minutes
+    await emailEntry.save();
+
+    // Send OTP via email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your OTP for password reset is: ${otp}. It expires in 10 minutes.`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.status(500).json({ message: "Error sending OTP. Please try again later." });
+      }
+      return res.status(200).json({ message: "OTP sent successfully. Check your email." });
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong. Please try again later." });
+  }
 };
 
 //VERIFY OTP
