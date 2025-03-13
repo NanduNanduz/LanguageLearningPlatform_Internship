@@ -55,10 +55,10 @@ const Login = ({onClose}) => {
       } else if (role === "instructor") {
         navigate("/instructorHome", { state: { user: response.data.user } });
       }
-      
+      alert("login success");
     } catch (error) {
       const errorMessage = error.response?.data?.message
-          alert(errorMessage)
+          setMessage(errorMessage)
     }
   
   };
@@ -79,15 +79,32 @@ const Login = ({onClose}) => {
     }
   };
 
-  const handleOtpSubmit = () => {
-    console.log("Entered OTP:", otp.join(""));
-    setOtpOpen(false);
-    setResetOpen(true);
+  const handleOtpSubmit = async () => {
+    try {
+      const enteredOtp = otp.join("");
+      await axios.post("http://localhost:3000/auth/verifyOtp", {
+        email: formData.email,
+        otp: enteredOtp,
+      });
+      alert("OTP verified successfully");
+      setOtpOpen(false);
+      setResetOpen(true);
+    } catch (error) {
+      alert(error.response?.data?.message || "Invalid OTP");
+    }
   };
-  const handleSendMail = () => {
-    alert("Message sent to your email");
-    setForgotOpen(false);
-    setOtpOpen(true);
+
+  const handleSendMail = async () => {
+   
+    try {
+      const response = await axios.post('http://localhost:3000/auth/reset-password',{email:formData.email} )
+      alert("OTP send to your E-mail")
+      setForgotOpen(false);
+      setOtpOpen(true);
+      } catch (error) {
+        const errorMessage = error.response?.data?.message
+        setMessage(errorMessage)
+        }
   };
 
   const handleResetPassword = () => {
@@ -169,7 +186,9 @@ const Login = ({onClose}) => {
               >
                 Forgot password?
               </Link>
-
+              {message && (
+            <div className="message text-center text-danger">{message}</div>
+          )}
               <Button
                 onClick={handleLogin}
                 variant="contained"
