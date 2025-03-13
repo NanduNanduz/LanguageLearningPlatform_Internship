@@ -14,23 +14,53 @@ import {
 import { Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
+import axios from "axios";
 
 
-const Login = ({ onClose }) => {
+const Login = ({onClose}) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [forgotOpen, setForgotOpen] = useState(false);
   const [otpOpen, setOtpOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [message,setMessage] = useState("")
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log("Logging in with:", formData);
-    onClose();
+
+
+  const handleLogin = async (e) => {
+    setMessage("")
+    if (!formData.email || !formData.password) {
+      setMessage("Please fill in all fields.");
+      return; // Exit the function if fields are empty
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3000/auth/login',formData);
+      const { role , blocked } = response.data.user;
+
+      if (blocked === "yes") {
+        setMessage("You are blocked from this site.");
+        return; // Exit the function if the user is blocked
+      }
+      sessionStorage.setItem("logintoken", response.data.token);
+
+      if (role === "student") {
+        navigate("/studentHome", { state: { user: response.data.user } });
+      } else if (role === "admin") {
+        navigate("/adminDashboard", { state: { user: response.data.user } });
+      } else if (role === "instructor") {
+        navigate("/instructorHome", { state: { user: response.data.user } });
+      }
+      
+    } catch (error) {
+      const errorMessage = error.response?.data?.message
+          alert(errorMessage)
+    }
+  
   };
 
   const handleForgotPassword = () => {
@@ -84,8 +114,11 @@ const Login = ({ onClose }) => {
             }}
           >
             <Box
-              component="form"
-              onSubmit={handleLogin}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  loginfunction();
+                }
+              }}
               sx={{ display: "flex", flexDirection: "column", gap: 2 }}
             >
               <Typography variant="h5" fontWeight="bold">
@@ -138,7 +171,7 @@ const Login = ({ onClose }) => {
               </Link>
 
               <Button
-                type="submit"
+                onClick={handleLogin}
                 variant="contained"
                 fullWidth
                 sx={{ bgcolor: "purple", color: "white", fontWeight: "bold" }}
