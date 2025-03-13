@@ -14,7 +14,6 @@ import {
 import { Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
-import Navbar from "../components/navbar/Navbar";
 
 
 const Login = ({ onClose }) => {

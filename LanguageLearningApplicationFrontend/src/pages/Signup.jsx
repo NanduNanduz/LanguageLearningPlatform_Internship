@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
 import {
   Button,
   Dialog,
@@ -11,8 +13,10 @@ import {
   TextField,
   Grid,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const Signup = ({ onClose }) => {
+  const navigate = useNavigate();
   const [openFormModal, setOpenFormModal] = useState(false);
   const [role, setRole] = useState("");
   const [formData, setFormData] = useState({
@@ -20,15 +24,33 @@ const Signup = ({ onClose }) => {
     email: "",
     password: "",
     confirmPassword: "",
+    role:role
   });
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
+    setFormData(prevData => ({ ...prevData, role: selectedRole }));
     setOpenFormModal(true);
   };
 
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios
+        .post("http://localhost:3000/auth/register", formData)
+        .then((res)=>{
+          alert('Signup Success')
+          navigate('/')
+        }).catch((error)=>{
+          const errorMessage = error.response?.data?.message
+          alert(errorMessage)
+        })
+    } catch (error) {
+      console.error("There was an error registering!", error); // Handle error response
+    }
   };
 
   return (
@@ -51,10 +73,12 @@ const Signup = ({ onClose }) => {
             }}
           >
             <Typography variant="h4" fontWeight="bold" gutterBottom>
-             Learning is a process ,not an event.
-           Let's Make it Happen Together!
+              Learning is a process ,not an event. Let's Make it Happen
+              Together!
             </Typography>
-            <Typography variant="body1">Join us and start your journey today.</Typography>
+            <Typography variant="body1">
+              Join us and start your journey today.
+            </Typography>
           </Grid>
 
           {/* Right Side - Role Selection */}
@@ -71,12 +95,17 @@ const Signup = ({ onClose }) => {
                     width: 230,
                     padding: 3,
                     cursor: "pointer",
-                    border: role === "student" ? "2px solid #FCA311" : "1px solid #ccc",
+                    border:
+                      role === "student"
+                        ? "2px solid #FCA311"
+                        : "1px solid #ccc",
                     borderRadius: 2,
                     "&:hover": { border: "2px solid #FCA311" },
                   }}
                 >
-                  <Typography variant="h6" fontWeight="bold">🎓 I'm a Student</Typography>
+                  <Typography variant="h6" fontWeight="bold">
+                    🎓 I'm a Student
+                  </Typography>
                   <Typography variant="body2" color="textSecondary">
                     Looking to learn and enroll in courses.
                   </Typography>
@@ -89,12 +118,17 @@ const Signup = ({ onClose }) => {
                     width: 230,
                     padding: 3,
                     cursor: "pointer",
-                    border: role === "instructor" ? "2px solid #FCA311" : "1px solid #ccc",
+                    border:
+                      role === "instructor"
+                        ? "2px solid #FCA311"
+                        : "1px solid #ccc",
                     borderRadius: 2,
                     "&:hover": { border: "2px solid #FCA311" },
                   }}
                 >
-                  <Typography variant="h6" fontWeight="bold">📚 I'm an Instructor</Typography>
+                  <Typography variant="h6" fontWeight="bold">
+                    📚 I'm an Instructor
+                  </Typography>
                   <Typography variant="body2" color="textSecondary">
                     Looking to teach and share knowledge.
                   </Typography>
@@ -102,7 +136,7 @@ const Signup = ({ onClose }) => {
               </Box>
             </DialogContent>
             <DialogActions sx={{ justifyContent: "center" }}>
-              <Button onClick={onClose} color="error" variant="contained">
+              <Button onClick={()=>{navigate('/')}} color="error" variant="contained">
                 Close
               </Button>
             </DialogActions>
@@ -130,7 +164,9 @@ const Signup = ({ onClose }) => {
             <Typography variant="h4" fontWeight="bold" gutterBottom>
               Welcome {role === "student" ? "Student" : "Instructor"}!
             </Typography>
-            <Typography variant="body1">Fill in your details to continue.</Typography>
+            <Typography variant="body1">
+              Fill in your details to continue.
+            </Typography>
           </Grid>
 
           {/* Right Side - Form */}
@@ -139,14 +175,45 @@ const Signup = ({ onClose }) => {
               {role === "student" ? "Student Signup" : "Instructor Signup"}
             </DialogTitle>
             <DialogContent>
-              <TextField label="Name" name="name" fullWidth margin="dense" onChange={handleChange} />
-              <TextField label="Email" name="email" type="email" fullWidth margin="dense" onChange={handleChange} />
-              <TextField label="Password" name="password" type="password" fullWidth margin="dense" onChange={handleChange} />
-              <TextField label="Confirm Password" name="confirmPassword" type="password" fullWidth margin="dense" onChange={handleChange} />
+              <TextField
+                label="Name"
+                name="name"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
+              <TextField
+                label="Email"
+                name="email"
+                type="email"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
+              <TextField
+                label="Password"
+                name="password"
+                type="password"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
+              <TextField
+                label="Confirm Password"
+                name="confirmPassword"
+                type="password"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
-              <Button variant="contained" sx={{ backgroundColor: "#FCA311", color: "#14213D" }}>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#FCA311", color: "#14213D" }}
+                onClick={handleSubmit}
+              >
                 Create Account
               </Button>
             </DialogActions>
