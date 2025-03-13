@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  Grid,
   TextField,
   Button,
   Typography,
@@ -13,17 +12,21 @@ import {
   DialogActions,
 } from "@mui/material";
 import { Email, Lock } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import Grid from "@mui/material/Grid2";
+
 
 const Login = ({ onClose }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [forgotOpen, setForgotOpen] = useState(false);
   const [otpOpen, setOtpOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleLogin = (e) => {
     e.preventDefault();
     console.log("Logging in with:", formData);
@@ -49,6 +52,18 @@ const Login = ({ onClose }) => {
   const handleOtpSubmit = () => {
     console.log("Entered OTP:", otp.join(""));
     setOtpOpen(false);
+    setResetOpen(true);
+  };
+  const handleSendMail = () => {
+    alert("Message sent to your email");
+    setForgotOpen(false);
+    setOtpOpen(true);
+  };
+
+  const handleResetPassword = () => {
+    alert("Password reset successful");
+    setResetOpen(false);
+    navigate("/login");
   };
 
   return (
@@ -134,7 +149,12 @@ const Login = ({ onClose }) => {
           </Grid>
 
           {/* Right Side: Image */}
-          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{ display: { xs: "none", md: "block" } }}
+          >
             <Box
               sx={{
                 backgroundImage:
@@ -150,7 +170,12 @@ const Login = ({ onClose }) => {
       </Dialog>
 
       {/* Forgot Password Dialog */}
-      <Dialog open={forgotOpen} onClose={handleForgotClose} maxWidth="md" fullWidth>
+      <Dialog
+        open={forgotOpen}
+        onClose={handleForgotClose}
+        maxWidth="md"
+        fullWidth
+      >
         <Grid container sx={{ minHeight: "450px" }}>
           {/* Left Side: Forgot Password Form */}
           <Grid
@@ -175,7 +200,6 @@ const Login = ({ onClose }) => {
             >
               Forgot Your Password?
             </DialogTitle>
-
             <Typography
               variant="body2"
               sx={{ textAlign: "center", color: "#666", mb: 2 }}
@@ -183,7 +207,13 @@ const Login = ({ onClose }) => {
               Enter your registered email to reset your password.
             </Typography>
 
-            <DialogContent sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <DialogContent
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
               <TextField
                 label="Email Address"
                 name="email"
@@ -202,8 +232,14 @@ const Login = ({ onClose }) => {
                 }}
               />
             </DialogContent>
-
-            <DialogActions sx={{ justifyContent: "center", pb: 3, flexDirection: "column", width: "100%" }}>
+            <DialogActions
+              sx={{
+                justifyContent: "center",
+                pb: 3,
+                flexDirection: "column",
+                width: "100%",
+              }}
+            >
               <Button
                 variant="contained"
                 fullWidth
@@ -218,6 +254,7 @@ const Login = ({ onClose }) => {
                     background: "linear-gradient(to right, #fc6076, #ff9b44)",
                   },
                 }}
+                onClick={handleSendMail}
               >
                 Send mail
               </Button>
@@ -244,7 +281,12 @@ const Login = ({ onClose }) => {
           </Grid>
 
           {/* Right Side: Forgot Password Image */}
-          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{ display: { xs: "none", md: "block" } }}
+          >
             <Box
               sx={{
                 backgroundImage: "url(/images/forgot_password.jpg)",
@@ -259,58 +301,127 @@ const Login = ({ onClose }) => {
       </Dialog>
 
       {/* OTP Dialog */}
-      <Dialog open={otpOpen} onClose={() => setOtpOpen(false)} maxWidth="sm" fullWidth>
-  <DialogContent sx={{ textAlign: "center", padding: 4 }}>
-    <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-      <img
-        src="https://cdn-icons-png.flaticon.com/512/2983/2983788.png"
-        alt="email verification"
-        style={{ width: 80, height: 80 }}
-      />
-    </Box>
-    <Typography variant="h5" fontWeight="bold">
-      Please Verify Account
-    </Typography>
-    <Typography variant="body2" sx={{ color: "#666", my: 1 }}>
-      Enter the six-digit code we sent to your email address.
-    </Typography>
+      <Dialog
+        open={otpOpen}
+        onClose={() => setOtpOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogContent sx={{ textAlign: "center", padding: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/2983/2983788.png"
+              alt="email verification"
+              style={{ width: 80, height: 80 }}
+            />
+          </Box>
+          <Typography variant="h5" fontWeight="bold">
+            Please Verify Account
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#666", my: 1 }}>
+            Enter the six-digit code we sent to your email address.
+          </Typography>
 
-    <Box sx={{ display: "flex", justifyContent: "center", gap: 1, my: 2 }}>
-      {otp.map((value, index) => (
-        <TextField
-          key={index}
-          type="text"
-          variant="outlined"
-          inputProps={{ maxLength: 1, style: { textAlign: "center", fontSize: "20px" } }}
-          sx={{
-            width: "3rem",
-            height: "3rem",
-            "& input": { padding: "10px" },
-            "& fieldset": { borderRadius: "10px" },
-          }}
-          value={value}
-          onChange={(e) => handleOtpChange(index, e.target.value)}
-        />
-      ))}
-    </Box>
+          <Box
+            sx={{ display: "flex", justifyContent: "center", gap: 1, my: 2 }}
+          >
+            {otp.map((value, index) => (
+              <TextField
+                key={index}
+                type="text"
+                variant="outlined"
+                inputProps={{
+                  maxLength: 1,
+                  style: { textAlign: "center", fontSize: "20px" },
+                }}
+                sx={{
+                  width: "3rem",
+                  height: "3rem",
+                  "& input": { padding: "10px" },
+                  "& fieldset": { borderRadius: "10px" },
+                }}
+                value={value}
+                onChange={(e) => handleOtpChange(index, e.target.value)}
+              />
+            ))}
+          </Box>
 
-    <Button
-      variant="contained"
-      fullWidth
-      sx={{
-        bgcolor: "purple",
-        color: "white",
-        fontWeight: "bold",
-        borderRadius: "25px",
-        textTransform: "none",
-        mt: 2,
-      }}
-      onClick={handleOtpSubmit}
-    >
-      Verify & Continue
-    </Button>
-  </DialogContent>
-</Dialog>
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{
+              bgcolor: "purple",
+              color: "white",
+              fontWeight: "bold",
+              borderRadius: "25px",
+              textTransform: "none",
+              mt: 2,
+            }}
+            onClick={handleOtpSubmit}
+          >
+            Verify & Continue
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogContent sx={{ textAlign: "center", padding: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/2983/2983788.png"
+              alt="password reset"
+              style={{ width: 80, height: 80 }}
+            />
+          </Box>
+          <Typography variant="h5" fontWeight="bold">
+            Reset Your Password
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#666", my: 1 }}>
+            Enter your new password below.
+          </Typography>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, my: 2 }}>
+            <TextField
+              label="New Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              required
+              sx={{ mt: 1, borderRadius: "10px" }}
+            />
+            <TextField
+              label="Confirm New Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              required
+              sx={{ mt: 1, borderRadius: "10px" }}
+            />
+          </Box>
+
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{
+              bgcolor: "purple",
+              color: "white",
+              fontWeight: "bold",
+              borderRadius: "25px",
+              textTransform: "none",
+              mt: 2,
+            }}
+            onClick={handleResetPassword}
+          >
+            Reset Password
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
