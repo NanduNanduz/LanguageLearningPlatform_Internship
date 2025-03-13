@@ -5,13 +5,37 @@ import streamifier from "streamifier";
 import PDFDocument from "pdfkit";
 import Quiz from "../models/quizModel.js";
 
-
 // Configure Cloudinary
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+//GET route for fetching instructor details
+
+export const getInstructorDetails = async (req, res) => {
+  try {
+    const { instructorId } = req.params;
+
+    const instructor = await userModel
+      .findOne({ _id: instructorId, role: "instructor" })
+      .populate("courseCreated");
+
+    if (!instructor) {
+      return res.status(404).json({ message: "Instructor not found" });
+    }
+
+    res.status(200).json(instructor);
+  } catch (error) {
+    console.error("Error fetching instructor details:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
 
 // Get course details
 export const getCourseDetails = async (req, res) => {
