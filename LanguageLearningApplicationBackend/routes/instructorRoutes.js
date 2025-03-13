@@ -15,11 +15,18 @@ import {
 } from "../controllers/instructorController.js";
 
 import { upload , parseFormData} from "../utils/multer.js";
+import { getInstructorDetails } from "../controllers/instructorController.js";
+
 
 const router = express.Router();
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
+
+
+
+router.get("/single-instructor/:instructorId", getInstructorDetails);
+
 
 //CreatingCourse
 router.post(
