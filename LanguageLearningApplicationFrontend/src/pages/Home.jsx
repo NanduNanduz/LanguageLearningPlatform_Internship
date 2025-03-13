@@ -1,9 +1,11 @@
 import React from 'react'
+import Navbar from '../components/navbar/Navbar'
 
 const Home = () => {
   return (
     <div>
-      <h1>Home</h1>
+      <Navbar/>
+      <h1 className='mt-5 text-center'>Home</h1>
       
     </div>
   )

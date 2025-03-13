@@ -7,7 +7,7 @@ import crypto from "crypto"; // Import crypto for generating OTP
 
 //SIGNUP
 export const register = async (req, res, next) => {
-  const { name, email, password, confirmPassword } = req.body;
+  const { name, email, password, confirmPassword, role } = req.body;
 
   // Check if password and confirmPassword match
   if (password !== confirmPassword) {
@@ -34,7 +34,8 @@ export const register = async (req, res, next) => {
     const newUser = new userModel({
       name,
       email,
-      password: hash, // Store the hashed password
+      password: hash,
+      role // Store the hashed password
     });
 
     // Save the user to the database
