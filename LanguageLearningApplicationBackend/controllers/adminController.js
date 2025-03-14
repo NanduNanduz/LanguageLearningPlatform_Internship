@@ -6,7 +6,6 @@ export const getCourses = async (req, res) => {
   try {
     const courses = await courseModel
       .find()
-      .populate("instructorId", "name email");
     res.status(200).json(courses);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });
