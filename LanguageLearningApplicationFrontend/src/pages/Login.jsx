@@ -193,6 +193,9 @@ const Login = ({onClose}) => {
               >
                 Forgot password?
               </Link>
+              {message && (
+            <div className="message text-center text-danger">{message}</div>
+          )}
 
               <Button
           onClick={handleLogin}
@@ -274,7 +277,7 @@ const Login = ({onClose}) => {
                 }}
               />
             </DialogContent>
-
+                
             <DialogActions sx={{ justifyContent: "center", pb: 3, flexDirection: "column", width: "100%" }}>
               <Button
                 variant="contained"
