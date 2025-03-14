@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Box,
+  Grid,
   TextField,
   Button,
   Typography,
@@ -13,7 +14,7 @@ import {
 } from "@mui/material";
 import { Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import Grid from "@mui/material/Grid2";
+import Grid2 from "@mui/material/Grid2";
 import axios from "axios";
 
 
@@ -142,11 +143,6 @@ const Login = ({onClose}) => {
             }}
           >
             <Box
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  loginfunction();
-                }
-              }}
               sx={{ display: "flex", flexDirection: "column", gap: 2 }}
             >
               <Typography variant="h5" fontWeight="bold">
@@ -197,11 +193,9 @@ const Login = ({onClose}) => {
               >
                 Forgot password?
               </Link>
-              {message && (
-            <div className="message text-center text-danger">{message}</div>
-          )}
+
               <Button
-                onClick={handleLogin}
+          onClick={handleLogin}
                 variant="contained"
                 fullWidth
                 sx={{ bgcolor: "purple", color: "white", fontWeight: "bold" }}
@@ -212,12 +206,7 @@ const Login = ({onClose}) => {
           </Grid>
 
           {/* Right Side: Image */}
-          <Grid
-            item
-            xs={12}
-            md={6}
-            sx={{ display: { xs: "none", md: "block" } }}
-          >
+          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
             <Box
               sx={{
                 backgroundImage:
@@ -233,12 +222,7 @@ const Login = ({onClose}) => {
       </Dialog>
 
       {/* Forgot Password Dialog */}
-      <Dialog
-        open={forgotOpen}
-        onClose={handleForgotClose}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={forgotOpen} onClose={handleForgotClose} maxWidth="md" fullWidth>
         <Grid container sx={{ minHeight: "450px" }}>
           {/* Left Side: Forgot Password Form */}
           <Grid
@@ -263,6 +247,7 @@ const Login = ({onClose}) => {
             >
               Forgot Your Password?
             </DialogTitle>
+
             <Typography
               variant="body2"
               sx={{ textAlign: "center", color: "#666", mb: 2 }}
@@ -270,13 +255,7 @@ const Login = ({onClose}) => {
               Enter your registered email to reset your password.
             </Typography>
 
-            <DialogContent
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
+            <DialogContent sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               <TextField
                 label="Email Address"
                 name="email"
@@ -295,17 +274,8 @@ const Login = ({onClose}) => {
                 }}
               />
             </DialogContent>
-            <DialogActions
-              sx={{
-                justifyContent: "center",
-                pb: 3,
-                flexDirection: "column",
-                width: "100%",
-              }}
-            >
-              {message && (
-            <div className="message text-center text-danger">{message}</div>
-          )}
+
+            <DialogActions sx={{ justifyContent: "center", pb: 3, flexDirection: "column", width: "100%" }}>
               <Button
                 variant="contained"
                 fullWidth
@@ -347,12 +317,7 @@ const Login = ({onClose}) => {
           </Grid>
 
           {/* Right Side: Forgot Password Image */}
-          <Grid
-            item
-            xs={12}
-            md={6}
-            sx={{ display: { xs: "none", md: "block" } }}
-          >
+          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
             <Box
               sx={{
                 backgroundImage: "url(/images/forgot_password.jpg)",
@@ -367,12 +332,7 @@ const Login = ({onClose}) => {
       </Dialog>
 
       {/* OTP Dialog */}
-      <Dialog
-        open={otpOpen}
-        onClose={() => setOtpOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={otpOpen} onClose={() => setOtpOpen(false)} maxWidth="sm" fullWidth>
         <DialogContent sx={{ textAlign: "center", padding: 4 }}>
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
             <img
@@ -388,18 +348,13 @@ const Login = ({onClose}) => {
             Enter the six-digit code we sent to your email address.
           </Typography>
 
-          <Box
-            sx={{ display: "flex", justifyContent: "center", gap: 1, my: 2 }}
-          >
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 1, my: 2 }}>
             {otp.map((value, index) => (
               <TextField
                 key={index}
                 type="text"
                 variant="outlined"
-                inputProps={{
-                  maxLength: 1,
-                  style: { textAlign: "center", fontSize: "20px" },
-                }}
+                inputProps={{ maxLength: 1, style: { textAlign: "center", fontSize: "20px" } }}
                 sx={{
                   width: "3rem",
                   height: "3rem",
@@ -431,12 +386,7 @@ const Login = ({onClose}) => {
       </Dialog>
 
       {/* Reset Password Dialog */}
-      <Dialog
-        open={resetOpen}
-        onClose={() => setResetOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={resetOpen} onClose={() => setResetOpen(false)} maxWidth="sm" fullWidth>
         <DialogContent sx={{ textAlign: "center", padding: 4 }}>
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
             <img
@@ -456,7 +406,6 @@ const Login = ({onClose}) => {
             <TextField
               label="New Password"
               type="password"
-              onChange={(e)=>{setNewPassword(e.target.value)}}
               variant="outlined"
               fullWidth
               required
@@ -465,7 +414,6 @@ const Login = ({onClose}) => {
             <TextField
               label="Confirm New Password"
               type="password"
-              onChange={(e)=>{setConfirmPassword(e.target.value)}}
               variant="outlined"
               fullWidth
               required
