@@ -103,7 +103,8 @@ const Course = () => {
                   <TableRow key={course._id} hover>
                     <TableCell>{course.title}</TableCell>
                     <TableCell>
-                      {course.instructorId?.name || "Unknown"}
+                      {/* {course.instructorId?.name || "Unknown"} */}
+                      {course.instructorId}
                     </TableCell>
                     <TableCell>{course.category}</TableCell>
                     <TableCell>{course.status}</TableCell>
