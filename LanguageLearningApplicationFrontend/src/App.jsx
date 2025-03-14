@@ -8,6 +8,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Studenthome from "./pages/student/Studenthome";
 import InstructorHome from "./pages/instructor/InstructorHome";
 import Navbar from "./components/navbar/Navbar";
+import Students from "./pages/admin/Students";
+import Course from "./pages/admin/Course"
+
 
 function App() {
 
@@ -16,12 +19,14 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route element={<Navbar/>}/>
-      <Route element={<PrivateRoutes/>} >
-            <Route path="/adminDashboard" element={<AdminDashboard />} />
-            <Route path="/studentHome" element={<Studenthome/>} />
-            <Route path="/instructorHome" element={<InstructorHome/>} />
-      </Route>    
+      <Route element={<Navbar />} />
+      <Route element={<PrivateRoutes />}>
+        <Route path="/adminDashboard" element={<AdminDashboard />} />
+        <Route path="/studentHome" element={<Studenthome />} />
+        <Route path="/instructorHome" element={<InstructorHome />} />
+        <Route path="/student-management" element={<Students />} />
+        <Route path="/course-management" element={<Course />} />
+      </Route>
     </Routes>
   );
 }
