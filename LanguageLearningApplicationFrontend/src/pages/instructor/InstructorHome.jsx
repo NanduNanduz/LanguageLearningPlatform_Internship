@@ -32,7 +32,6 @@ const InstructorHome = () => {
           <Typography color="error">Instructor data not found. Please log in.</Typography>
         )}
       </div>
-          <Button onClick={()=>{navigate('/instructorCourses',{state:{user:instructor}})}}>Courses</Button>
     </>
   );
 };
