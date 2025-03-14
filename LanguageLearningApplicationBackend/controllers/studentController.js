@@ -90,9 +90,6 @@ export const getAllStudents = async (req, res) => {
   }
 };
 
-
-
-
 export const getUserDetails = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -113,7 +110,6 @@ export const getUserDetails = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
