@@ -26,22 +26,13 @@ const InstructorHome = () => {
             <CardContent>
               <Typography variant="h5">Welcome, {instructor.name}</Typography>
               <Typography>Email: {instructor.email}</Typography>
-              <Typography>Courses Created:</Typography>
-              <ul>
-                {instructor.courseCreated.length > 0 ? (
-                  instructor.courseCreated.map((course) => (
-                    <li key={course._id}>{course.courseTitle}</li>
-                  ))
-                ) : (
-                  <Typography>No courses created yet.</Typography>
-                )}
-              </ul>
             </CardContent>
           </Card>
         ) : (
           <Typography color="error">Instructor data not found. Please log in.</Typography>
         )}
       </div>
+          <Button onClick={()=>{navigate('/instructorCourses',{state:{user:instructor}})}}>Courses</Button>
     </>
   );
 };

@@ -33,10 +33,28 @@ export const getInstructorDetails = async (req, res) => {
   }
 };
 
-// Get course details
+// Get one instructors courses
+export const getInstructorCourses = async (req, res) => {
+  try {
+    const { instructorId } = req.params; // Get instructorId from request params
+
+    // Find all courses created by this instructor
+    const courses = await courseModel.find({ instructorId });
+
+    if (!courses || courses.length === 0) {
+      return res.status(404).json({ success: false, message: "No courses found for this instructor" });
+    }
+
+    res.status(200).json({ success: true, courses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//get one course details
 export const getCourseDetails = async (req, res) => {
   try {
-    const courseId = req.params.id;
+    const courseId = req.params.courseId;
     const course = await courseModel.findById(courseId);
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
@@ -46,6 +64,7 @@ export const getCourseDetails = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // Delete a course
 export const deleteCourse = async (req, res) => {
@@ -109,7 +128,7 @@ export const editCourseDetails = async (req, res) => {
 export const createCourse = async (req, res) => {
   try {
     const { title, description, price, category, instructorName } = req.body;
-    const {instructorId} = req.params;
+    const { instructorId } = req.params;
 
     if (!req.files || !req.files.thumbnail) {
       return res.status(400).json({ success: false, message: "Course thumbnail is required" });
@@ -120,7 +139,7 @@ export const createCourse = async (req, res) => {
       folder: "course_thumbnails",
     });
 
-    let videoUploads = []; 
+    let videoUploads = [];
 
     // Convert videoTitle to an array if it's a single string
     let videoTitles = req.body.videoTitle;
@@ -133,26 +152,19 @@ export const createCourse = async (req, res) => {
         return res.status(400).json({ success: false, message: "Each video must have a corresponding title" });
       }
 
-      if (!req.files.videoThumbnails || req.files.videoThumbnails.length !== req.files.videos.length) {
-        return res.status(400).json({ success: false, message: "Each video must have a corresponding thumbnail" });
-      }
+      videoUploads = await Promise.all(
+        req.files.videos.map(async (videoFile, index) => {
+          const videoUpload = await cloudinary.v2.uploader.upload(videoFile.path, {
+            folder: "course_videos",
+            resource_type: "video",
+          });
 
-      videoUploads = await Promise.all(req.files.videos.map(async (videoFile, index) => {
-        const videoThumbnailUpload = await cloudinary.v2.uploader.upload(req.files.videoThumbnails[index].path, {
-          folder: "course_video_thumbnails",
-        });
-
-        const videoUpload = await cloudinary.v2.uploader.upload(videoFile.path, {
-          folder: "course_videos",
-          resource_type: "video",
-        });
-
-        return {
-          videoTitle: videoTitles[index] || "Untitled Video", 
-          videoThumbnail: videoThumbnailUpload.secure_url,
-          videoUrl: videoUpload.secure_url,
-        };
-      }));
+          return {
+            videoTitle: videoTitles[index] || "Untitled Video",
+            videoUrl: videoUpload.secure_url,
+          };
+        })
+      );
     }
 
     const newCourse = new courseModel({
@@ -164,17 +176,17 @@ export const createCourse = async (req, res) => {
       instructorId,
       instructorName,
       videos: videoUploads,
-      status: "Pending", 
+      status: "Pending",
     });
 
     await newCourse.save();
 
-    const updatedInstructor = await userModel.findByIdAndUpdate(
+    await userModel.findByIdAndUpdate(
       instructorId,
       {
-        $push: { 
-          courseCreated: { courseId: newCourse._id,}
-        }
+        $push: {
+          courseCreated: { courseId: newCourse._id },
+        },
       },
       { new: true }
     );
@@ -184,6 +196,7 @@ export const createCourse = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 //Deleting videos inside a course
 export const deleteVideoFromCourse = async (req, res) => {
@@ -234,7 +247,6 @@ export const deleteVideoFromCourse = async (req, res) => {
 export const updateVideoInCourse = async (req, res) => {
   const { courseId, videoId } = req.params;
   const newVideoTitle = req.body?.newVideoTitle;
-  const videoThumbnail = req.files?.videoThumbnail?.[0]; // Get the first file
 
   try {
     console.log(`Updating video in course: ${courseId}, Video: ${videoId}`);
@@ -262,33 +274,6 @@ export const updateVideoInCourse = async (req, res) => {
       console.log("Video title updated");
     }
 
-    // Upload and update new thumbnail if provided
-    if (videoThumbnail && videoThumbnail.path) {
-      console.log("Uploading new thumbnail...");
-
-      // Upload to Cloudinary
-      const thumbnailUpload = await cloudinary.v2.uploader.upload(videoThumbnail.path, {
-        folder: "course_video_thumbnails",
-      });
-
-      // ✅ Delete old thumbnail from Cloudinary if it exists
-      if (course.videos[videoIndex].videoThumbnail) {
-        const oldThumbnailPublicId = course.videos[videoIndex].videoThumbnail
-          .split("/")
-          .pop()
-          .split(".")[0];
-
-        await cloudinary.v2.uploader.destroy(`course_video_thumbnails/${oldThumbnailPublicId}`);
-        console.log("Old thumbnail deleted from Cloudinary");
-      }
-
-      // ✅ Update the video thumbnail URL in the course
-      course.videos[videoIndex].videoThumbnail = thumbnailUpload.secure_url;
-      console.log("New Thumbnail uploaded");
-
-
-    }
-
     // Mark the videos array as modified
     course.markModified("videos");
 
@@ -301,6 +286,7 @@ export const updateVideoInCourse = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 //adding videos and assignments as pdf after creating course
 export const addVideosAndResources = async (req, res) => {

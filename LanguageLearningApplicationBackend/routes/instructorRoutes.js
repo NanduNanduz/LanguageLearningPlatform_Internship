@@ -1,6 +1,7 @@
 import express from "express";
 import {
   deleteCourse,
+  getInstructorCourses,
   getCourseDetails,
   editCourseDetails,
   createCourse,
@@ -40,7 +41,9 @@ router.post(
   );
 router.delete("/delete-course/:id", deleteCourse); //deletingCourse
 
-router.get("/courseDetails/:id", getCourseDetails); //CourseDetails
+router.get("/courseDetails/:instructorId", getInstructorCourses); //instructror courses
+
+router.get("/courseItems/:courseId", getCourseDetails);
 
 router.put("/editCourse/:id",upload.fields([{name:"thumbnail", maxCount:1}]),editCourseDetails); //editCourse
 
