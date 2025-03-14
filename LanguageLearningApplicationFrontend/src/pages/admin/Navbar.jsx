@@ -1,37 +1,3 @@
-// import React from "react";
-// import { Box, Typography, Avatar, IconButton } from "@mui/material";
-// import NotificationsIcon from "@mui/icons-material/Notifications";
-// import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
-// const Navbar = ({ title }) => {
-//   return (
-//     <Box
-//       sx={{
-//         display: "flex",
-//         justifyContent: "space-between",
-//         alignItems: "center",
-//         padding: "10px 20px",
-//         backgroundColor: "#fff",
-//         boxShadow: "0px 2px 5px rgba(0,0,0,0.1)",
-//       }}
-//     >
-//       <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-//         {title}
-//       </Typography>
-//       <Box sx={{ display: "flex", alignItems: "center" }}>
-//         <IconButton>
-//           <NotificationsIcon />
-//         </IconButton>
-//         <Avatar sx={{ marginLeft: 2 }}>
-//           <AccountCircleIcon />
-//         </Avatar>
-//       </Box>
-//     </Box>
-//   );
-// };
-
-// export default Navbar;
-
 
 import React, { useState } from "react";
 import {
@@ -48,16 +14,20 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PersonIcon from "@mui/icons-material/Person";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ title }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate()
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
+    sessionStorage.clear();
+    navigate("/");
     setAnchorEl(null);
   };
 
