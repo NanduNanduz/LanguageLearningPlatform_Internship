@@ -13,12 +13,7 @@ export const register = async (req, res, next) => {
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords do not match." });
   }
-
-  // Check if the username already exists
-  const existingUser = await userModel.findOne({ name });
-  if (existingUser) {
-    return res.status(400).json({ message: "Username already taken." });
-  }
+ 
 
   // Check if the email already exists
   const existingEmail = await userModel.findOne({ email });
