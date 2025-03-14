@@ -355,7 +355,7 @@ const Login = ({onClose}) => {
           >
             <Box
               sx={{
-                backgroundImage: "url(/images/forgot_password.jpg)",
+                backgroundImage: "url(./images/forgot_password.jpg)",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 width: "100%",
