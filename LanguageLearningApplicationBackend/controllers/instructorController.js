@@ -33,10 +33,6 @@ export const getInstructorDetails = async (req, res) => {
   }
 };
 
-
-
-
-
 // Get course details
 export const getCourseDetails = async (req, res) => {
   try {
@@ -45,7 +41,7 @@ export const getCourseDetails = async (req, res) => {
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
-    res.json(course);
+    res.send(course);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
