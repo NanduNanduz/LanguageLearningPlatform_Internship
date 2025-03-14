@@ -41,6 +41,9 @@ const CourseSchema = new mongoose.Schema(
       ref: "User", // Reference to User model (Instructor)
       required: true,
     },
+    instructorName:{
+      type:String
+    },
     videos: [
       {
         videoTitle: { type: String, required: true },

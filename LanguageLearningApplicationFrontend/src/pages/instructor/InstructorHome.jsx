@@ -30,7 +30,7 @@ const InstructorHome = () => {
               <ul>
                 {instructor.courseCreated.length > 0 ? (
                   instructor.courseCreated.map((course) => (
-                    <li key={course._id}>{course.title}</li>
+                    <li key={course._id}>{course.courseTitle}</li>
                   ))
                 ) : (
                   <Typography>No courses created yet.</Typography>

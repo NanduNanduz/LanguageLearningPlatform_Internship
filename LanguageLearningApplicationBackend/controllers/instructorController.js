@@ -51,10 +51,19 @@ export const getCourseDetails = async (req, res) => {
 export const deleteCourse = async (req, res) => {
   try {
     const courseId = req.params.id;
-    const deletedCourse = await courseModel.findByIdAndDelete(courseId);
-    if (!deletedCourse) {
+    const Course = await courseModel.findById(courseId);
+    if (!Course) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
+    const instructorId = Course.instructorId
+    await courseModel.findByIdAndDelete(courseId);
+    await userModel.findByIdAndUpdate(
+      instructorId,
+      {
+        $pull: { courseCreated: { courseId: courseId } } // Removes the entire object that matches
+      },
+      { new: true }
+    );
     res.status(200).json({ success: true, message: "Course deleted successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -99,7 +108,8 @@ export const editCourseDetails = async (req, res) => {
 // Adding new course and uploading video with it
 export const createCourse = async (req, res) => {
   try {
-    const { title, description, price, category, instructorId } = req.body;
+    const { title, description, price, category, instructorName } = req.body;
+    const {instructorId} = req.params;
 
     if (!req.files || !req.files.thumbnail) {
       return res.status(400).json({ success: false, message: "Course thumbnail is required" });
@@ -152,11 +162,22 @@ export const createCourse = async (req, res) => {
       description,
       thumbnail: thumbnailUpload.secure_url,
       instructorId,
+      instructorName,
       videos: videoUploads,
       status: "Pending", 
     });
 
     await newCourse.save();
+
+    const updatedInstructor = await userModel.findByIdAndUpdate(
+      instructorId,
+      {
+        $push: { 
+          courseCreated: { courseId: newCourse._id,}
+        }
+      },
+      { new: true }
+    );
 
     res.status(201).json({ success: true, course: newCourse });
   } catch (error) {

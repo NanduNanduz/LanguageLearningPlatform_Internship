@@ -30,7 +30,7 @@ router.get("/single-instructor/:instructorId", getInstructorDetails);
 
 //CreatingCourse
 router.post(
-    "/createCourse",
+    "/createCourse/:instructorId",
     upload.fields([
       { name: "thumbnail", maxCount: 1 },
       { name: "videos", maxCount: 10 },
