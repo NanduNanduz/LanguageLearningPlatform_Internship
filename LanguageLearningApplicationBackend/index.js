@@ -15,6 +15,8 @@ dotenv.config();
 const app = express();
 app.use(morgan('dev'));
 app.use(cors());
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
 db(); // calling db
 
 app.use('/auth', authRoutes); // Ensure the route prefix is correct

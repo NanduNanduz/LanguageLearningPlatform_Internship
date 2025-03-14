@@ -14,23 +14,55 @@ import {
 import { Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
+import axios from "axios";
 
 
-const Login = ({ onClose }) => {
+const Login = ({onClose}) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [forgotOpen, setForgotOpen] = useState(false);
   const [otpOpen, setOtpOpen] = useState(false);
+  const [newpassword,setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [resetOpen, setResetOpen] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [message,setMessage] = useState("")
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log("Logging in with:", formData);
-    onClose();
+
+
+  const handleLogin = async (e) => {
+    setMessage("")
+    if (!formData.email || !formData.password) {
+      setMessage("Please fill in all fields.");
+      return; // Exit the function if fields are empty
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3000/auth/login',formData);
+      const { role , blocked } = response.data.user;
+
+      if (blocked === "yes") {
+        setMessage("You are blocked from this site.");
+        return; // Exit the function if the user is blocked
+      }
+      sessionStorage.setItem("logintoken", response.data.token);
+
+      if (role === "student") {
+        navigate("/studentHome", { state: { user: response.data.user } });
+      } else if (role === "admin") {
+        navigate("/adminDashboard", { state: { user: response.data.user } });
+      } else if (role === "instructor") {
+        navigate("/instructorHome", { state: { user: response.data.user } });
+      }
+      alert("login success");
+    } catch (error) {
+      const errorMessage = error.response?.data?.message
+          setMessage(errorMessage)
+    }
+  
   };
 
   const handleForgotPassword = () => {
@@ -49,21 +81,47 @@ const Login = ({ onClose }) => {
     }
   };
 
-  const handleOtpSubmit = () => {
-    console.log("Entered OTP:", otp.join(""));
-    setOtpOpen(false);
-    setResetOpen(true);
-  };
-  const handleSendMail = () => {
-    alert("Message sent to your email");
-    setForgotOpen(false);
-    setOtpOpen(true);
+  const handleOtpSubmit = async () => {
+    try {
+      const enteredOtp = otp.join("");
+      await axios.post("http://localhost:3000/auth/verifyOtp", {
+        email: formData.email,
+        otp: enteredOtp,
+      });
+      alert("OTP verified successfully");
+      setOtpOpen(false);
+      setResetOpen(true);
+    } catch (error) {
+      alert(error.response?.data?.message || "Invalid OTP");
+    }
   };
 
-  const handleResetPassword = () => {
-    alert("Password reset successful");
-    setResetOpen(false);
-    navigate("/login");
+  const handleSendMail = async () => {
+   
+    try {
+      const response = await axios.post('http://localhost:3000/auth/reset-password',{email:formData.email} )
+      alert("OTP send to your E-mail")
+      setForgotOpen(false);
+      setOtpOpen(true);
+      } catch (error) {
+        const errorMessage = error.response?.data?.message
+        setMessage(errorMessage)
+        }
+  };
+
+  const handleResetPassword = async () => {
+    try {
+      await axios.post("http://localhost:3000/auth/newPass", {
+        email: formData.email,
+        newPassword:newpassword,
+        newConfirmPassword : confirmPassword
+      });
+      alert("Password reset successful");
+      setResetOpen(false);
+      navigate("/login");
+    } catch (error) {
+      alert(error.response?.data?.message || "Password reset failed");
+    }
   };
 
   return (
@@ -84,8 +142,11 @@ const Login = ({ onClose }) => {
             }}
           >
             <Box
-              component="form"
-              onSubmit={handleLogin}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  loginfunction();
+                }
+              }}
               sx={{ display: "flex", flexDirection: "column", gap: 2 }}
             >
               <Typography variant="h5" fontWeight="bold">
@@ -136,9 +197,11 @@ const Login = ({ onClose }) => {
               >
                 Forgot password?
               </Link>
-
+              {message && (
+            <div className="message text-center text-danger">{message}</div>
+          )}
               <Button
-                type="submit"
+                onClick={handleLogin}
                 variant="contained"
                 fullWidth
                 sx={{ bgcolor: "purple", color: "white", fontWeight: "bold" }}
@@ -240,6 +303,9 @@ const Login = ({ onClose }) => {
                 width: "100%",
               }}
             >
+              {message && (
+            <div className="message text-center text-danger">{message}</div>
+          )}
               <Button
                 variant="contained"
                 fullWidth
@@ -390,6 +456,7 @@ const Login = ({ onClose }) => {
             <TextField
               label="New Password"
               type="password"
+              onChange={(e)=>{setNewPassword(e.target.value)}}
               variant="outlined"
               fullWidth
               required
@@ -398,6 +465,7 @@ const Login = ({ onClose }) => {
             <TextField
               label="Confirm New Password"
               type="password"
+              onChange={(e)=>{setConfirmPassword(e.target.value)}}
               variant="outlined"
               fullWidth
               required

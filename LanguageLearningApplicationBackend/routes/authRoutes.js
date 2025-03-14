@@ -3,9 +3,6 @@ import { register, login, resetPassword, verifyOtp, newPass } from "../controlle
 
 const router = express.Router();
 
-router.use(express.json());
-router.use(express.urlencoded({ extended: true }));
-
 
 router.post("/register", register);
 router.post("/login", login);
