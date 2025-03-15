@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Card, CardContent, Typography } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -6,6 +6,7 @@ const InstructorHome = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const instructor = location.state?.user; // Getting instructor details from login
+
 
   const handleLogout = () => {
     sessionStorage.clear();
@@ -26,6 +27,14 @@ const InstructorHome = () => {
             <CardContent>
               <Typography variant="h5">Welcome, {instructor.name}</Typography>
               <Typography>Email: {instructor.email}</Typography>
+            </CardContent>
+            <CardContent>
+              <Typography variant="h5">Your Courses</Typography>
+              <ul>
+                {instructor.courses.map((course) => (
+                  <li key={course.id}>{course.name}</li>
+                  ))}
+              </ul>
             </CardContent>
           </Card>
         ) : (
