@@ -50,6 +50,8 @@ const Login = ({onClose}) => {
         return; // Exit the function if the user is blocked
       }
       sessionStorage.setItem("logintoken", response.data.token);
+      sessionStorage.setItem("user", JSON.stringify(response.data.user));
+
 
       if (role === "student") {
         navigate("/studentHome", { state: { user: response.data.user } });

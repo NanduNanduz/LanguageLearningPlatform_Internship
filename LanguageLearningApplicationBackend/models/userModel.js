@@ -40,8 +40,7 @@ const userSchema = mongoose.Schema(
     ],
     courseCreated: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Course"
+        courseId:mongoose.Schema.Types.ObjectId
       }
     ],
     certificates: [

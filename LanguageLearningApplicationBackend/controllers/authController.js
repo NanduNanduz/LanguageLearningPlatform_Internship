@@ -13,7 +13,7 @@ export const register = async (req, res, next) => {
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords do not match." });
   }
- 
+
 
   // Check if the email already exists
   const existingEmail = await userModel.findOne({ email });

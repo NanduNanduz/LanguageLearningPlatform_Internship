@@ -1,5 +1,7 @@
 import courseModel from "../models/courseModel.js";
 import userModel from "../models/userModel.js";
+import Quiz from "../models/quizModel.js";
+import Submission from "../models/submissionModel.js";  
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
@@ -90,9 +92,6 @@ export const getAllStudents = async (req, res) => {
   }
 };
 
-
-
-
 export const getUserDetails = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -113,7 +112,6 @@ export const getUserDetails = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -172,5 +170,130 @@ export const enrollCourse = async (req, res) => {
   } catch (error) {
     console.error("Stripe Error:", error);
     res.status(500).json({ message: "Payment failed", error });
+  }
+};
+
+//viewing a quiz by student
+export const getQuizByCourse = async (req, res) => {  
+  try {  
+    const { courseId } = req.params;  
+
+    // Find the quiz for the selected course  
+    const quiz = await Quiz.findOne({ courseId }).populate("courseId");  
+
+    if (!quiz) {  
+      return res.status(404).json({ success: false, message: "Quiz not found for this course" });  
+    }  
+
+    res.status(200).json({ success: true, quiz });  
+  } catch (error) {  
+    res.status(500).json({ success: false, message: error.message });  
+  }  
+};
+//submitting quiz by student
+export const submitQuiz = async (req, res) => {
+  try {
+    const { userId, quizId, timeTaken } = req.body;
+    let selectedAnswers = req.body.selectedAnswers;
+
+    console.log("Raw selectedAnswers:", selectedAnswers); // Debugging
+
+    // ✅ Check if the student has already attempted this quiz
+    const existingAttempt = await Submission.findOne({ userId, quizId });
+    if (existingAttempt) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already attempted this quiz. Only one attempt is allowed.",
+      });
+    }
+
+    // ✅ Ensure `selectedAnswers` is treated as an array
+    if (!Array.isArray(selectedAnswers)) {
+      selectedAnswers = [selectedAnswers]; 
+    }
+
+    // ✅ Convert text values to numbers
+    selectedAnswers = selectedAnswers.map((ans) => {
+      const parsed = parseInt(ans, 10);
+      return isNaN(parsed) ? null : parsed;
+    });
+
+    // ✅ Check if any answer is invalid
+    if (selectedAnswers.includes(null)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid answer format. Answers must be numbers.",
+      });
+    }
+
+    // ✅ Fetch the quiz
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    // ✅ Calculate score
+    let correctAnswersCount = 0;
+    quiz.questions.forEach((question, index) => {
+      if (question.correctAnswerIndex === selectedAnswers[index]) {
+        correctAnswersCount++;
+      }
+    });
+
+    const totalQuestions = quiz.questions.length;
+    const percentageScore = (correctAnswersCount / totalQuestions) * 100;
+    const passed = percentageScore >= quiz.passingScore;
+
+    // ✅ Save submission
+    const submission = new Submission({
+      userId,
+      quizId,
+      selectedAnswers,
+      score: percentageScore,
+      correctAnswersCount,
+      passed,
+      attemptNumber: 1, // Always 1 since only 1 attempt is allowed
+      timeTaken: timeTaken ? parseInt(timeTaken, 10) : null,
+      isBestAttempt: true, // Since it's the only attempt, it's the best
+    });
+
+    await submission.save();
+
+    // ✅ Update the `submissions` array in the Quiz model
+    quiz.submissions.push(submission._id);
+    await quiz.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Quiz submitted successfully",
+      score: percentageScore,
+      correctAnswersCount,
+      passed,
+      attemptNumber: 1,
+      timeTaken,
+      isBestAttempt: true,
+    });
+  } catch (error) {
+    console.error("Quiz submission error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//viewing result by the student
+export const getUserQuizResults = async (req, res) => {
+  try {
+    const { userId, courseId } = req.params;
+
+    // Find the user's enrolled course progress
+    const user = await userModel.findById(userId);
+    const enrolledCourse = user.enrolledCourses.find((ec) => ec.courseId.toString() === courseId);
+
+    if (!enrolledCourse) {
+      return res.status(404).json({ success: false, message: "User not enrolled in this course" });
+    }
+
+    res.status(200).json({ success: true, quizScores: enrolledCourse.quizScores });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
