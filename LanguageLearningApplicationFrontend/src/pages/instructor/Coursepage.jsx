@@ -86,12 +86,6 @@ const CoursePage = () => {
         style={{ display: "block", margin: "auto", marginTop: "20px" }}
       />
     );
-  if (error)
-    return (
-      <Typography color="error" align="center">
-        {error}
-      </Typography>
-    );
 
   return (
     <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>

@@ -14,6 +14,7 @@ import AddCourse from "./pages/instructor/AddCourse";
 import Coursepage from "./pages/instructor/Coursepage";
 import Resourcespage from "./pages/instructor/Resourcespage";
 import QuizzPage from "./pages/instructor/QuizzPage";
+import UpdateCourse from "./pages/instructor/UpdateCourse";
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/coursePage/:courseId" element={<Coursepage />} />
         <Route path="/addResources/:courseId" element={<Resourcespage />} />
         <Route path="/addquiz/:courseId" element={<QuizzPage />} />
+        <Route path="/updateCourse/:courseId" element={<UpdateCourse />} />
 
       </Route>
     </Routes>
