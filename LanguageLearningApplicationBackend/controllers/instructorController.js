@@ -12,6 +12,13 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
+// Get all instructors
+export const getInstuctors = async (req, res) => {
+  const instructors = await userModel.find({ role: "instructor" });
+  res.json(instructors);
+};
+
 //GET route for fetching instructor details
 
 export const getInstructorDetails = async (req, res) => {
