@@ -10,6 +10,8 @@ import InstructorHome from "./pages/instructor/InstructorHome";
 import Navbar from "./components/navbar/Navbar";
 import Students from "./pages/admin/Students";
 import Course from "./pages/admin/Course"
+import AddCourse from "./pages/instructor/AddCourse";
+import Coursepage from "./pages/instructor/Coursepage";
 
 
 function App() {
@@ -26,6 +28,8 @@ function App() {
         <Route path="/instructorHome" element={<InstructorHome />} />
         <Route path="/student-management" element={<Students />} />
         <Route path="/course-management" element={<Course />} />
+        <Route path="/addCourse" element={<AddCourse />} />
+        <Route path="/coursePage/:courseId" element={<Coursepage />} />
       </Route>
     </Routes>
   );

@@ -59,7 +59,7 @@ export const getCourseDetails = async (req, res) => {
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
-    res.send(course);
+    res.status(200).json({ success: true, course });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -127,7 +127,7 @@ export const editCourseDetails = async (req, res) => {
 // Adding new course and uploading video with it
 export const createCourse = async (req, res) => {
   try {
-    const { title, description, price, category, instructorName } = req.body;
+    const { title, description, price, category, instructorName} = req.body;
     const { instructorId } = req.params;
 
     if (!req.files || !req.files.thumbnail) {
