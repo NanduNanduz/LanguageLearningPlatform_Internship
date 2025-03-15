@@ -35,7 +35,6 @@ const InstructorHome = () => {
           throw new Error("Invalid API response format");
         }
       } catch (error) {
-        setError("Error fetching course details");
         console.error("Error fetching course details:", error);
       }
     };
