@@ -1,9 +1,10 @@
 import express from "express";
-import { approveCourse, rejectCourse } from "../controllers/adminController.js"; 
+import { approveCourse, blockInstructor, rejectCourse } from "../controllers/adminController.js"; 
 import adminAuth from "../middlewares/adminAuth.js";
 import { getCourses } from "../controllers/adminController.js";
 import { toggleBlockUser } from "../controllers/adminController.js";
 import { deleteStudent } from "../controllers/adminController.js";
+
 
 
 const router = express.Router();
@@ -23,6 +24,9 @@ router.put("/course-reject/:id",rejectCourse);
 router.put("/block-student/:userId", toggleBlockUser);
 
 router.delete("/delete-student/:id", deleteStudent);
+
+// Block/Unblock instructor
+router.put("/block-instructor/:id", blockInstructor);
 
 
 
