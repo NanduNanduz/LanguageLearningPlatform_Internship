@@ -41,16 +41,18 @@ const Instructors = () => {
     }
   };
 
-  const toggleBlockStatus = async (id, status) => {
-    try {
-      await axios.put(`http://localhost:3000/admin/block-instructor/${id}`, {
-        blocked: !status,
-      });
-      fetchInstructors();
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
-  };
+ const toggleBlockStatus = async (id, currentStatus) => {
+   try {
+     const newStatus = currentStatus === "yes" ? "no" : "yes"; // Toggle status
+     await axios.put(`http://localhost:3000/admin/block-instructor/${id}`, {
+       blocked: newStatus,
+     });
+     fetchInstructors();
+   } catch (error) {
+     console.error("Error updating status:", error);
+   }
+ };
+
 
   const deleteInstructor = async (id) => {
     try {
@@ -107,6 +109,9 @@ const Instructors = () => {
                     <strong>Email</strong>
                   </TableCell>
                   <TableCell>
+                    <strong>Course Count</strong>
+                  </TableCell>
+                  <TableCell>
                     <strong>Courses Created</strong>
                   </TableCell>
                   <TableCell align="center">
@@ -122,17 +127,32 @@ const Instructors = () => {
                   <TableRow key={instructor._id} hover>
                     <TableCell>{instructor.name}</TableCell>
                     <TableCell>{instructor.email}</TableCell>
-                    <TableCell>{instructor.courseCount}</TableCell>
+                    <TableCell>
+                      {instructor.courseCreated
+                        ? instructor.courseCreated.length
+                        : 0}
+                    </TableCell>
+                    <TableCell>
+                      {instructor.courseCreated &&
+                      instructor.courseCreated.length > 0
+                        ? instructor.courseCreated.map((course, index) => (
+                            <div key={index}>{course.title}</div>
+                          ))
+                        : "No courses created"}
+                    </TableCell>
+
                     <TableCell align="center">
                       <Button
                         variant="contained"
-                        color={instructor.blocked ? "error" : "success"}
+                        color={
+                          instructor.blocked === "yes" ? "error" : "success"
+                        }
                         onClick={() =>
                           toggleBlockStatus(instructor._id, instructor.blocked)
                         }
                         sx={{ textTransform: "capitalize" }}
                       >
-                        {instructor.blocked ? "Blocked" : "Unblocked"}
+                        {instructor.blocked === "yes" ? "Blocked" : "Unblocked"}
                       </Button>
                     </TableCell>
                     <TableCell align="center">
@@ -147,15 +167,21 @@ const Instructors = () => {
                         onClose={handleMenuClose}
                       >
                         <MenuItem
-                          onClick={() =>
-                            toggleBlockStatus(
-                              selectedInstructor._id,
-                              selectedInstructor.blocked
-                            )
-                          }
+                          onClick={() => {
+                            if (selectedInstructor) {
+                              toggleBlockStatus(
+                                selectedInstructor._id,
+                                selectedInstructor.blocked
+                              );
+                              handleMenuClose();
+                            }
+                          }}
                         >
-                          {selectedInstructor?.blocked ? "Unblock" : "Block"}
+                          {selectedInstructor?.blocked === "yes"
+                            ? "Unblock"
+                            : "Block"}
                         </MenuItem>
+
                         <MenuItem
                           onClick={() =>
                             deleteInstructor(selectedInstructor._id)
