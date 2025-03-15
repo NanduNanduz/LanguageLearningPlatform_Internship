@@ -104,7 +104,7 @@ const Course = () => {
                     <TableCell>{course.title}</TableCell>
                     <TableCell>
                       {/* {course.instructorId?.name || "Unknown"} */}
-                      {course.instructorId}
+                      {course.instructorName}
                     </TableCell>
                     <TableCell>{course.category}</TableCell>
                     <TableCell>{course.status}</TableCell>
