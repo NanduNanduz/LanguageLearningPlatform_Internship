@@ -319,15 +319,7 @@ export const addVideosAndResources = async (req, res) => {
         return res.status(400).json({ success: false, message: "Each video must have a corresponding title" });
       }
 
-      if (!req.files.videoThumbnails || req.files.videoThumbnails.length !== req.files.videos.length) {
-        return res.status(400).json({ success: false, message: "Each video must have a corresponding thumbnail" });
-      }
-
       videoUploads = await Promise.all(req.files.videos.map(async (videoFile, index) => {
-        const videoThumbnailUpload = await cloudinary.v2.uploader.upload(req.files.videoThumbnails[index].path, {
-          folder: "course_video_thumbnails",
-        });
-
         const videoUpload = await cloudinary.v2.uploader.upload(videoFile.path, {
           folder: "course_videos",
           resource_type: "video",
@@ -335,7 +327,6 @@ export const addVideosAndResources = async (req, res) => {
 
         return {
           videoTitle: videoTitle[index] || "Untitled Video",
-          videoThumbnail: videoThumbnailUpload.secure_url,
           videoUrl: videoUpload.secure_url,
         };
       }));
@@ -370,6 +361,7 @@ export const addVideosAndResources = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 //generating certificate
 export const generateCertificate = async (userName, courseTitle) => {
@@ -543,7 +535,6 @@ export const issueCertificate = async (req, res) => {
 export const createQuizQuestions = async (req, res) => {
   try {
     const { courseId } = req.params;
-    console.log("Form Data Received:", req.body); // Debugging
 
     const course = await courseModel.findById(courseId);
     if (!course) {

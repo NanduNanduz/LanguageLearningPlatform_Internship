@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -28,6 +28,7 @@ const CoursePage = () => {
   const [quizLoading, setQuizLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedSection, setSelectedSection] = useState("videos");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -41,7 +42,9 @@ const CoursePage = () => {
           throw new Error("Course not found.");
         }
       } catch (error) {
-        setError(error.response?.data?.message || "Error fetching course data.");
+        setError(
+          error.response?.data?.message || "Error fetching course data."
+        );
       } finally {
         setLoading(false);
       }
@@ -83,7 +86,12 @@ const CoursePage = () => {
         style={{ display: "block", margin: "auto", marginTop: "20px" }}
       />
     );
-  if (error) return <Typography color="error" align="center">{error}</Typography>;
+  if (error)
+    return (
+      <Typography color="error" align="center">
+        {error}
+      </Typography>
+    );
 
   return (
     <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
@@ -95,10 +103,31 @@ const CoursePage = () => {
           <Typography variant="body1" color="textSecondary">
             {course.description}
           </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate(`/addresources/${courseId}`)}
+            style={{ marginBottom: "20px" }}
+          >
+            Add videos and resources
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ margin: "10px 0" }}
+            onClick={() => navigate(`/addquiz/${courseId}`)}
+          >
+            Add Quiz
+          </Button>
         </CardContent>
       </Card>
 
-      <Stack direction="row" spacing={2} justifyContent="center" marginBottom={3}>
+      <Stack
+        direction="row"
+        spacing={2}
+        justifyContent="center"
+        marginBottom={3}
+      >
         <Button
           variant={selectedSection === "quizzes" ? "contained" : "outlined"}
           onClick={() => handleSectionChange("quizzes")}
@@ -128,13 +157,19 @@ const CoursePage = () => {
             <CircularProgress style={{ display: "block", margin: "auto" }} />
           ) : quizzes.length > 0 ? (
             quizzes.map((quiz, index) => (
-              <Accordion key={quiz._id || index} sx={{ boxShadow: 2, marginBottom: 2 }}>
+              <Accordion
+                key={quiz._id || index}
+                sx={{ boxShadow: 2, marginBottom: 2 }}
+              >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <Typography variant="h6">Quiz {index + 1}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   {quiz.questions.map((question, qIndex) => (
-                    <Card key={question._id || qIndex} sx={{ marginBottom: 2, padding: 2 }}>
+                    <Card
+                      key={question._id || qIndex}
+                      sx={{ marginBottom: 2, padding: 2 }}
+                    >
                       <Typography variant="body1" fontWeight="bold">
                         {qIndex + 1}. {question.questionText}
                       </Typography>
@@ -149,7 +184,8 @@ const CoursePage = () => {
                         ))}
                       </RadioGroup>
                       <Typography fontWeight="bold" color="green">
-                        Correct Answer: {question.options[question.correctAnswerIndex].text}
+                        Correct Answer:{" "}
+                        {question.options[question.correctAnswerIndex].text}
                       </Typography>
                     </Card>
                   ))}
@@ -171,12 +207,14 @@ const CoursePage = () => {
             course.resources.map((resource) => (
               <Card sx={{ boxShadow: 2, marginBottom: 2 }} key={resource._id}>
                 <CardContent>
-                  <Typography variant="body1">{resource.name}</Typography>
+                  <Typography variant="body1">
+                    {resource.resourceName}
+                  </Typography>
                   <Button
                     variant="outlined"
                     color="secondary"
                     startIcon={<CloudDownloadIcon />}
-                    onClick={() => window.open(resource.url, "_blank")}
+                    onClick={() => window.open(resource.resourceUrl, "_blank")}
                   >
                     Download
                   </Button>
