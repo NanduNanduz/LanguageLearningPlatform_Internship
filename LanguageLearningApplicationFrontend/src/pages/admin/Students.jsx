@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -16,7 +18,6 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import { FaCheckCircle } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
@@ -42,14 +43,54 @@ const Students = () => {
     }
   };
 
+  // Function to toggle block/unblock status
+  const toggleBlockStatus = async (studentId, currentStatus) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/admin/block-student/${studentId}`
+      );
+
+      // Update UI
+      setStudents((prevStudents) =>
+        prevStudents.map((student) =>
+          student._id === studentId
+            ? { ...student, blocked: response.data.user.blocked }
+            : student
+        )
+      );
+    } catch (error) {
+      console.error("Error updating block status:", error);
+    }
+  };
+
+  // Function to open menu
   const handleMenuOpen = (event, student) => {
     setAnchorEl(event.currentTarget);
     setSelectedStudent(student);
   };
 
+  // Function to close menu
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedStudent(null);
+  };
+
+  // Function to delete a student
+  const handleDeleteStudent = async (studentId) => {
+    try {
+      await axios.delete(
+        `http://localhost:3000/admin/delete-student/${studentId}`
+      );
+
+      // Update UI after deletion
+      setStudents((prevStudents) =>
+        prevStudents.filter((student) => student._id !== studentId)
+      );
+
+      handleMenuClose();
+    } catch (error) {
+      console.error("Error deleting student:", error);
+    }
   };
 
   return (
@@ -57,14 +98,12 @@ const Students = () => {
       <CssBaseline />
       <Sidebar />
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
         <Navbar title="Student Management" />
 
-        {/* Content Container */}
         <Container
           maxWidth="lg"
           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
@@ -72,6 +111,7 @@ const Students = () => {
           <Typography variant="h5" fontWeight="bold" mb={2}>
             Student Management
           </Typography>
+
           <TableContainer
             component={Paper}
             elevation={3}
@@ -81,19 +121,13 @@ const Students = () => {
               <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableRow>
                   <TableCell>
-                    <strong>Name</strong>
+                    <strong>Student Name</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Email</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Role</strong>
+                    <strong>Student Email</strong>
                   </TableCell>
                   <TableCell align="center">
-                    <strong>Verified</strong>
-                  </TableCell>
-                  <TableCell align="center">
-                    <strong>Status</strong>
+                    <strong>Student Status</strong>
                   </TableCell>
                   <TableCell align="center">
                     <strong>Actions</strong>
@@ -116,30 +150,77 @@ const Students = () => {
                       </Box>
                     </TableCell>
                     <TableCell>{student.email}</TableCell>
-                    <TableCell>{student.role}</TableCell>
-                    <TableCell align="center">
-                      {student.verified ? (
-                        <FaCheckCircle
-                          style={{ color: "green", fontSize: "18px" }}
-                        />
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box
-                        sx={{
-                          padding: "5px 10px",
-                          borderRadius: "8px",
-                          color: student.blocked === "no" ? "green" : "red",
+
+                    {/* Status Toggle */}
+                    {/* <TableCell
+                      align="center"
+                      onClick={() =>
+                        toggleBlockStatus(student._id, student.blocked)
+                      }
+                      sx={{
+                        cursor: "pointer",
+                        width: "90px",
+                        borderRadius: "5px",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: student.blocked === "no" ? "green" : "red",
+                        backgroundColor:
+                          student.blocked === "no" ? "#d4edda" : "#f8d7da",
+
+                        // Flexbox Fix
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "24px", // Explicit height for better alignment
+                        minWidth: "70px",
+                        padding: "0 8px", // Reduce padding
+                        textTransform: "capitalize", // Ensure consistent text style
+
+                        transition: "0.3s",
+                        "&:hover": {
                           backgroundColor:
-                            student.blocked === "no" ? "#d4edda" : "#f8d7da",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {student.blocked === "no" ? "Active" : "Banned"}
-                      </Box>
-                    </TableCell>
+                            student.blocked === "no" ? "#c3e6cb" : "#f5c6cb",
+                        },
+                      }}
+                    >
+                      {student.blocked === "no" ? "Unblocked" : "Blocked"}
+                    </TableCell> */}
+
+
+                    <TableCell
+  align="center"
+  onClick={() => toggleBlockStatus(student._id, student.blocked)}
+  sx={{
+    cursor: "pointer",
+    width: "90px",
+    borderRadius: "5px",
+    fontSize: "12px",
+    fontWeight: "bold",
+    color: student.blocked === "no" ? "green" : "red",
+    backgroundColor: student.blocked === "no" ? "#d4edda" : "#f8d7da",
+    
+    // Ensure full width & height
+    display: "flex",  
+    alignItems: "center",  
+    justifyContent: "center",  
+    height: "100%",  
+    minHeight: "30px", // Ensure proper vertical alignment
+    minWidth: "80px",  
+
+    padding: "0px", // Remove extra padding
+    textTransform: "capitalize", 
+
+    transition: "0.3s",
+    "&:hover": {
+      backgroundColor: student.blocked === "no" ? "#c3e6cb" : "#f5c6cb",
+    },
+  }}
+>
+  {student.blocked === "no" ? "Unblocked" : "Blocked"}
+</TableCell>
+
+
+                    {/* Action Menu */}
                     <TableCell align="center">
                       <IconButton
                         onClick={(event) => handleMenuOpen(event, student)}
@@ -151,8 +232,14 @@ const Students = () => {
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                       >
-                        <MenuItem>Edit</MenuItem>
-                        <MenuItem style={{ color: "red" }}>Delete</MenuItem>
+                        <MenuItem
+                          onClick={() =>
+                            handleDeleteStudent(selectedStudent._id)
+                          }
+                          style={{ color: "red" }}
+                        >
+                          Delete
+                        </MenuItem>
                       </Menu>
                     </TableCell>
                   </TableRow>
