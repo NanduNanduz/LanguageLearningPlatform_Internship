@@ -15,6 +15,8 @@ import Coursepage from "./pages/instructor/Coursepage";
 import Resourcespage from "./pages/instructor/Resourcespage";
 import QuizzPage from "./pages/instructor/QuizzPage";
 import UpdateCourse from "./pages/instructor/UpdateCourse";
+import Instructors from "./pages/admin/Instructors";
+
 
 
 function App() {
@@ -30,13 +32,13 @@ function App() {
         <Route path="/studentHome" element={<Studenthome />} />
         <Route path="/instructorHome" element={<InstructorHome />} />
         <Route path="/student-management" element={<Students />} />
+        <Route path="/instructor-management" element={<Instructors />} />
         <Route path="/course-management" element={<Course />} />
         <Route path="/addCourse" element={<AddCourse />} />
         <Route path="/coursePage/:courseId" element={<Coursepage />} />
         <Route path="/addResources/:courseId" element={<Resourcespage />} />
         <Route path="/addquiz/:courseId" element={<QuizzPage />} />
         <Route path="/updateCourse/:courseId" element={<UpdateCourse />} />
-
       </Route>
     </Routes>
   );
