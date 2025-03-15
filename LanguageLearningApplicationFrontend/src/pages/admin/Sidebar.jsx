@@ -37,6 +37,12 @@ const Sidebar = () => {
           </ListItemIcon>
           <ListItemText primary="Students" />
         </ListItem>
+        <ListItem button component={Link} to="/instructor-management">
+          <ListItemIcon>
+            <PeopleIcon />
+          </ListItemIcon>
+          <ListItemText primary="Instructors" />
+        </ListItem>
         <ListItem button component={Link} to="/course-management">
           <ListItemIcon>
             <SchoolIcon />
