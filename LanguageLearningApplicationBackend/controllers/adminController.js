@@ -1,5 +1,7 @@
 import courseModel from "../models/courseModel.js";
 
+import userModel from "../models/userModel.js";
+
 
 // Get all courses (for admin panel)
 export const getCourses = async (req, res) => {
@@ -42,3 +44,51 @@ export const rejectCourse = async (req, res) => {
     res.status(500).json({ message: "Server Error", error });
   }
 };
+
+
+
+// Toggle block/unblock user
+export const toggleBlockUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find the user by ID
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Toggle the blocked status
+    user.blocked = user.blocked === "no" ? "yes" : "no";
+    await user.save();
+
+    res
+      .status(200)
+      .json({
+        message: `User ${user.blocked === "yes" ? "Blocked" : "Unblocked"}`,
+        user,
+      });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error });
+  }
+};
+
+
+
+
+export const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete student
+    const deletedStudent = await userModel.findByIdAndDelete(id);
+
+    if (!deletedStudent) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.status(200).json({ message: "Student deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting student:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
