@@ -12,7 +12,8 @@ import {
   createQuizQuestions,
   editQuiz,
   editQuizQuestion,
-  getQuizzesByCourse
+  getQuizzesByCourse,
+  getInstuctors
 } from "../controllers/instructorController.js";
 
 import { upload , parseFormData} from "../utils/multer.js";
@@ -24,7 +25,7 @@ const router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 
-
+router.get("/all-Instructors", getInstuctors)
 
 router.get("/single-instructor/:instructorId", getInstructorDetails);
 
