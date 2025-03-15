@@ -3,6 +3,8 @@ import courseModel from "../models/courseModel.js";
 import userModel from "../models/userModel.js";
 
 
+
+
 // Get all courses (for admin panel)
 export const getCourses = async (req, res) => {
   try {
@@ -47,7 +49,7 @@ export const rejectCourse = async (req, res) => {
 
 
 
-// Toggle block/unblock user
+//  block/unblock user
 export const toggleBlockUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -90,5 +92,15 @@ export const deleteStudent = async (req, res) => {
     console.error("Error deleting student:", error);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+
+
+// Block/Unblock instructor
+export const blockInstructor = async (req, res) => {
+  const instructor = await userModel.findById(req.params.id);
+  instructor.blocked = req.body.blocked;
+  await instructor.save();
+  res.json({ message: "Instructor status updated" });
 };
 
