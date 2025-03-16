@@ -16,6 +16,22 @@ export const getCourses = async (req, res) => {
   }
 };
 
+export const courseDetails =  async (req, res) => {
+  try {
+    const course = await courseModel.findById(req.params.courseId).populate(
+      "videos"
+    );
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+    res.json(course);
+  } catch (error) {
+    console.error("Error fetching course details:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
 
 // Approve Course
 export const approveCourse = async (req, res) => {
