@@ -15,10 +15,10 @@ router.use(express.urlencoded({ extended: true }));
 router.get("/courses", getCourses); 
 
 // Approve a course
-router.put("/course-approve/:id", approveCourse);
+router.put("/approve-course/:id", approveCourse);
 
 // Reject a course
-router.put("/course-reject/:id",rejectCourse);
+router.put("/reject-course/:id",rejectCourse);
 
 // Route to block/unblock a student
 router.put("/block-student/:userId", toggleBlockUser);
