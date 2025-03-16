@@ -100,47 +100,71 @@ const InstructorProfile = () => {
 
   return (
     <Container maxWidth="sm" style={{ marginTop: "20px" }}>
-      <Card>
-        <CardContent style={{ textAlign: "center" }}>
-          <Avatar
-            src={profile?.profilePicture || "https://via.placeholder.com/150"}
-            alt="Profile"
-            sx={{ width: 80, height: 80, margin: "auto" }}
-          />
-          <Typography variant="h5" style={{ marginTop: "10px" }}>
-            {profile?.name}
-          </Typography>
-          <Typography color="textSecondary">{profile?.email}</Typography>
+      <Card
+  sx={{
+    maxWidth: 400,
+    margin: "auto",
+    padding: 3,
+    boxShadow: 5,
+    borderRadius: 3,
+    textAlign: "center",
+    background: "linear-gradient(135deg, #f8fafc, #e2e8f0)",
+  }}
+>
+  <CardContent>
+    <Avatar
+      src={profile?.profilePicture || "https://via.placeholder.com/150"}
+      alt="Profile"
+      sx={{
+        width: 100,
+        height: 100,
+        margin: "auto",
+        border: "4px solid #3f51b5",
+        boxShadow: 3,
+      }}
+    />
+    <Typography variant="h5" sx={{ mt: 2, fontWeight: "bold", color: "#3f51b5" }}>
+      {profile?.name}
+    </Typography>
+    <Typography color="textSecondary">{profile?.email}</Typography>
 
-          <Typography variant="body1" style={{ marginTop: "10px" }}>
-            <strong>Bio:</strong> {profile?.bio || "N/A"}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Qualification:</strong> {profile?.qualification || "N/A"}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Mobile:</strong> {profile?.mobile || "N/A"}
-          </Typography>
-          <Typography variant="body1">
-            <strong>GitHub:</strong> {profile?.socialLinks?.github || "N/A"}
-          </Typography>
-          <Typography variant="body1">
-            <strong>LinkedIn:</strong> {profile?.socialLinks?.linkedIn || "N/A"}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Twitter:</strong> {profile?.socialLinks?.twitter || "N/A"}
-          </Typography>
+    <Typography variant="body1" sx={{ mt: 2 }}>
+      <strong>Bio:</strong> {profile?.bio || "N/A"}
+    </Typography>
+    <Typography variant="body1">
+      <strong>Qualification:</strong> {profile?.qualification || "N/A"}
+    </Typography>
+    <Typography variant="body1">
+      <strong>Mobile:</strong> {profile?.mobile || "N/A"}
+    </Typography>
+    <Typography variant="body1">
+      <strong>GitHub:</strong> {profile?.socialLinks?.github || "N/A"}
+    </Typography>
+    <Typography variant="body1">
+      <strong>LinkedIn:</strong> {profile?.socialLinks?.linkedIn || "N/A"}
+    </Typography>
+    <Typography variant="body1">
+      <strong>Twitter:</strong> {profile?.socialLinks?.twitter || "N/A"}
+    </Typography>
 
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ marginTop: "20px" }}
-            onClick={() => setOpenEdit(true)}
-          >
-            Edit Profile
-          </Button>
-        </CardContent>
-      </Card>
+    <Button
+      variant="contained"
+      color="primary"
+      sx={{
+        mt: 3,
+        borderRadius: 2,
+        paddingX: 3,
+        boxShadow: 3,
+        transition: "0.3s",
+        "&:hover": { backgroundColor: "#303f9f" },
+      }}
+      onClick={() => setOpenEdit(true)}
+    >
+      Edit Profile
+    </Button>
+  </CardContent>
+</Card>
+
 
       {/* Edit Profile Modal */}
       <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>

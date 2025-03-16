@@ -16,12 +16,13 @@ import {
   FormControlLabel,
   Radio,
   TextField,
+  IconButton
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import EditIcon from "@mui/icons-material/Edit";
 
 const CoursePage = () => {
   const { courseId } = useParams();
@@ -31,6 +32,9 @@ const CoursePage = () => {
   const [quizLoading, setQuizLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedSection, setSelectedSection] = useState("videos");
+  const [editingVideoId, setEditingVideoId] = useState(null);
+  const [newVideoTitle, setNewVideoTitle] = useState("");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -101,26 +105,24 @@ const CoursePage = () => {
     }
   };
 
-  const handleUpdateVideoTitle = async (videoId, newTitle) => {
+  const handleUpdateVideoTitle = async (videoId) => {
     try {
-      const response = await axios.put(
-        `http://localhost:3000/instructor/updateVideo/${courseId}/${videoId}`,
-        { title: newTitle }
-      );
-      if (response.data.success) {
-        setCourse((prevCourse) => ({
-          ...prevCourse,
-          videos: prevCourse.videos.map((video) =>
-            video._id === videoId ? { ...video, videoTitle: newTitle } : video
-          ),
-        }));
-      } else {
-        throw new Error("Failed to update video title.");
-      }
+      await axios.put(`http://localhost:3000/instructor/updateVideo/${courseId}/${videoId}`, {
+        newVideoTitle,
+      });
+      setCourse({
+        ...course,
+        videos: course.videos.map(video =>
+          video._id === videoId ? { ...video, videoTitle: newVideoTitle } : video
+        )
+      });
+      setEditingVideoId(null);
+      setNewVideoTitle("");
     } catch (error) {
-      setError(error.response?.data?.message || "Error updating video title.");
+      console.error("Error updating video title:", error);
     }
   };
+
 
   if (loading)
     return (
@@ -131,32 +133,34 @@ const CoursePage = () => {
 
   return (
     <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
-      <Card sx={{ boxShadow: 3, marginBottom: 3 }}>
-        <CardContent>
-          <Typography variant="h4" fontWeight="bold">
-            {course.title}
-          </Typography>
-          <Typography variant="body1" color="textSecondary">
-            {course.description}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate(`/addresources/${courseId}`)}
-            style={{ marginBottom: "20px" }}
-          >
-            Add videos and resources
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ margin: "10px 0" }}
-            onClick={() => navigate(`/addquiz/${courseId}`)}
-          >
-            Add Quiz
-          </Button>
-        </CardContent>
-      </Card>
+      <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
+  <CardContent>
+    <Typography variant="h4" fontWeight="bold">
+      {course.title}
+    </Typography>
+    <Typography variant="body1" color="textSecondary" sx={{ marginBottom: 2 }}>
+      {course.description}
+    </Typography>
+    
+    {/* Using Stack to align buttons properly */}
+    <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => navigate(`/addresources/${courseId}`)}
+      >
+        Add Videos & Resources
+      </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => navigate(`/addquiz/${courseId}`)}
+      >
+        Add Quiz
+      </Button>
+    </Stack>
+  </CardContent>
+</Card>
 
       <Stack
         direction="row"
@@ -263,48 +267,33 @@ const CoursePage = () => {
         </>
       )}
 
-      {selectedSection === "videos" && (
+{selectedSection === "videos" && (
         <>
-          <Typography variant="h5" fontWeight="bold" marginBottom={2}>
-            Course Videos
-          </Typography>
+          <Typography variant="h5" fontWeight="bold" marginBottom={2}>Course Videos</Typography>
           <Grid container spacing={3}>
             {course.videos.length > 0 ? (
-              course.videos.map((video) => (
+              course.videos.map(video => (
                 <Grid item xs={12} sm={6} md={4} key={video._id}>
                   <Card sx={{ boxShadow: 3 }}>
                     <CardContent>
-                      <Typography variant="h6">{video.videoTitle}</Typography>
-                      <video
-                        src={video.videoUrl}
-                        controls
-                        style={{
-                          width: "100%",
-                          borderRadius: "10px",
-                          marginBottom: "10px",
-                        }}
-                      />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<PlayCircleOutlineIcon />}
-                        fullWidth
-                        onClick={() => window.open(video.videoUrl, "_blank")}
-                      >
-                        Play Fullscreen
-                      </Button>
-                      <TextField
-                        label="Edit Title"
-                        variant="outlined"
-                        defaultValue={video.videoTitle}
-                        onBlur={(e) => handleUpdateVideoTitle(video._id, e.target.value)}
-                        style={{ marginTop: "10px", width: "100%" }}
-                      />
-                      <Button
-                        onClick={() => handleDeleteVideo(video._id)}
-                      >
-                        <DeleteIcon color="error" />
-                      </Button>
+                      {editingVideoId === video._id ? (
+                        <TextField
+                          value={newVideoTitle}
+                          onChange={(e) => setNewVideoTitle(e.target.value)}
+                          fullWidth
+                        />
+                      ) : (
+                        <Typography variant="h6">{video.videoTitle}</Typography>
+                      )}
+                      <video src={video.videoUrl} controls style={{ width: "100%", borderRadius: "10px", marginBottom: "10px" }} />
+                      <Stack direction="row" spacing={1}>
+                        <IconButton onClick={() => handleDeleteVideo(video._id)}><DeleteIcon color="error" /></IconButton>
+                        {editingVideoId === video._id ? (
+                          <Button variant="contained" color="secondary" onClick={() => handleUpdateVideoTitle(video._id)}>Save</Button>
+                        ) : (
+                          <IconButton onClick={() => { setEditingVideoId(video._id); setNewVideoTitle(video.videoTitle); }}><EditIcon /></IconButton>
+                        )}
+                      </Stack>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -315,6 +304,7 @@ const CoursePage = () => {
           </Grid>
         </>
       )}
+
     </div>
   );
 };
