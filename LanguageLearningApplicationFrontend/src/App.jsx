@@ -16,6 +16,7 @@ import Resourcespage from "./pages/instructor/Resourcespage";
 import QuizzPage from "./pages/instructor/QuizzPage";
 import UpdateCourse from "./pages/instructor/UpdateCourse";
 import Instructors from "./pages/admin/Instructors";
+import InstructorProfile from "./pages/instructor/InstructorProfile";
 
 
 
@@ -39,6 +40,7 @@ function App() {
         <Route path="/addResources/:courseId" element={<Resourcespage />} />
         <Route path="/addquiz/:courseId" element={<QuizzPage />} />
         <Route path="/updateCourse/:courseId" element={<UpdateCourse />} />
+        <Route path="/profileInstructor" element={<InstructorProfile />} />
       </Route>
     </Routes>
   );

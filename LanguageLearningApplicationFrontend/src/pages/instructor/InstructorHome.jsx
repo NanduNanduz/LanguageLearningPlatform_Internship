@@ -7,16 +7,36 @@ import {
   Typography,
   Grid,
   CardActions,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Box,
+  Container,
+  Menu,
+  MenuItem,
+  Avatar,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const InstructorHome = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const instructor = location.state?.user; // Getting instructor details from login
-
-  const [courseDetails, setCourseDetails] = useState([]); // Default empty array
+  const instructor = location.state?.user;
+  const [courseDetails, setCourseDetails] = useState([]);
+  const [profilePicture, setProfilePicture] = useState(null);
   const [error, setError] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -24,23 +44,24 @@ const InstructorHome = () => {
         const response = await axios.get(
           `http://localhost:3000/instructor/courseDetails/${instructor?._id}`
         );
-
-        console.log("API Response:", response.data); // Debugging
-
-        if (Array.isArray(response.data)) {
-          setCourseDetails(response.data);
-        } else if (response.data && typeof response.data === "object") {
-          setCourseDetails(response.data.courses || []); // Adjust based on API structure
-        } else {
-          throw new Error("Invalid API response format");
-        }
+        setCourseDetails(response.data?.courses || []);
       } catch (error) {
         console.error("Error fetching course details:", error);
       }
     };
 
+    const fetchProfileDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/user/profile/${instructor?._id}`);
+        setProfilePicture(response.data.user?.profilePicture || null);
+      } catch (error) {
+        console.error("Error fetching profile details:", error);
+      }
+    };
+
     if (instructor?._id) {
       fetchCourseDetails();
+      fetchProfileDetails();
     }
   }, [instructor]);
 
@@ -58,46 +79,69 @@ const InstructorHome = () => {
     }
   };
 
-  const handleUpdate = (courseId) => {
-    navigate(`/updateCourse/${courseId}`);
+  const handleUpdate = (courseId) => navigate(`/updateCourse/${courseId}`);
+  const handleProfileClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const goToProfile = () => {
+    navigate("/profileInstructor", { state: { instructor } });
+    handleClose();
   };
 
   return (
-    <>
-      <div style={{ textAlign: "right", padding: "10px" }}>
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Logout
-        </Button>
-        <Button
-          onClick={() => navigate("/addCourse", { state: { instructor: instructor } })}
-          variant="contained"
-          color="primary"
-        >
-          ADD COURSE
-        </Button>
-      </div>
-
-      <div className="mt-5 text-center">
-        {instructor ? (
-          <Card sx={{ maxWidth: 600, margin: "auto", padding: 2 }}>
-            <CardContent>
-              <Typography variant="h5">Welcome, {instructor.name}</Typography>
-              <Typography>Email: {instructor.email}</Typography>
-            </CardContent>
-          </Card>
-        ) : (
-          <Typography color="error">
-            Instructor data not found. Please log in.
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {/* Top Bar */}
+      <AppBar position="static">
+        <Toolbar>
+          {isMobile && (
+            <IconButton color="inherit" edge="start" onClick={() => setMobileOpen(!mobileOpen)}>
+              <MenuIcon />
+            </IconButton>
+          )}
+          <Typography variant="h6" sx={{ flexGrow: 1, textAlign: isMobile ? "center" : "left" }}>
+            Instructor Dashboard
           </Typography>
-        )}
-      </div>
+          <IconButton color="inherit" onClick={handleProfileClick}>
+            <Avatar src={profilePicture || ""} alt="Profile">
+              {!profilePicture && <AccountCircleIcon />}
+            </Avatar>
+          </IconButton>
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+            <MenuItem onClick={goToProfile}>Profile</MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
 
-      {/* Courses Section */}
-      <div style={{ marginTop: "20px", padding: "20px" }}>
-        <Typography variant="h4" align="center" gutterBottom>
+      {/* Sidebar */}
+      <Drawer
+        variant={isMobile ? "temporary" : "permanent"}
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        sx={{
+          [`& .MuiDrawer-paper`]: {
+            width: 240,
+            boxSizing: "border-box",
+          },
+        }}
+      >
+        <List>
+          <ListItem>
+            <ListItemText primary={`Welcome, ${instructor?.name}`} />
+          </ListItem>
+          <ListItem button component={Link} to="/addCourse" state={{ instructor }}>
+            <ListItemText primary="Add Course" />
+          </ListItem>
+          <ListItem button onClick={handleLogout}>
+            <ListItemText primary="Logout" />
+          </ListItem>
+        </List>
+      </Drawer>
+
+      {/* Main Content */}
+      <Container sx={{ flexGrow: 1, padding: 3, marginLeft: isMobile ? 0 : "240px" }}>
+        <Typography variant="h4" gutterBottom align="center">
           Your Courses
         </Typography>
-
         <Grid container spacing={3} justifyContent="center">
           {courseDetails.length > 0 ? (
             courseDetails.map((course) => (
@@ -107,30 +151,13 @@ const InstructorHome = () => {
                     <Typography variant="h6">{course.title}</Typography>
                   </CardContent>
                   <CardActions>
-                    {/* Navigate to CoursePage */}
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="primary"
-                      component={Link}
-                      to={`/coursePage/${course._id}`}
-                    >
-                      View Course
+                    <Button size="small" variant="contained" color="primary" component={Link} to={`/coursePage/${course._id}`}>
+                      View
                     </Button>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => handleUpdate(course._id)}
-                    >
+                    <Button size="small" variant="contained" color="secondary" onClick={() => handleUpdate(course._id)}>
                       Update
                     </Button>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      color="error"
-                      onClick={() => handleDelete(course._id)}
-                    >
+                    <Button size="small" variant="contained" color="error" onClick={() => handleDelete(course._id)}>
                       Delete
                     </Button>
                   </CardActions>
@@ -138,19 +165,14 @@ const InstructorHome = () => {
               </Grid>
             ))
           ) : (
-            <Typography align="center" color="textSecondary">
+            <Typography color="textSecondary" align="center">
               No courses found.
             </Typography>
           )}
         </Grid>
-
-        {error && (
-          <Typography color="error" align="center" marginTop="10px">
-            {error}
-          </Typography>
-        )}
-      </div>
-    </>
+        {error && <Typography color="error" align="center" marginTop={2}>{error}</Typography>}
+      </Container>
+    </Box>
   );
 };
 
