@@ -15,11 +15,13 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  TextField,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import DeleteIcon from "@mui/icons-material/Delete";
+
 
 const CoursePage = () => {
   const { courseId } = useParams();
@@ -96,6 +98,27 @@ const CoursePage = () => {
       }
     } catch (error) {
       setError(error.response?.data?.message || "Error deleting video.");
+    }
+  };
+
+  const handleUpdateVideoTitle = async (videoId, newTitle) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/instructor/updateVideo/${courseId}/${videoId}`,
+        { title: newTitle }
+      );
+      if (response.data.success) {
+        setCourse((prevCourse) => ({
+          ...prevCourse,
+          videos: prevCourse.videos.map((video) =>
+            video._id === videoId ? { ...video, videoTitle: newTitle } : video
+          ),
+        }));
+      } else {
+        throw new Error("Failed to update video title.");
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || "Error updating video title.");
     }
   };
 
@@ -260,6 +283,22 @@ const CoursePage = () => {
                           borderRadius: "10px",
                           marginBottom: "10px",
                         }}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<PlayCircleOutlineIcon />}
+                        fullWidth
+                        onClick={() => window.open(video.videoUrl, "_blank")}
+                      >
+                        Play Fullscreen
+                      </Button>
+                      <TextField
+                        label="Edit Title"
+                        variant="outlined"
+                        defaultValue={video.videoTitle}
+                        onBlur={(e) => handleUpdateVideoTitle(video._id, e.target.value)}
+                        style={{ marginTop: "10px", width: "100%" }}
                       />
                       <Button
                         onClick={() => handleDeleteVideo(video._id)}
