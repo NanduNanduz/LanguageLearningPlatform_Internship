@@ -27,7 +27,6 @@ export const getInstructorDetails = async (req, res) => {
 
     const instructor = await userModel
       .findOne({ _id: instructorId, role: "instructor" })
-      .populate("courseCreated");
 
     if (!instructor) {
       return res.status(404).json({ message: "Instructor not found" });
@@ -224,19 +223,6 @@ export const deleteVideoFromCourse = async (req, res) => {
 
     // Extract video details
     const { videoUrl, videoThumbnail } = course.videos[videoIndex];
-
-    // Extract public_id from Cloudinary URLs
-    const extractPublicId = (url) => {
-      const parts = url.split("/");
-      return parts[parts.length - 1].split(".")[0]; // Get the filename without extension
-    };
-
-    const videoPublicId = extractPublicId(videoUrl);
-    const thumbnailPublicId = extractPublicId(videoThumbnail);
-
-    // Delete video and thumbnail from Cloudinary
-    await cloudinary.v2.uploader.destroy(videoPublicId, { resource_type: "video" });
-    await cloudinary.v2.uploader.destroy(thumbnailPublicId, { resource_type: "image" });
 
     // Remove video from the videos array
     course.videos.splice(videoIndex, 1);
