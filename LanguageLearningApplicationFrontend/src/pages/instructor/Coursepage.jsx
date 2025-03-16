@@ -19,6 +19,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const CoursePage = () => {
   const { courseId } = useParams();
@@ -77,6 +78,24 @@ const CoursePage = () => {
     setSelectedSection(section);
     if (section === "quizzes" && quizzes.length === 0) {
       fetchQuizzes();
+    }
+  };
+
+  const handleDeleteVideo = async (videoId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:3000/instructor/delete-video/${courseId}/${videoId}`
+      );
+      if (response.data.success) {
+        setCourse((prevCourse) => ({
+          ...prevCourse,
+          videos: prevCourse.videos.filter((video) => video._id !== videoId),
+        }));
+      } else {
+        throw new Error("Failed to delete video.");
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || "Error deleting video.");
     }
   };
 
@@ -243,13 +262,9 @@ const CoursePage = () => {
                         }}
                       />
                       <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<PlayCircleOutlineIcon />}
-                        fullWidth
-                        onClick={() => window.open(video.videoUrl, "_blank")}
+                        onClick={() => handleDeleteVideo(video._id)}
                       >
-                        Play Fullscreen
+                        <DeleteIcon color="error" />
                       </Button>
                     </CardContent>
                   </Card>
