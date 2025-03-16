@@ -35,23 +35,24 @@ const Course = () => {
     }
   };
 
-  const handleApprove = async (id) => {
-    try {
-      await axios.put(`http://localhost:3000/admin/approve-course/${id}`);
-      fetchCourses();
-    } catch (error) {
-      console.error("Error approving course:", error);
-    }
-  };
+ const handleApprove = async (id) => {
+   try {
+     await axios.put(`http://localhost:3000/admin/approve-course/${id}`);
+     fetchCourses(); // Refresh course list
+   } catch (error) {
+     console.error("Error approving course:", error);
+   }
+ };
 
-  const handleReject = async (id) => {
-    try {
-      await axios.put(`http://localhost:3000/admin/reject-course/${id}`);
-      fetchCourses();
-    } catch (error) {
-      console.error("Error rejecting course:", error);
-    }
-  };
+ const handleReject = async (id) => {
+   try {
+     await axios.put(`http://localhost:3000/admin/reject-course/${id}`);
+     fetchCourses(); // Refresh course list
+   } catch (error) {
+     console.error("Error rejecting course:", error);
+   }
+ };
+
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
@@ -131,25 +132,21 @@ const Course = () => {
                     <TableCell>{course.category}</TableCell>
                     <TableCell>{course.status}</TableCell>
                     <TableCell align="center">
-                      {course.status === "Pending" && (
-                        <>
-                          <Button
-                            color="success"
-                            startIcon={<CheckCircle />}
-                            onClick={() => handleApprove(course._id)}
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            color="error"
-                            startIcon={<Cancel />}
-                            onClick={() => handleReject(course._id)}
-                            sx={{ ml: 1 }}
-                          >
-                            Reject
-                          </Button>
-                        </>
-                      )}
+                      <Button
+                        color="success"
+                        startIcon={<CheckCircle />}
+                        onClick={() => handleApprove(course._id)}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        color="error"
+                        startIcon={<Cancel />}
+                        onClick={() => handleReject(course._id)}
+                        sx={{ ml: 1 }}
+                      >
+                        Reject
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
