@@ -36,30 +36,38 @@ export const courseDetails =  async (req, res) => {
 // Approve Course
 export const approveCourse = async (req, res) => {
   try {
-    const course = await courseModel.findById(req.params.id);
-    if (!course) return res.status(404).json({ message: "Course not found" });
+    const course = await courseModel.findByIdAndUpdate(
+      req.params.id,
+      { status: "Approved" },
+      { new: true }
+    );
 
-    course.status = "Approved";
-    await course.save();
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
 
-    res.status(200).json({ message: "Course Approved", course });
+    res.status(200).json({ message: "Course approved successfully", course });
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
+    res.status(500).json({ message: "Server error", error });
   }
 };
 
 // Reject Course
-export const rejectCourse = async (req, res) => {
+export const rejectCourse =  async (req, res) => {
   try {
-    const course = await courseModel.findById(req.params.id);
-    if (!course) return res.status(404).json({ message: "Course not found" });
+    const course = await courseModel.findByIdAndUpdate(
+      req.params.id,
+      { status: "Rejected" },
+      { new: true }
+    );
 
-    course.status = "Rejected";
-    await course.save();
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
 
-    res.status(200).json({ message: "Course Rejected", course });
+    res.status(200).json({ message: "Course rejected successfully", course });
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
+    res.status(500).json({ message: "Server error", error });
   }
 };
 
