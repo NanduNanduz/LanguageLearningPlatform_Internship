@@ -1,5 +1,5 @@
 import express from "express";
-import { approveCourse, blockInstructor, rejectCourse } from "../controllers/adminController.js"; 
+import { approveCourse, blockInstructor, courseDetails, rejectCourse } from "../controllers/adminController.js"; 
 import adminAuth from "../middlewares/adminAuth.js";
 import { getCourses } from "../controllers/adminController.js";
 import { toggleBlockUser } from "../controllers/adminController.js";
@@ -27,6 +27,8 @@ router.delete("/delete-student/:id", deleteStudent);
 
 // Block/Unblock instructor
 router.put("/block-instructor/:id", blockInstructor);
+
+router.get("/courseDetails/:courseId", courseDetails);
 
 
 
