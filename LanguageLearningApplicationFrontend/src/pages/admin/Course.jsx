@@ -17,6 +17,7 @@ import {
 import { CheckCircle, Cancel } from "@mui/icons-material";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import { Link } from "react-router-dom";
 
 const Course = () => {
   const [courses, setCourses] = useState([]);
@@ -82,13 +83,16 @@ const Course = () => {
               <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableRow>
                   <TableCell>
-                    <strong>Title</strong>
+                    <strong>Course Title</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Thumbnail</strong>
                   </TableCell>
                   <TableCell>
                     <strong>Instructor</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Category</strong>
+                    <strong>Course Category</strong>
                   </TableCell>
                   <TableCell>
                     <strong>Status</strong>
@@ -101,7 +105,25 @@ const Course = () => {
               <TableBody>
                 {courses.map((course) => (
                   <TableRow key={course._id} hover>
-                    <TableCell>{course.title}</TableCell>
+                    <TableCell>
+                      <Link
+                        to={`/courseDetails/${course._id}`}
+                        style={{ textDecoration: "none", color: "blue" }}
+                      >
+                        {course.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <img
+                        src={course.thumbnail}
+                        alt={course.title}
+                        style={{
+                          width: "80px",
+                          height: "50px",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </TableCell>
                     <TableCell>
                       {/* {course.instructorId?.name || "Unknown"} */}
                       {course.instructorName}
