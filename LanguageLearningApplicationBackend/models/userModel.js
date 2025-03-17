@@ -40,7 +40,8 @@ const userSchema = mongoose.Schema(
     ],
     courseCreated: [
       {
-        courseId:mongoose.Schema.Types.ObjectId
+        courseId:mongoose.Schema.Types.ObjectId,
+        courseTitle:String
       }
     ],
     certificates: [
