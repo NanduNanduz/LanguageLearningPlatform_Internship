@@ -1,5 +1,5 @@
 import express from "express";
-import { enrollCourse, getUserQuizResults, submitQuiz } from "../controllers/studentController.js";
+import { enrollCourse, getStudentDetails, getUserQuizResults, submitQuiz } from "../controllers/studentController.js";
 import {getUserDetails} from "../controllers/studentController.js";
 import { getAllStudents , getQuizByCourse} from "../controllers/studentController.js";
 import { parseFormData } from "../utils/multer.js";
@@ -13,5 +13,6 @@ router.get("/all-students", getAllStudents);
 router.get("/quiz/:courseId",getQuizByCourse )
 router.post("/submitquiz",parseFormData,submitQuiz)
 router.get("/quizResults/:userId/:courseId",getUserQuizResults)
+router.get("/studentDetails/:studentId", getStudentDetails)
 
 export default router;
