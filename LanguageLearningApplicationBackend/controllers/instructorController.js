@@ -191,7 +191,7 @@ export const createCourse = async (req, res) => {
       instructorId,
       {
         $push: {
-          courseCreated: { courseId: newCourse._id },
+          courseCreated: { courseId: newCourse._id , courseTitle:newCourse.title},
         },
       },
       { new: true }

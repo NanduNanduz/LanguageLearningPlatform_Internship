@@ -14,10 +14,13 @@ import AddCourse from "./pages/instructor/AddCourse";
 import Coursepage from "./pages/instructor/Coursepage";
 import Resourcespage from "./pages/instructor/Resourcespage";
 import QuizzPage from "./pages/instructor/QuizzPage";
-import UpdateCourse from "./pages/instructor/UpdateCourse";
+import UpdateCourse from "./pages/instructor/Updatecourse";
 import Instructors from "./pages/admin/Instructors";
 import InstructorProfile from "./pages/instructor/InstructorProfile";
 import CourseDetails from "./pages/admin/CourseDetails";
+import StudentProfile from "./pages/student/StudentProfile";
+import EnrolledCourses from "./pages/student/EnrolledCourses";
+import CoursePageStudent from "./pages/student/CoursePageStudent";
 
 
 
@@ -43,6 +46,12 @@ function App() {
         <Route path="/updateCourse/:courseId" element={<UpdateCourse />} />
         <Route path="/profileInstructor" element={<InstructorProfile />} />
         <Route path="/courseDetails/:courseId" element={<CourseDetails />} />
+        <Route path="/profileStudent" element={<StudentProfile />} />
+        <Route path="/enrolledCourses" element={<EnrolledCourses />} />
+        <Route path="/coursePageStudent/:courseId" element={<CoursePageStudent />} />
+
+
+
       </Route>
     </Routes>
   );
