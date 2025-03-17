@@ -19,6 +19,8 @@ import Instructors from "./pages/admin/Instructors";
 import InstructorProfile from "./pages/instructor/InstructorProfile";
 import CourseDetails from "./pages/admin/CourseDetails";
 import StudentProfile from "./pages/student/StudentProfile";
+import EnrolledCourses from "./pages/student/EnrolledCourses";
+import CoursePageStudent from "./pages/student/CoursePageStudent";
 
 
 
@@ -45,6 +47,10 @@ function App() {
         <Route path="/profileInstructor" element={<InstructorProfile />} />
         <Route path="/courseDetails/:courseId" element={<CourseDetails />} />
         <Route path="/profileStudent" element={<StudentProfile />} />
+        <Route path="/enrolledCourses" element={<EnrolledCourses />} />
+        <Route path="/coursePageStudent/:courseId" element={<CoursePageStudent />} />
+
+
 
       </Route>
     </Routes>

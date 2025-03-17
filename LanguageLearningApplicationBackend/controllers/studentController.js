@@ -117,15 +117,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const enrollCourse = async (req, res) => {
   try {
-    const { courseId } = req.params;
-
-    // Hardcoded user ID for testing (Replace with a valid user _id from your DB)
-    const userId = "67cda74f2f65ad3915f910e4";
+    const { courseId, studentId } = req.params;
 
     const course = await courseModel.findById(courseId);
     if (!course) return res.status(404).json({ message: "Course not found" });
 
-    const user = await userModel.findById(userId);
+    const user = await userModel.findById(studentId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Check if the user is already enrolled
@@ -138,7 +135,7 @@ export const enrollCourse = async (req, res) => {
     // If the course is free, enroll the user immediately
     if (course.price === 0) {
       user.enrolledCourses.push(courseId);
-      course.studentsEnrolled.push(userId);
+      course.studentsEnrolled.push(studentId);
       await user.save();
       await course.save();
       return res.status(200).json({ message: "Successfully enrolled", course });
@@ -315,5 +312,15 @@ export const getStudentDetails = async (req, res) => {
   } catch (error) {
     console.error("Error fetching student details:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all approved courses
+export const getApprovedCourses = async (req, res) => {
+  try {
+    const courses = await courseModel.find({ status: "Approved" }); // Fetch only approved courses
+    res.status(200).json({ success: true, courses });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
   }
 };
