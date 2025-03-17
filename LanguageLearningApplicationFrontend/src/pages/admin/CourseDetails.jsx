@@ -68,9 +68,9 @@ const CourseDetails = () => {
         {course.videos && course.videos.length > 0 ? (
           course.videos.map((video, index) => (
             <ListItem key={video._id}>
-              <ListItemText primary={`${index + 1}. ${video.title}`} />
+              <ListItemText primary={`${index + 1}. ${video.videoTitle}`} />
               <video width="300" height="180" controls>
-                <source src={video.url} type="video/mp4" />
+                <source src={video.videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </ListItem>
