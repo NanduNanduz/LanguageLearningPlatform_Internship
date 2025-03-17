@@ -136,7 +136,7 @@ const Instructors = () => {
                       {instructor.courseCreated &&
                       instructor.courseCreated.length > 0
                         ? instructor.courseCreated.map((course, index) => (
-                            <div key={index}>{course.title}</div>
+                            <div key={index}>{course.courseTitle}</div>
                           ))
                         : "No courses created"}
                     </TableCell>
