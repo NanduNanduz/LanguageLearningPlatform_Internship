@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Button, TextField, Typography, CircularProgress, Box, Select, MenuItem } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Typography,
+  CircularProgress,
+  Select,
+  MenuItem,
+} from "@mui/material";
 
 const QuizzPage = () => {
   const { courseId } = useParams();
   const [questions, setQuestions] = useState([
-    { questionText: "", options: ["", "", "", ""], correctAnswer: 0 }
+    { questionText: "", options: ["", "", "", ""], correctAnswer: 0 },
   ]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -34,12 +41,15 @@ const QuizzPage = () => {
 
   // Add a new question field
   const addQuestion = () => {
-    setQuestions([...questions, { questionText: "", options: ["", "", "", ""], correctAnswer: 0 }]);
+    setQuestions([
+      ...questions,
+      { questionText: "", options: ["", "", "", ""], correctAnswer: 0 },
+    ]);
   };
 
   // Upload Quiz
   const handleUpload = async () => {
-    if (questions.some(q => !q.questionText || q.options.some(opt => !opt))) {
+    if (questions.some((q) => !q.questionText || q.options.some((opt) => !opt))) {
       setMessage("Please complete all question fields.");
       return;
     }
@@ -76,59 +86,140 @@ const QuizzPage = () => {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
-      <Typography variant="h4" marginBottom={2}>Create Quiz</Typography>
-
-      {questions.map((q, qIndex) => (
-        <Box key={qIndex} marginBottom={3} padding={2} border="1px solid #ddd" borderRadius="8px">
-          <TextField
-            label={`Question ${qIndex + 1}`}
-            fullWidth
-            value={q.questionText}
-            onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
-            margin="normal"
-          />
-
-          {q.options.map((option, optIndex) => (
-            <TextField
-              key={optIndex}
-              label={`Option ${optIndex + 1}`}
-              fullWidth
-              value={option}
-              onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
-              margin="normal"
-            />
-          ))}
-
-          <Typography variant="subtitle1" marginTop={1}>Correct Answer:</Typography>
-          <Select
-            value={q.correctAnswer}
-            onChange={(e) => handleCorrectAnswerChange(qIndex, e.target.value)}
-            fullWidth
-          >
-            {q.options.map((opt, optIndex) => (
-              <MenuItem key={optIndex} value={optIndex}>{opt}</MenuItem>
-            ))}
-          </Select>
-        </Box>
-      ))}
-
-      <Button variant="outlined" onClick={addQuestion} style={{ marginBottom: "10px" }}>
-        + Add Another Question
-      </Button>
-
-      <Button
-        variant="contained"
-        color="primary"
-        fullWidth
-        onClick={handleUpload}
-        disabled={loading}
-        style={{ marginTop: "20px" }}
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #6A11CB 0%, #2575FC 100%)",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          width: "90%",
+          maxWidth: "400px",
+          padding: "20px",
+          textAlign: "center",
+        }}
       >
-        {loading ? <CircularProgress size={24} /> : "Submit Quiz"}
-      </Button>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            marginBottom: "15px",
+            color: "#fff",
+          }}
+        >
+          Create Quiz
+        </Typography>
 
-      {message && <Typography color="error" align="center" marginTop={2}>{message}</Typography>}
+        {questions.map((q, qIndex) => (
+          <div
+            key={qIndex}
+            style={{
+              marginBottom: "15px",
+            }}
+          >
+            <TextField
+              label={`Question ${qIndex + 1}`}
+              fullWidth
+              value={q.questionText}
+              onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
+              margin="normal"
+              variant="outlined"
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                borderRadius: "4px",
+              }}
+            />
+
+            {q.options.map((option, optIndex) => (
+              <TextField
+                key={optIndex}
+                label={`Option ${optIndex + 1}`}
+                fullWidth
+                value={option}
+                onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
+                margin="normal"
+                variant="outlined"
+                sx={{
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  borderRadius: "4px",
+                }}
+              />
+            ))}
+
+            <Typography
+              variant="subtitle2"
+              sx={{ marginTop: "10px", color: "#fff" }}
+            >
+              Correct Answer:
+            </Typography>
+            <Select
+              value={q.correctAnswer}
+              onChange={(e) => handleCorrectAnswerChange(qIndex, e.target.value)}
+              fullWidth
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.8)",
+                borderRadius: "4px",
+                marginBottom: "10px",
+              }}
+            >
+              {q.options.map((opt, optIndex) => (
+                <MenuItem key={optIndex} value={optIndex}>
+                  {opt}
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+        ))}
+
+        <Button
+          variant="outlined"
+          onClick={addQuestion}
+          sx={{
+            width: "100%",
+            borderRadius: "20px",
+            border: "2px solid #fff",
+            color: "#fff",
+            fontWeight: "bold",
+            marginBottom: "10px",
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+            },
+          }}
+        >
+          + Add Question
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={handleUpload}
+          disabled={loading}
+          sx={{
+            background: "linear-gradient(135deg, #6A11CB 0%, #2575FC 100%)",
+            borderRadius: "20px",
+            padding: "10px",
+            fontWeight: "bold",
+            color: "#fff",
+          }}
+        >
+          {loading ? <CircularProgress size={24} /> : "Submit Quiz"}
+        </Button>
+
+        {message && (
+          <Typography
+            color="error"
+            sx={{ marginTop: "10px", fontWeight: "bold", color: "#fff" }}
+          >
+            {message}
+          </Typography>
+        )}
+      </div>
     </div>
   );
 };
