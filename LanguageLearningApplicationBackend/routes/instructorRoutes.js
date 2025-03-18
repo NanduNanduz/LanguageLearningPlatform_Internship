@@ -13,7 +13,8 @@ import {
   editQuiz,
   editQuizQuestion,
   getQuizzesByCourse,
-  getInstuctors
+  getInstuctors,
+  deleteResource
 } from "../controllers/instructorController.js";
 
 import { upload , parseFormData} from "../utils/multer.js";
@@ -77,6 +78,9 @@ router.put("/editQuestion/:quizId/:questionId",parseFormData, editQuizQuestion);
 
 //getting quiz of a course
 router.get("/quiz/:courseId", getQuizzesByCourse);
+
+router.delete("/course/:courseId/resource/:resourceId", deleteResource);
+
 
 
 export default router;

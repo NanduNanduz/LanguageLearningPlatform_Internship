@@ -698,4 +698,33 @@ export const editQuizQuestion = async (req, res) => {
 };
 
 
+export const deleteResource = async (req, res) => {
+  try {
+    const { courseId, resourceId } = req.params;
+
+    // Find the course
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Check if resource exists
+    const resourceIndex = course.resources.findIndex(resource => resource._id.toString() === resourceId);
+    if (resourceIndex === -1) {
+      return res.status(404).json({ message: "Resource not found in the course" });
+    }
+
+    // Remove the resource from the array
+    course.resources.splice(resourceIndex, 1);
+
+    // Save the updated course
+    await course.save();
+
+    res.status(200).json({ message: "Resource deleted successfully", course });
+  } catch (error) {
+    console.error("Error deleting resource:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
