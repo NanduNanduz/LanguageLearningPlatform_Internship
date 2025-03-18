@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
-  Container,
   Card,
   CardContent,
   Typography,
@@ -12,7 +11,10 @@ import {
   DialogContent,
   DialogActions,
   Avatar,
+  Grid,
   IconButton,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { useLocation } from "react-router-dom";
@@ -22,8 +24,10 @@ const StudentProfile = () => {
   const student = location.state?.student;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [formData, setFormData] = useState({
     bio: "",
     github: "",
@@ -49,6 +53,7 @@ const StudentProfile = () => {
         mobile: response.data.user.mobile || "",
         qualification: response.data.user.qualification || "",
       });
+      setPreviewImage(response.data.user.profilePicture || "https://via.placeholder.com/150");
       setLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -61,20 +66,20 @@ const StudentProfile = () => {
   };
 
   const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      setProfileImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file);
+      setPreviewImage(URL.createObjectURL(file)); // Show preview before upload
     }
   };
 
   const handleUpdate = async () => {
+    setSaving(true);
     try {
       const data = new FormData();
-      data.append("bio", formData.bio);
-      data.append("github", formData.github);
-      data.append("linkedIn", formData.linkedIn);
-      data.append("twitter", formData.twitter);
-      data.append("mobile", formData.mobile);
-      data.append("qualification", formData.qualification);
+      Object.keys(formData).forEach((key) => {
+        data.append(key, formData[key]);
+      });
       if (profileImage) {
         data.append("profilePicture", profileImage);
       }
@@ -84,10 +89,18 @@ const StudentProfile = () => {
       });
 
       setOpenEdit(false);
-      fetchProfile();
+      fetchProfile(); // Refresh profile details after update
     } catch (error) {
       console.error("Error updating profile:", error);
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handleEditOpen = () => {
+    setPreviewImage(profile?.profilePicture || "https://via.placeholder.com/150");
+    setProfileImage(null); // Reset selected image to avoid unintended changes
+    setOpenEdit(true);
   };
 
   if (loading) {
@@ -95,49 +108,110 @@ const StudentProfile = () => {
   }
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: "20px" }}>
-      <Card sx={{ maxWidth: 400, margin: "auto", padding: 3, boxShadow: 5, borderRadius: 3, textAlign: "center", background: "linear-gradient(135deg, #f8fafc, #e2e8f0)" }}>
-        <CardContent>
-          <Avatar src={profile?.profilePicture || "https://via.placeholder.com/150"} alt="Profile" sx={{ width: 100, height: 100, margin: "auto", border: "4px solid #3f51b5", boxShadow: 3 }} />
-          <Typography variant="h5" sx={{ mt: 2, fontWeight: "bold", color: "#3f51b5" }}>{profile?.name}</Typography>
-          <Typography color="textSecondary">{profile?.email}</Typography>
+    <div style={{ textAlign: "center" }}>
+      {/* Profile Header */}
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          height: "250px",
+          backgroundImage: "url('/images/bgpic.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          borderRadius: "0 0 15px 15px",
+        }}
+      >
+        <Avatar
+          src={profile?.profilePicture || "https://via.placeholder.com/150"}
+          alt="Profile"
+          sx={{
+            width: 180,
+            height: 180,
+            position: "absolute",
+            bottom: "-60px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            border: "4px solid white",
+            boxShadow: 3,
+          }}
+        />
+      </Box>
 
-          <Typography variant="body1" sx={{ mt: 2 }}><strong>Bio:</strong> {profile?.bio || "N/A"}</Typography>
-          <Typography variant="body1"><strong>qualification:</strong> {profile?.qualification || "N/A"}</Typography>
-          <Typography variant="body1"><strong>Mobile:</strong> {profile?.mobile || "N/A"}</Typography>
-          <Typography variant="body1"><strong>GitHub:</strong> {profile?.socialLinks?.github || "N/A"}</Typography>
-          <Typography variant="body1"><strong>LinkedIn:</strong> {profile?.socialLinks?.linkedIn || "N/A"}</Typography>
-          <Typography variant="body1"><strong>Twitter:</strong> {profile?.socialLinks?.twitter || "N/A"}</Typography>
+      {/* Name and Email */}
+      <Typography variant="h5" sx={{ mt: 7, fontWeight: "bold", color: "#3f51b5" }}>
+        {profile?.name}
+      </Typography>
+      <Typography color="textSecondary">{profile?.email}</Typography>
 
-          <Button variant="contained" color="primary" sx={{ mt: 3, borderRadius: 2, paddingX: 3, boxShadow: 3, transition: "0.3s", "&:hover": { backgroundColor: "#303f9f" } }} onClick={() => setOpenEdit(true)}>Edit Profile</Button>
-        </CardContent>
-      </Card>
+      {/* Profile Details in Cards */}
+      <Box sx={{ width: "100%", backgroundColor: "#ADB2D4", paddingTop: 5, paddingBottom: 5, mt: 3 }}>
+        <Grid container spacing={2} sx={{ maxWidth: 600, margin: "auto" }}>
+          {[
+            { label: "Bio", value: profile?.bio },
+            { label: "Qualification", value: profile?.qualification },
+            { label: "Mobile", value: profile?.mobile },
+            { label: "GitHub", value: profile?.socialLinks?.github },
+            { label: "LinkedIn", value: profile?.socialLinks?.linkedIn },
+            { label: "Twitter", value: profile?.socialLinks?.twitter },
+          ].map((item, index) => (
+            <Grid item xs={6} key={index}>
+              <Card variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="subtitle1" fontWeight="bold">{item.label}</Typography>
+                <Typography>{item.value || "N/A"}</Typography>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
+      <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={handleEditOpen}>
+        Edit Profile
+      </Button>
+
+      {/* Edit Profile Dialog */}
       <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
         <DialogTitle>Edit Profile</DialogTitle>
-        <DialogContent>
-          <div style={{ textAlign: "center", marginBottom: "10px" }}>
-            <Avatar src={profileImage ? URL.createObjectURL(profileImage) : profile?.profilePicture} sx={{ width: 80, height: 80, margin: "auto" }} />
-            <input accept="image/*" type="file" onChange={handleImageChange} style={{ display: "none" }} id="upload-photo" />
+        <DialogContent sx={{ textAlign: "center" }}>
+          <Avatar src={previewImage} alt="Profile Preview" sx={{ width: 100, height: 100, margin: "auto", mt: 2 }} />
+          
+          {/* Camera Upload Button */}
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: 2 }}>
+            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} id="upload-photo" />
             <label htmlFor="upload-photo">
-              <IconButton component="span" color="primary">
-                <PhotoCameraIcon />
+              <IconButton color="primary" component="span">
+                <PhotoCameraIcon sx={{ fontSize: 40 }} />
               </IconButton>
             </label>
-          </div>
-          <TextField fullWidth label="Bio" name="bio" value={formData.bio} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="qualification" name="qualification" value={formData.qualification} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="Mobile" name="mobile" value={formData.mobile} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="GitHub" name="github" value={formData.github} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="LinkedIn" name="linkedIn" value={formData.linkedIn} onChange={handleChange} margin="normal" />
-          <TextField fullWidth label="Twitter" name="twitter" value={formData.twitter} onChange={handleChange} margin="normal" />
+          </Box>
+
+          {/* Editable Fields */}
+          {[
+            { name: "bio", label: "Bio" },
+            { name: "mobile", label: "Mobile" },
+            { name: "qualification", label: "Qualification" },
+            { name: "github", label: "GitHub" },
+            { name: "linkedIn", label: "LinkedIn" },
+            { name: "twitter", label: "Twitter" },
+          ].map((field, index) => (
+            <TextField
+              key={index}
+              fullWidth
+              margin="dense"
+              label={field.label}
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+            />
+          ))}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEdit(false)} color="secondary">Cancel</Button>
-          <Button onClick={handleUpdate} color="primary" variant="contained">Save Changes</Button>
+          <Button onClick={handleUpdate} color="primary" disabled={saving}>
+            {saving ? <CircularProgress size={24} /> : "Save Changes"}
+          </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </div>
   );
 };
 
