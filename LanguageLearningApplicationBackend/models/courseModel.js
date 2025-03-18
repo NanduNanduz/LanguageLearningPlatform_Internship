@@ -65,7 +65,8 @@ const CourseSchema = new mongoose.Schema(
     ],
     studentsEnrolled: [
       {
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        studentName: { type: String },
         completedVideos: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed video IDs
         completedResources: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed resources
         quizScores: [

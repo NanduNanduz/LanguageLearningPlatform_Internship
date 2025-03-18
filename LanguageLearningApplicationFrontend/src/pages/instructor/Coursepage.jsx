@@ -34,6 +34,7 @@ const CoursePage = () => {
   const [selectedSection, setSelectedSection] = useState("videos");
   const [editingVideoId, setEditingVideoId] = useState(null);
   const [newVideoTitle, setNewVideoTitle] = useState("");
+  const [students, setStudents] = useState([]);
 
   const navigate = useNavigate();
 
@@ -123,6 +124,19 @@ const CoursePage = () => {
     }
   };
 
+  const fetchEnrolledStudents = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/instructor/enrolled-students/${courseId}`);
+      if (response.data.success) {
+        setStudents(response.data.students);
+      } else {
+        throw new Error("No students found.");
+      }
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
+
 
   if (loading)
     return (
@@ -186,6 +200,7 @@ const CoursePage = () => {
         >
           Videos
         </Button>
+        <Button variant={selectedSection === "students" ? "contained" : "outlined"} onClick={() => handleSectionChange("students")}>Enrolled Students</Button>
       </Stack>
 
       {selectedSection === "quizzes" && (
@@ -302,6 +317,27 @@ const CoursePage = () => {
               <Typography>No videos available.</Typography>
             )}
           </Grid>
+        </>
+      )}
+       {selectedSection === "students" && (
+        <>
+          <Typography variant="h5" fontWeight="bold" marginBottom={2}>Enrolled Students</Typography>
+          {students.length > 0 ? (
+            <Grid container spacing={2}>
+              {students.map((student) => (
+                <Grid item xs={12} sm={6} key={student._id}>
+                  <Card sx={{ boxShadow: 2 }}>
+                    <CardContent>
+                      <Typography variant="h6">{student.name}</Typography>
+                      <Typography variant="body2" color="textSecondary">{student.email}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Typography>No students enrolled.</Typography>
+          )}
         </>
       )}
 
