@@ -1,15 +1,12 @@
 import courseModel from "../models/courseModel.js";
 import userModel from "../models/userModel.js";
+import paymentModel from "../models/paymentModel.js";
 import Quiz from "../models/quizModel.js";
 import Submission from "../models/submissionModel.js";  
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
 dotenv.config();
-
-
-
-
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -155,6 +152,17 @@ export const verifyPayment = async (req, res) => {
     // Save the updated user and course
     await user.save();
     await course.save();
+
+    // Save payment details in the Payment model
+    const payment = new paymentModel({
+      studentId: userId,
+      courseId: courseId,
+      amount: course.price, // Amount in dollars
+      paymentStatus: "Completed", // Payment is completed
+      transactionId: session.payment_intent, // Stripe payment intent ID
+    });
+
+    await payment.save();
 
     return res.json({ message: "Payment verified, enrolled successfully!" });
   } catch (error) {
