@@ -92,7 +92,7 @@ const QuizzPage = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #6A11CB 0%, #2575FC 100%)",
+        background: "#ADB2D4",
         padding: "20px",
       }}
     >
@@ -201,7 +201,7 @@ const QuizzPage = () => {
           onClick={handleUpload}
           disabled={loading}
           sx={{
-            background: "linear-gradient(135deg, #6A11CB 0%, #2575FC 100%)",
+            background: "linear-gradient(135deg,rgb(94, 78, 111) 0%, #2575FC 100%)",
             borderRadius: "20px",
             padding: "10px",
             fontWeight: "bold",
