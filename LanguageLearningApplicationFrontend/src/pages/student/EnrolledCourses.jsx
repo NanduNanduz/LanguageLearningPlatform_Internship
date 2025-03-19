@@ -108,7 +108,7 @@ const EnrolledCourses = () => {
                     variant="contained"
                     color="primary"
                     component={Link}
-                    to={`/coursePageStudent/${course._id}`}
+                    to={`/fullCourse/${course._id}`}
                     sx={{ borderRadius: 2, fontSize: "0.8rem", padding: "6px 12px" }}
                   >
                     Go to Course

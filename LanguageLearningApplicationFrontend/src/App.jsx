@@ -23,6 +23,7 @@ import EnrolledCourses from "./pages/student/EnrolledCourses";
 import CoursePageStudent from "./pages/student/CoursePageStudent";
 import AdminTransactions from "./pages/admin/Transaction";
 import PaymentSuccess from "./pages/student/PaymentSuccess";
+import FullCoursePageStudent from "./pages/student/FullCoursePageStudent";
 
 
 
@@ -56,6 +57,8 @@ function App() {
         />
         <Route path="/user-transactions" element={<AdminTransactions />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/fullCourse/:courseId" element={<FullCoursePageStudent />} />
+
       </Route>
     </Routes>
   );
