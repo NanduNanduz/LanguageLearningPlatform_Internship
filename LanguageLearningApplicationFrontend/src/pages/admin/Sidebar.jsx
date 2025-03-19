@@ -49,7 +49,7 @@ const Sidebar = () => {
           </ListItemIcon>
           <ListItemText primary="Courses" />
         </ListItem>
-        <ListItem button component={Link} to="/admin/transactions">
+        <ListItem button component={Link} to="/user-transactions">
           <ListItemIcon>
             <PaymentIcon />
           </ListItemIcon>

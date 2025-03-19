@@ -131,9 +131,7 @@ const InstructorHome = () => {
           <ListItem button component={Link} to="/addCourse" state={{ instructor }}>
             <ListItemText primary="Add Course" />
           </ListItem>
-          <ListItem button onClick={handleLogout}>
-            <ListItemText primary="Logout" />
-          </ListItem>
+          
         </List>
       </Drawer>
 

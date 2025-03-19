@@ -4,7 +4,6 @@ import axios from "axios";
 import {
   TextField,
   Button,
-  Paper,
   Typography,
   Grid,
   Input,
@@ -82,89 +81,110 @@ const UpdateCourse = () => {
           },
         }
       );
-
-      navigate("/instructorHome",{state:{user:user}});
+      alert("course updated successfully");
+      navigate("/instructorHome", { state: { user: user } });
     } catch (error) {
       console.error("Error updating course:", error);
     }
   };
 
   return (
-    <Paper elevation={3} style={{ padding: 20, maxWidth: 600, margin: "auto", marginTop: 40 }}>
-      <Typography variant="h5" align="center" gutterBottom>
-        Update Course
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              label="Title"
-              name="title"
-              value={courseDetails.title}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-          </Grid>
+    <div
+      style={{
+        backgroundColor:"#ADB2D4", // Red background
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <div style={{ maxWidth: 600, width: "100%" }}>
+        <Typography variant="h5" gutterBottom sx={{textAlign:"center",fontWeight: "bold", marginBottom: "15px",
+                    }}>
+                  Update Course
+                </Typography>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Title"
+                name="title"
+                value={courseDetails.title}
+                onChange={handleChange}
+                fullWidth
+                required
+                InputProps={{ style: { backgroundColor: "white" } }}
+              />
+            </Grid>
 
-          <Grid item xs={12}>
-            <TextField
-              label="Description"
-              name="description"
-              value={courseDetails.description}
-              onChange={handleChange}
-              fullWidth
-              required
-              multiline
-              rows={3}
-            />
-          </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Description"
+                name="description"
+                value={courseDetails.description}
+                onChange={handleChange}
+                fullWidth
+                required
+                multiline
+                rows={3}
+                InputProps={{ style: { backgroundColor: "white" } }}
+              />
+            </Grid>
 
-          <Grid item xs={6}>
-            <TextField
-              label="Price"
-              type="number"
-              name="price"
-              value={courseDetails.price}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-          </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Price"
+                type="number"
+                name="price"
+                value={courseDetails.price}
+                onChange={handleChange}
+                fullWidth
+                required
+                InputProps={{ style: { backgroundColor: "white" } }}
+              />
+            </Grid>
 
-          <Grid item xs={6}>
-            <TextField
-              label="Category"
-              name="category"
-              value={courseDetails.category}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-          </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Category"
+                name="category"
+                value={courseDetails.category}
+                onChange={handleChange}
+                fullWidth
+                required
+                InputProps={{ style: { backgroundColor: "white" } }}
+              />
+            </Grid>
 
-          <Grid item xs={12}>
-            {courseDetails.thumbnail && (
-              <Card sx={{ maxWidth: 150, marginBottom: 2 }}>
-                <CardMedia
-                  component="img"
-                  height="100"
-                  image={courseDetails.thumbnail}
-                  alt="Course Thumbnail"
-                />
-              </Card>
-            )}
-            <Input type="file" onChange={handleFileChange} fullWidth />
-          </Grid>
+            <Grid item xs={12}>
+              {courseDetails.thumbnail && (
+                <Card sx={{ maxWidth: 150, marginBottom: 2 }}>
+                  <CardMedia
+                    component="img"
+                    height="100"
+                    image={courseDetails.thumbnail}
+                    alt="Course Thumbnail"
+                  />
+                </Card>
+              )}
+              <Input type="file" onChange={handleFileChange} fullWidth />
+            </Grid>
 
-          <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" fullWidth>
-              Update Course
-            </Button>
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{ backgroundColor: "rgb(85, 123, 159)", color: "white" }} // Darker red button
+                fullWidth
+              >
+                Update Course
+              </Button>
+            </Grid>
           </Grid>
-        </Grid>
-      </form>
-    </Paper>
+        </form>
+      </div>
+    </div>
   );
 };
 

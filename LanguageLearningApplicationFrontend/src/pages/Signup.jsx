@@ -136,10 +136,18 @@ const Signup = ({ onClose }) => {
               </Box>
             </DialogContent>
             <DialogActions sx={{ justifyContent: "center" }}>
-              <Button onClick={()=>{navigate('/')}} color="error" variant="contained">
-                Close
-              </Button>
-            </DialogActions>
+  <Typography variant="body2" sx={{ cursor: "pointer", color: "rgb(41, 39, 35)" }}>
+    Already have an account?{" "}
+    <span
+      style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+      onClick={() => navigate("/login")}
+    >
+      Login
+    </span>
+  </Typography>
+</DialogActions>
+
+           
           </Grid>
         </Grid>
       </Dialog>
@@ -208,7 +216,7 @@ const Signup = ({ onClose }) => {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={() => navigate("/")}>Cancel</Button>
               <Button
                 variant="contained"
                 sx={{ backgroundColor: "#FCA311", color: "#14213D" }}

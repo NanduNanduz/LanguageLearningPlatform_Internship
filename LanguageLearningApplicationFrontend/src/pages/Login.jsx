@@ -207,6 +207,17 @@ const Login = ({onClose}) => {
               >
                 Login
               </Button>
+              <Typography variant="body2" sx={{ textAlign: "center", mt: 2 }}>
+                Don't have an account?{' '}
+                <Link
+                  component="button"
+                  variant="body2"
+                  color="primary"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign up
+                </Link>
+              </Typography>
             </Box>
           </Grid>
 

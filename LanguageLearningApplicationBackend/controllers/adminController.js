@@ -1,6 +1,7 @@
 import courseModel from "../models/courseModel.js";
 
 import userModel from "../models/userModel.js";
+ import paymentModel from "../models/paymentModel.js"
 
 
 
@@ -128,3 +129,35 @@ export const blockInstructor = async (req, res) => {
   res.json({ message: "Instructor status updated" });
 };
 
+
+export const allPayment = async (req, res) => {
+  try {
+    const payments = await paymentModel.find()
+      .populate("studentId", "name email") // Populate student details
+      .populate("courseId", "title"); // Populate course details
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch transactions" });
+  }
+};
+export const refundPayment = async (req, res) => {
+  try {
+    const payment = await paymentModel.findById(req.params.id);
+    if (!payment || payment.paymentStatus !== "Completed") {
+      return res.status(400).json({ message: "Refund not possible" });
+    }
+
+    // Refund logic using Stripe API
+    await stripe.refunds.create({ payment_intent: payment.transactionId });
+
+    // Update payment status and refund status
+    payment.paymentStatus = "Refunded";
+    payment.refundIssued = true;
+    await payment.save();
+
+    res.json({ message: "Refund issued successfully" });
+  } catch (error) {
+    console.error("Refund failed:", error);
+    res.status(500).json({ error: "Refund failed" });
+  }
+};

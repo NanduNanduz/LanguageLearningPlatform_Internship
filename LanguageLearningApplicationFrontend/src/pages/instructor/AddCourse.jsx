@@ -6,7 +6,7 @@ import {
   Typography,
   Grid,
   IconButton,
-  Box,
+  Paper,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import AddIcon from "@mui/icons-material/Add";
@@ -107,9 +107,9 @@ const AddCourse = () => {
   };
 
   return (
-    <Box
+    <Paper
       sx={{
-        backgroundColor: "#e3f2fd",
+        backgroundColor: "#ADB2D4", // Light blue background
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -117,36 +117,104 @@ const AddCourse = () => {
         padding: 3,
       }}
     >
-      <form onSubmit={handleSubmit} encType="multipart/form-data" style={{ width: "100%", maxWidth: 600 }}>
-        <Typography variant="h5" gutterBottom>
+      <form
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+        style={{ width: "100%", maxWidth: 600 }}
+      >
+        <Typography variant="h5" gutterBottom sx={{textAlign:"center",fontWeight: "bold", marginBottom: "15px",
+            }}>
           Create a New Course
         </Typography>
         {error && <Typography color="error">{error}</Typography>}
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <TextField fullWidth label="Course Title" name="title" onChange={handleChange} required />
+            <TextField
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
+              fullWidth
+              variant="filled"
+              label="Course Title"
+              name="title"
+              
+              onChange={handleChange}
+              required
+            />
           </Grid>
 
           <Grid item xs={12}>
-            <TextField fullWidth label="Description" name="description" multiline rows={3} onChange={handleChange} required />
+            <TextField
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
+              fullWidth
+              variant="filled"
+              label="Description"
+              name="description"
+              multiline
+              rows={3}
+              onChange={handleChange}
+              required
+            />
           </Grid>
 
           <Grid item xs={12}>
-            <TextField fullWidth label="Price (₹)" name="price" type="number" onChange={handleChange} required />
+            <TextField
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
+              fullWidth
+              variant="filled"
+              label="Price (₹)"
+              name="price"
+              type="number"
+              onChange={handleChange}
+              required
+            />
           </Grid>
 
           <Grid item xs={12}>
-            <TextField fullWidth label="Category" name="category" onChange={handleChange} required />
+            <TextField
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
+              fullWidth
+              variant="filled"
+              label="Category"
+              name="category"
+              onChange={handleChange}
+              required
+            />
           </Grid>
 
           <Grid item xs={12}>
-            <TextField fullWidth label="Instructor Name" name="instructorName" onChange={handleChange} required />
+            <TextField
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
+              fullWidth
+              variant="filled"
+              label="Instructor Name"
+              name="instructorName"
+              onChange={handleChange}
+              required
+            />
           </Grid>
 
           <Grid item xs={12}>
             <input type="file" accept="image/*" onChange={handleThumbnailChange} style={{ display: "none" }} id="thumbnail-upload" required />
             <label htmlFor="thumbnail-upload">
-              <Button variant="outlined" component="span" startIcon={<AddPhotoAlternateIcon />}>Upload Thumbnail (Required)</Button>
+             <Button
+                    variant="outlined"
+                    component="span"
+                    startIcon={<AddPhotoAlternateIcon />}
+                    sx={{ color: "black" }}
+                  >
+                    Upload Thumbnail{" "}
+                    <span style={{ color: "rgb(161, 57, 57)" }}>(Required)</span>
+            </Button>
+
             </label>
             {thumbnail && <Typography mt={1}>Selected: {thumbnail.name}</Typography>}
           </Grid>
@@ -156,12 +224,21 @@ const AddCourse = () => {
             {videoTitles.map((title, index) => (
               <Grid container spacing={2} key={index} alignItems="center">
                 <Grid item xs={6}>
-                  <TextField fullWidth label="Video Title" value={title} onChange={(e) => handleVideoTitleChange(e, index)} />
+                  <TextField
+                  sx={{
+                    backgroundColor: "white", 
+                    borderRadius: "5px"}}
+                    fullWidth
+                    variant="filled"
+                    label="Video Title"
+                    value={title}
+                    onChange={(e) => handleVideoTitleChange(e, index)}
+                  />
                 </Grid>
                 <Grid item xs={4}>
                   <input type="file" accept="video/*" onChange={(e) => handleVideoChange(e, index)} style={{ display: "none" }} id={`video-upload-${index}`} />
                   <label htmlFor={`video-upload-${index}`}>
-                    <Button variant="outlined" component="span">Upload Video</Button>
+                    <Button variant="outlined" component="span" sx={{color:"black"}}>Upload Video</Button>
                   </label>
                 </Grid>
                 <Grid item xs={2}>
@@ -173,15 +250,32 @@ const AddCourse = () => {
                 </Grid>
               </Grid>
             ))}
-            <Button startIcon={<AddIcon />} onClick={addVideoField} sx={{ mt: 1 }}>Add Another Video</Button>
+            <Button startIcon={<AddIcon />} onClick={addVideoField} sx={{ mt: 1,color:"black" }}>
+              Add Another Video
+            </Button>
           </Grid>
 
           <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary" fullWidth>Create Course</Button>
+          <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      backgroundColor: "rgb(85, 123, 159)", // ✅ Matching blue color
+                      color: "#FFFFFF", // ✅ White text
+                      borderColor: "#1565C0", // ✅ Darker blue border
+                      "&:hover": {
+                        backgroundColor: "rgb(75, 144, 213)", // ✅ Slightly darker on hover
+                      },
+                    }}
+                  >
+                    Create Course
+          </Button>
+
           </Grid>
         </Grid>
       </form>
-    </Box>
+    </Paper>
   );
 };
 

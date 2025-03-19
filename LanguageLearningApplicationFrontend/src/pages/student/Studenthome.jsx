@@ -272,9 +272,7 @@ const handleEnroll = async (courseId) => {
           <ListItem>
             <ListItemText primary={`Welcome, ${student?.name}`} />
           </ListItem>
-          <ListItem button onClick={handleLogout}>
-            <ListItemText primary="Logout" />
-          </ListItem>
+          
         </List>
       </Drawer>
 
