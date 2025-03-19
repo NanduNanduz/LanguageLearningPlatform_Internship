@@ -8,6 +8,8 @@ import {
   CircularProgress,
   Select,
   MenuItem,
+  Box,
+  useMediaQuery,
 } from "@mui/material";
 
 const QuizzPage = () => {
@@ -17,6 +19,8 @@ const QuizzPage = () => {
   ]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   // Handle Question Text Change
   const handleQuestionChange = (index, value) => {
@@ -86,26 +90,26 @@ const QuizzPage = () => {
   };
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         background: "#ADB2D4",
-        padding: "20px",
+        padding: isMobile ? "10px" : "20px",
       }}
     >
-      <div
-        style={{
-          width: "90%",
-          maxWidth: "400px",
+      <Box
+        sx={{
+          width: isMobile ? "95%" : "50%",
+          maxWidth: "500px",
           padding: "20px",
           textAlign: "center",
         }}
       >
         <Typography
-          variant="h5"
+          variant={isMobile ? "h6" : "h5"}
           sx={{
             fontWeight: "bold",
             marginBottom: "15px",
@@ -116,9 +120,9 @@ const QuizzPage = () => {
         </Typography>
 
         {questions.map((q, qIndex) => (
-          <div
+          <Box
             key={qIndex}
-            style={{
+            sx={{
               marginBottom: "15px",
             }}
           >
@@ -173,7 +177,7 @@ const QuizzPage = () => {
                 </MenuItem>
               ))}
             </Select>
-          </div>
+          </Box>
         ))}
 
         <Button
@@ -219,8 +223,8 @@ const QuizzPage = () => {
             {message}
           </Typography>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 
