@@ -19,16 +19,60 @@ const CourseSchema = new mongoose.Schema(
     category: {
       type: String,
       enum: [
-        "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati",
-        "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili",
-        "Santali", "Kashmiri", "Konkani", "Sindhi", "Dogri", "Manipuri",
-        "Bodo", "Sanskrit", "Nepali",
-        "English", "Spanish", "French", "German", "Portuguese", "Mandarin Chinese",
-        "Cantonese", "Japanese", "Korean", "Russian", "Italian", "Turkish",
-        "Dutch", "Polish", "Greek", "Hebrew", "Arabic", "Persian (Farsi)",
-        "Thai", "Vietnamese", "Malay", "Swedish", "Danish", "Finnish",
-        "Norwegian", "Hungarian", "Czech", "Slovak", "Romanian", "Ukrainian",
-        "Filipino (Tagalog)", "Swahili"
+        "Hindi",
+        "Bengali",
+        "Telugu",
+        "Marathi",
+        "Tamil",
+        "Urdu",
+        "Gujarati",
+        "Kannada",
+        "Odia",
+        "Punjabi",
+        "Malayalam",
+        "Assamese",
+        "Maithili",
+        "Santali",
+        "Kashmiri",
+        "Konkani",
+        "Sindhi",
+        "Dogri",
+        "Manipuri",
+        "Bodo",
+        "Sanskrit",
+        "Nepali",
+        "English",
+        "Spanish",
+        "French",
+        "German",
+        "Portuguese",
+        "Mandarin Chinese",
+        "Cantonese",
+        "Japanese",
+        "Korean",
+        "Russian",
+        "Italian",
+        "Turkish",
+        "Dutch",
+        "Polish",
+        "Greek",
+        "Hebrew",
+        "Arabic",
+        "Persian (Farsi)",
+        "Thai",
+        "Vietnamese",
+        "Malay",
+        "Swedish",
+        "Danish",
+        "Finnish",
+        "Norwegian",
+        "Hungarian",
+        "Czech",
+        "Slovak",
+        "Romanian",
+        "Ukrainian",
+        "Filipino (Tagalog)",
+        "Swahili",
       ],
       required: [true, "Course category is required"],
     },
@@ -41,8 +85,8 @@ const CourseSchema = new mongoose.Schema(
       ref: "User", // Reference to User model (Instructor)
       required: true,
     },
-    instructorName:{
-      type:String
+    instructorName: {
+      type: String,
     },
     videos: [
       {
@@ -68,7 +112,6 @@ const CourseSchema = new mongoose.Schema(
         studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         studentName: { type: String },
         completedVideos: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed video IDs
-        completedResources: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed resources
         quizScores: [
           {
             quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" },
@@ -76,6 +119,16 @@ const CourseSchema = new mongoose.Schema(
             passed: Boolean,
           },
         ],
+        assignments: [
+          {
+            studentId : { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+            assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Ref to assignment
+            fileUrl: { type: String, required: true }, // URL of submitted assignment file
+            submittedAt: { type: Date, default: Date.now }, // Submission timestamp
+            feedback: { type: String }, // Optional feedback from instructor
+          },
+        ],
+
         progressPercentage: { type: Number, default: 0 },
         isCompleted: { type: Boolean, default: false }, // Stores course completion date
       },

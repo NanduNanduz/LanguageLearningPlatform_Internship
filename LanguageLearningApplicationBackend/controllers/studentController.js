@@ -220,7 +220,7 @@ export const getQuizByCourse = async (req, res) => {
 //submitting quiz by student
 export const submitQuiz = async (req, res) => {
   try {
-    const { userId, quizId, timeTaken } = req.body;
+    const { userId, quizId } = req.body;
     let selectedAnswers = req.body.selectedAnswers;
 
     console.log("Raw selectedAnswers:", selectedAnswers); // Debugging
@@ -280,7 +280,6 @@ export const submitQuiz = async (req, res) => {
       correctAnswersCount,
       passed,
       attemptNumber: 1, // Always 1 since only 1 attempt is allowed
-      timeTaken: timeTaken ? parseInt(timeTaken, 10) : null,
       isBestAttempt: true, // Since it's the only attempt, it's the best
     });
 
@@ -290,6 +289,46 @@ export const submitQuiz = async (req, res) => {
     quiz.submissions.push(submission._id);
     await quiz.save();
 
+    // ✅ Update the `enrolledCourses` section in the user model
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // ✅ Find the enrolled course
+    const enrolledCourse = user.enrolledCourses.find(
+      (ec) => ec.courseId.toString() === quiz.courseId.toString()
+    );
+
+    if (enrolledCourse) {
+      // ✅ Check if quiz score already exists
+      const existingQuizScore = enrolledCourse.quizScores.find(
+        (qs) => qs.quizId.toString() === quizId
+      );
+
+      if (existingQuizScore) {
+        // ✅ Update existing quiz score
+        existingQuizScore.score = percentageScore;
+        existingQuizScore.passed = passed;
+      } else {
+        // ✅ Add new quiz score
+        enrolledCourse.quizScores.push({
+          quizId,
+          score: percentageScore,
+          passed,
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "User is not enrolled in this course.",
+      });
+    }
+
+    // ✅ Save updated user document
+    await user.save();
+
     res.status(200).json({
       success: true,
       message: "Quiz submitted successfully",
@@ -297,7 +336,6 @@ export const submitQuiz = async (req, res) => {
       correctAnswersCount,
       passed,
       attemptNumber: 1,
-      timeTaken,
       isBestAttempt: true,
     });
   } catch (error) {
@@ -306,21 +344,47 @@ export const submitQuiz = async (req, res) => {
   }
 };
 
+
 //viewing result by the student
 export const getUserQuizResults = async (req, res) => {
   try {
     const { userId, courseId } = req.params;
 
-    // Find the user's enrolled course progress
-    const user = await userModel.findById(userId);
-    const enrolledCourse = user.enrolledCourses.find((ec) => ec.courseId.toString() === courseId);
+    // Fetch user with enrolled courses and populate quiz scores
+    const user = await userModel.findById(userId)
+      .populate({
+        path: "enrolledCourses.courseId", // Ensure course details are available
+        select: "title",
+      })
+      .populate({
+        path: "enrolledCourses.quizScores.quizId",
+        select: "title",
+      });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Find the specific course
+    const enrolledCourse = user.enrolledCourses.find(
+      (ec) => ec.courseId._id.toString() === courseId
+    );
 
     if (!enrolledCourse) {
       return res.status(404).json({ success: false, message: "User not enrolled in this course" });
     }
 
-    res.status(200).json({ success: true, quizScores: enrolledCourse.quizScores });
+    // Format quiz scores with proper data
+    const formattedQuizScores = enrolledCourse.quizScores.map((quiz) => ({
+      quizId: quiz.quizId._id,
+      quizTitle: quiz.quizId.title, 
+      score: quiz.score,
+      passed: quiz.passed,
+    }));
+
+    res.status(200).json({ success: true, quizScores: formattedQuizScores });
   } catch (error) {
+    console.error("Error fetching quiz results:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

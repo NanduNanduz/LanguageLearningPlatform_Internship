@@ -8,62 +8,88 @@ import {
   Grid,
   Button,
   CircularProgress,
+  Stack,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Stack,
   RadioGroup,
   FormControlLabel,
   Radio,
+  TextField,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 
-const FullCoursePageStudent = () => {
+const StudentCoursePage = () => {
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const userId = user._id;
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [quizLoading, setQuizLoading] = useState(false);
   const [selectedSection, setSelectedSection] = useState("videos");
+  const [assignmentFile, setAssignmentFile] = useState(null);
+  const [submittedAssignments, setSubmittedAssignments] = useState([]);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+const [submittedQuiz, setSubmittedQuiz] = useState(null);
+const [quizResults, setQuizResults] = useState(null);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:3000/instructor/courseItems/${courseId}`
-        );
-        if (response.data.success) {
-          setCourse(response.data.course);
-        } else {
-          throw new Error("Course not found.");
-        }
+        const response = await axios.get(`http://localhost:3000/instructor/courseItems/${courseId}`);
+        setCourse(response.data.course);
       } catch (error) {
         console.error("Error fetching course data:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCourseDetails();
   }, [courseId]);
 
   const fetchQuizzes = async () => {
-    setQuizLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:3000/instructor/quiz/${courseId}`
-      );
-      if (response.data.success) {
-        setQuizzes(response.data.quizzes);
-      } else {
-        throw new Error("No quizzes found.");
-      }
+      const response = await axios.get(`http://localhost:3000/instructor/quiz/${courseId}`);
+      setQuizzes(response.data.quizzes || []);
     } catch (error) {
       console.error("Error fetching quizzes:", error);
-    } finally {
-      setQuizLoading(false);
     }
+  };
+
+  const handleAnswerChange = (quizId, questionIndex, value) => {
+    setSelectedAnswers((prev) => ({
+      ...prev,
+      [quizId]: {
+        ...prev[quizId],
+        [questionIndex]: parseInt(value, 10) // Convert back to number
+      }
+    }));
+  };
+
+
+  // Submit quiz
+const handleSubmitQuiz = async (quizId) => {
+    if (!selectedAnswers[quizId]) {
+      alert("Please select answers before submitting.");
+      return;
+    }
+  
+    setLoading(true);
+    try {
+      const response = await axios.post("http://localhost:3000/student/submitquiz", {
+        userId,
+        quizId,
+        selectedAnswers: Object.values(selectedAnswers[quizId]),
+      });
+  
+      setQuizResults(response.data);
+      setSubmittedQuiz(quizId);
+    } catch (error) {
+      console.error("Quiz submission failed:", error);
+      alert(error.response?.data?.message || "Quiz submission failed.");
+    }
+    setLoading(false);
   };
 
   const handleSectionChange = (section) => {
@@ -73,14 +99,28 @@ const FullCoursePageStudent = () => {
     }
   };
 
-  if (loading) return <CircularProgress style={{ display: "block", margin: "auto", marginTop: "20px" }} />;
+  const handleAssignmentUpload = async () => {
+    if (!assignmentFile) return;
+    
+    const formData = new FormData();
+    formData.append("file", assignmentFile);
+    try {
+      await axios.post(`http://localhost:3000/student/upload-assignment/${courseId}`, formData);
+      alert("Assignment submitted successfully!");
+    } catch (error) {
+      console.error("Error uploading assignment:", error);
+      alert("Failed to submit assignment. Try again.");
+    }
+  };
+
+  if (loading) return <CircularProgress style={{ display: "block", margin: "auto" }} />;
 
   return (
     <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
       <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
         <CardContent>
           <Typography variant="h4" fontWeight="bold">{course.title}</Typography>
-          <Typography variant="body1" color="textSecondary" sx={{ marginBottom: 2 }}>{course.description}</Typography>
+          <Typography variant="body1" color="textSecondary">{course.description}</Typography>
         </CardContent>
       </Card>
 
@@ -94,80 +134,81 @@ const FullCoursePageStudent = () => {
         <Button variant={selectedSection === "videos" ? "contained" : "outlined"} onClick={() => handleSectionChange("videos")}>
           Videos
         </Button>
+        <Button variant={selectedSection === "assignments" ? "contained" : "outlined"} onClick={() => handleSectionChange("assignments")}>
+          Assignments
+        </Button>
       </Stack>
 
-      {selectedSection === "quizzes" && (
-        <>
-          <Typography variant="h5" fontWeight="bold" marginBottom={2}>Quizzes</Typography>
-          {quizLoading ? (
-            <CircularProgress style={{ display: "block", margin: "auto" }} />
-          ) : quizzes.length > 0 ? (
-            quizzes.map((quiz, index) => (
-              <Accordion key={quiz._id || index} sx={{ boxShadow: 2, marginBottom: 2 }}>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="h6">Quiz {index + 1}</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  {quiz.questions.map((question, qIndex) => (
-                    <Card key={question._id || qIndex} sx={{ marginBottom: 2, padding: 2 }}>
-                      <Typography variant="body1" fontWeight="bold">{qIndex + 1}. {question.questionText}</Typography>
-                      <RadioGroup>
-                        {question.options.map((option, oIndex) => (
-                          <FormControlLabel key={option._id || oIndex} value={option.text} control={<Radio />} label={option.text} />
-                        ))}
-                      </RadioGroup>
-                    </Card>
-                  ))}
-                </AccordionDetails>
-              </Accordion>
-            ))
-          ) : (
-            <Typography>No quizzes available.</Typography>
-          )}
-        </>
-      )}
+      {selectedSection === "quizzes" && quizzes.map((quiz, index) => (
+  <Accordion key={quiz._id || index} sx={{ boxShadow: 2, marginBottom: 2 }}>
+    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+      <Typography variant="h6">Quiz {index + 1}</Typography>
+    </AccordionSummary>
+    <AccordionDetails>
+      {quiz.questions.map((question, qIndex) => (
+        <Card key={qIndex} sx={{ marginBottom: 2, padding: 2 }}>
+          <Typography variant="body1" fontWeight="bold">{qIndex + 1}. {question.questionText}</Typography>
+          <RadioGroup
+            value={selectedAnswers[quiz._id]?.[qIndex] ?? ""}
+            onChange={(e) => handleAnswerChange(quiz._id, qIndex, e.target.value)}
+          >
+            {question.options.map((option, oIndex) => (
+              <FormControlLabel key={oIndex} value={String(oIndex)} control={<Radio />} label={option.text} />
+            ))}
+          </RadioGroup>
+        </Card>
+      ))}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => handleSubmitQuiz(quiz._id)}
+      >
+        Submit Quiz
+      </Button>
+    </AccordionDetails>
+  </Accordion>
+))}
 
-      {selectedSection === "resources" && (
-        <>
-          <Typography variant="h5" fontWeight="bold" marginBottom={2}>Resources</Typography>
-          {course.resources.length > 0 ? (
-            course.resources.map((resource) => (
-              <Card sx={{ boxShadow: 2, marginBottom: 2 }} key={resource._id}>
-                <CardContent>
-                  <Typography variant="body1">{resource.resourceName}</Typography>
-                  <Button variant="outlined" color="secondary" startIcon={<CloudDownloadIcon />} onClick={() => window.open(resource.resourceUrl, "_blank")}>Open</Button>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Typography>No resources available.</Typography>
-          )}
-        </>
-      )}
 
-      {selectedSection === "videos" && (
+      {selectedSection === "resources" && course.resources.map((resource) => (
+        <Card key={resource._id} sx={{ boxShadow: 2, marginBottom: 2 }}>
+          <CardContent>
+            <Typography variant="body1">{resource.resourceName}</Typography>
+            <Button variant="outlined" color="secondary" startIcon={<CloudDownloadIcon />} onClick={() => window.open(resource.resourceUrl, "_blank")}>Download</Button>
+          </CardContent>
+        </Card>
+      ))}
+
+      {selectedSection === "videos" && course.videos.map((video) => (
+        <Card key={video._id} sx={{ boxShadow: 3, marginBottom: 3 }}>
+          <CardContent>
+            <Typography variant="h6">{video.videoTitle}</Typography>
+            <video src={video.videoUrl} controls style={{ width: "100%", borderRadius: "10px" }} />
+          </CardContent>
+        </Card>
+      ))}
+
+      {selectedSection === "assignments" && (
         <>
-          <Typography variant="h5" fontWeight="bold" marginBottom={2}>Course Videos</Typography>
-          <Grid container spacing={3}>
-            {course.videos.length > 0 ? (
-              course.videos.map((video) => (
-                <Grid item xs={12} sm={6} md={4} key={video._id}>
-                  <Card sx={{ boxShadow: 3 }}>
-                    <CardContent>
-                      <Typography variant="h6">{video.videoTitle}</Typography>
-                      <video src={video.videoUrl} controls style={{ width: "100%", borderRadius: "10px", marginBottom: "10px" }} />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))
-            ) : (
-              <Typography>No videos available.</Typography>
-            )}
-          </Grid>
+          <Typography variant="h5" fontWeight="bold">Submit Assignment</Typography>
+          <input type="file" onChange={(e) => setAssignmentFile(e.target.files[0])} />
+          <Button variant="contained" color="primary" onClick={handleAssignmentUpload} sx={{ marginTop: 2 }}>Submit</Button>
+          
+          <Typography variant="h6" marginTop={3}>Your Submitted Assignments</Typography>
+          {submittedAssignments.length > 0 ? submittedAssignments.map((assignment, index) => (
+            <Card key={index} sx={{ boxShadow: 2, marginBottom: 2 }}>
+              <CardContent>
+                <Typography>{assignment.fileName}</Typography>
+                <Button variant="outlined" color="secondary" onClick={() => window.open(assignment.fileUrl, "_blank")}>
+                  View Assignment
+                </Button>
+              </CardContent>
+            </Card>
+          )) : <Typography>No assignments submitted yet.</Typography>}
         </>
       )}
     </div>
   );
 };
 
-export default FullCoursePageStudent;
+export default StudentCoursePage;

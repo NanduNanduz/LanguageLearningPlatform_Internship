@@ -12,10 +12,10 @@ router.post("/enroll/:courseId/:studentId", enrollCourse);
 
 
 router.get("/all-students", getAllStudents);
-router.get("/quiz/:courseId",getQuizByCourse )
-router.post("/submitquiz",parseFormData,submitQuiz)
-router.get("/quizResults/:userId/:courseId",getUserQuizResults)
-router.get("/studentDetails/:studentId", getStudentDetails)
+router.get("/quiz/:courseId",getQuizByCourse );
+router.post("/submitquiz",parseFormData,submitQuiz);
+router.get("/quizResults/:userId/:courseId",getUserQuizResults);
+router.get("/studentDetails/:studentId", getStudentDetails);
 router.get("/approved-courses", getApprovedCourses);
 router.get("/verify-payment", verifyPayment);
 router.get("/enrolledCourse/:studentId", getEnrolledCourses);
