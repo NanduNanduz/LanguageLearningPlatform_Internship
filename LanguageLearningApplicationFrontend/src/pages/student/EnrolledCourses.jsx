@@ -23,7 +23,7 @@ const EnrolledCourses = () => {
     const fetchEnrolledCourses = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/enrolledCourses/${student?._id}`
+          `http://localhost:3000/student/enrolledCourse/${student?._id}`
         );
         setEnrolledCourses(response.data?.courses || []);
       } catch (error) {
