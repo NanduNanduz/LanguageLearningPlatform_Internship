@@ -354,3 +354,22 @@ export const getApprovedCourses = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error });
   }
 };
+
+//get enrolled course of a particular student
+export const getEnrolledCourses = async (req, res) => {
+  try {
+    const studentId = req.params.studentId;
+
+    // Find student by ID and populate enrolled courses
+    const student = await userModel.findById(studentId).populate("enrolledCourses");
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.status(200).json({ courses: student.enrolledCourses });
+  } catch (error) {
+    console.error("Error fetching enrolled courses:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
