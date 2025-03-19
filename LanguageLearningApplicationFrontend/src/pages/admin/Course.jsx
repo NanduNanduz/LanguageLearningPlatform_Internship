@@ -96,6 +96,9 @@ const Course = () => {
                     <strong>Course Category</strong>
                   </TableCell>
                   <TableCell>
+                    <strong>Course Price</strong>
+                  </TableCell>
+                  <TableCell>
                     <strong>Status</strong>
                   </TableCell>
                   <TableCell align="center">
@@ -130,6 +133,8 @@ const Course = () => {
                       {course.instructorName}
                     </TableCell>
                     <TableCell>{course.category}</TableCell>
+                    <TableCell>₹{course.price}</TableCell>
+
                     <TableCell>{course.status}</TableCell>
                     <TableCell align="center">
                       <Button

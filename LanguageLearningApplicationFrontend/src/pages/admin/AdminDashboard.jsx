@@ -56,8 +56,8 @@ const AdminDashboard = () => {
             {[
               {
                 title: "BUDGET",
-                value: "$24k",
-                icon: "💲",
+                value: "₹24k",
+                icon: "₹",
                 color: "#7B61FF",
                 percentage: "+12%",
                 trend: "up",
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
               },
               {
                 title: "TOTAL PROFIT",
-                value: "$15k",
+                value: "₹15k",
                 icon: "📊",
                 color: "#7B61FF",
               },
