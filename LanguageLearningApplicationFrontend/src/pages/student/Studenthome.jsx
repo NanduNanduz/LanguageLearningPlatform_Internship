@@ -33,7 +33,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 const Studenthome = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const student = location.state?.user;
+  
+  const studentData = location.state?.user;
+
   const [courses, setCourses] = useState([]);
   const [profilePicture, setProfilePicture] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -99,6 +101,21 @@ const Studenthome = () => {
     "Swahili",
   ];
 
+
+const [student, setStudent] = useState(null);
+
+useEffect(() => {
+  const storedUser = sessionStorage.getItem("user");
+  if (storedUser) {
+    setStudent(JSON.parse(storedUser));
+  } else {
+    console.warn("Student data not found in session storage");
+  }
+}, []);
+
+
+
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -155,15 +172,32 @@ const Studenthome = () => {
       setFilteredCourses(courses);
     }
   };
-  const handleEnroll = async (courseId) => {
-    try {
-      const response = await axios.post(`http://localhost:3000/student/enroll/${courseId}/${student._id}`);
+  
+
+
+const handleEnroll = async (courseId) => {
+  if (!student || !student._id) {
+    alert("Student information is missing. Please try logging in again.");
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      `http://localhost:3000/student/enroll/${courseId}/${student._id}`
+    );
+
+    if (response.data.sessionId) {
+      // If payment is required, redirect to Stripe payment
+      window.location.href = response.data.url;
+    } else {
       alert(response.data.message || "Enrolled Successfully!");
-    } catch (error) {
-      console.error("Enrollment failed:", error);
-      alert("Failed to enroll. Try again later.");
     }
-  };
+  } catch (error) {
+    console.error("Enrollment failed:", error);
+    alert("Failed to enroll. Try again later.");
+  }
+};
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Top Bar */}
