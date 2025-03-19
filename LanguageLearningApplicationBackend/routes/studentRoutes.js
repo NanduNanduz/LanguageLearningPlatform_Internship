@@ -1,5 +1,5 @@
 import express from "express";
-import { enrollCourse, getStudentDetails, getUserQuizResults, submitQuiz, verifyPayment } from "../controllers/studentController.js";
+import { enrollCourse, getEnrolledCourses, getStudentDetails, getUserQuizResults, submitQuiz, verifyPayment } from "../controllers/studentController.js";
 import {getUserDetails} from "../controllers/studentController.js";
 import { getAllStudents , getQuizByCourse, getApprovedCourses} from "../controllers/studentController.js";
 import { parseFormData } from "../utils/multer.js";
@@ -18,7 +18,7 @@ router.get("/quizResults/:userId/:courseId",getUserQuizResults)
 router.get("/studentDetails/:studentId", getStudentDetails)
 router.get("/approved-courses", getApprovedCourses);
 router.get("/verify-payment", verifyPayment);
-
+router.get("/enrolledCourse/:studentId", getEnrolledCourses);
 export default router;
 
 
