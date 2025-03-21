@@ -94,7 +94,7 @@ const handleSubmitQuiz = async (quizId) => {
   
       setQuizResults(response.data);
       setSubmittedQuiz(quizId);
-      navigate(`/fullcourse/${courseId}`)
+      navigate(`/fullCourse/${courseId}`)
     } catch (error) {
       console.error("Quiz submission failed:", error);
       alert(error.response?.data?.message || "Quiz submission failed.");
