@@ -23,6 +23,8 @@ import EnrolledCourses from "./pages/student/EnrolledCourses";
 import CoursePageStudent from "./pages/student/CoursePageStudent";
 import AdminTransactions from "./pages/admin/Transaction";
 import PaymentSuccess from "./pages/student/PaymentSuccess";
+import SendAnnouncement from "./pages/admin/SendAnnouncement";
+import Notifications from "./pages/student/Notifications";
 
 
 
@@ -50,6 +52,9 @@ function App() {
         <Route path="/courseDetails/:courseId" element={<CourseDetails />} />
         <Route path="/profileStudent" element={<StudentProfile />} />
         <Route path="/enrolledCourses" element={<EnrolledCourses />} />
+        <Route path="/send-announcement" element={<SendAnnouncement />} />
+        <Route path="/notifications" element={<Notifications />}/>
+        
         <Route
           path="/coursePageStudent/:courseId"
           element={<CoursePageStudent />}
