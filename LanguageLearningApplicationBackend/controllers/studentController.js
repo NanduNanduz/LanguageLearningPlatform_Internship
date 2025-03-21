@@ -5,6 +5,7 @@ import Quiz from "../models/quizModel.js";
 import Submission from "../models/submissionModel.js";  
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import notificationModel from "../models/notificationModel.js";
 
 dotenv.config();
 
@@ -360,5 +361,44 @@ export const getApprovedCourses = async (req, res) => {
     res.status(200).json({ success: true, courses });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+
+
+
+// Get All Notifications (for users)
+export const getAllNotifications = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Fetch notifications where the user is a recipient
+    const notifications = await notificationModel.find({
+      recipients: userId,
+    }).populate("sentBy", "name");
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ error: "Failed to fetch notifications" });
+  }
+};
+
+// Mark Notification as Read
+export const markAsRead = async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+    const userId = req.user._id;
+
+    // Update the notification's isRead array
+    await notificationModel.updateOne(
+      { _id: notificationId, "isRead.userId": userId },
+      { $set: { "isRead.$.read": true } }
+    );
+
+    res.status(200).json({ message: "Notification marked as read" });
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    res.status(500).json({ error: "Failed to mark notification as read" });
   }
 };
