@@ -1,7 +1,8 @@
 import courseModel from "../models/courseModel.js";
 
 import userModel from "../models/userModel.js";
- import paymentModel from "../models/paymentModel.js"
+ import paymentModel from "../models/paymentModel.js";
+ import notificationModel from "../models/notificationModel.js"
 
 
 
@@ -161,3 +162,39 @@ export const refundPayment = async (req, res) => {
     res.status(500).json({ error: "Refund failed" });
   }
 };
+
+
+export const sendAnnouncement = async (req, res) => {
+  try {
+    console.log("req.io:", req.io); // Debugging log
+    const { title, message } = req.body;
+
+    // Check if req.user is defined
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ error: "User not authenticated." });
+    }
+
+    // Fetch all users from the database
+    const users = await userModel.find({}, { _id: 1 }); // Only fetch _id field
+    const recipientIds = users.map((user) => user._id); // Extract ObjectId of each user
+
+    // Create a new notification
+    const notification = new notificationModel({
+      title,
+      message,
+      recipients: recipientIds, // Save all user IDs as recipients
+      sentBy: req.user._id, // Admin who sent the notification
+    });
+
+    await notification.save();
+
+    // Send real-time notifications (using WebSocket)
+    req.io.emit("new-notification", notification); // Use req.io to emit the event
+
+    res.status(201).json({ message: "Announcement sent successfully" });
+  } catch (error) {
+    console.error("Error sending announcement:", error);
+    res.status(500).json({ error: "Failed to send announcement" });
+  }
+};
+
