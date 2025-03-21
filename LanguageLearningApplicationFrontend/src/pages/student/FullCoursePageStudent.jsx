@@ -108,6 +108,7 @@ const StudentCoursePage = () => {
       setSubmittedQuiz(quizId);
 
       alert("Quiz submitted successfully");
+      window.location.reload();
     } catch (error) {
       console.error("Quiz submission failed:", error);
       alert(error.response?.data?.message || "Quiz submission failed.");
