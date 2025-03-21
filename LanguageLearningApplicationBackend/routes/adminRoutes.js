@@ -39,7 +39,7 @@ router.post("/payments/refund/:id", refundPayment);
 
 
 // Send announcement (Admin only)
-router.post("/sendAnnouncement",verifyToken , sendAnnouncement);
+router.post("/sendAnnouncement", verifyToken, sendAnnouncement);
 
 
 

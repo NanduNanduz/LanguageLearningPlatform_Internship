@@ -24,6 +24,8 @@ import CoursePageStudent from "./pages/student/CoursePageStudent";
 import AdminTransactions from "./pages/admin/Transaction";
 import PaymentSuccess from "./pages/student/PaymentSuccess";
 import FullCoursePageStudent from "./pages/student/FullCoursePageStudent";
+import SendAnnouncement from "./pages/admin/SendAnnouncement";
+import Notifications from "./pages/student/Notifications";
 
 
 
@@ -57,8 +59,12 @@ function App() {
         />
         <Route path="/user-transactions" element={<AdminTransactions />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
-        <Route path="/fullCourse/:courseId" element={<FullCoursePageStudent />} />
-
+        <Route
+          path="/fullCourse/:courseId"
+          element={<FullCoursePageStudent />}
+        />
+        <Route path="/send-announcement" element={<SendAnnouncement />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Route>
     </Routes>
   );

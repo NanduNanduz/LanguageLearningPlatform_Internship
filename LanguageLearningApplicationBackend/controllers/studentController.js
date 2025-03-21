@@ -5,6 +5,7 @@ import Quiz from "../models/quizModel.js";
 import Submission from "../models/submissionModel.js";  
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import notificationModel from "../models/notificationModel.js";
 
 dotenv.config();
 
@@ -440,5 +441,24 @@ export const getEnrolledCourses = async (req, res) => {
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export const getAllNotifications = async (req, res) => {
+  try {
+    const userId = req.user._id; // Ensure req.user is defined
+
+    // Fetch notifications where the user is a recipient
+    const notifications = await notificationModel
+      .find({
+        recipients: userId,
+      })
+      .populate("sentBy", "name");
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ error: "Failed to fetch notifications" });
   }
 };
