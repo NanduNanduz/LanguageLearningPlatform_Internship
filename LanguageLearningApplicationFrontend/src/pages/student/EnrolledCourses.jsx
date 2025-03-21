@@ -23,19 +23,34 @@ const EnrolledCourses = () => {
     const fetchEnrolledCourses = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/enrolledCourses/${student?._id}`
+          `http://localhost:3000/student/enrolledCourse/${student?._id}`
         );
-        setEnrolledCourses(response.data?.courses || []);
+    
+        const enrolledData = response.data?.courses || [];
+    
+        // Extract course IDs and fetch full course details
+        const courseIds = enrolledData.map((item) => item.courseId || item._id);
+    
+        const courseDetailsPromises = courseIds.map((id) =>
+          axios.get(`http://localhost:3000/instructor/courseItems/${id}`)
+        );
+    
+        const courseResponses = await Promise.all(courseDetailsPromises);
+    
+        // Extract the actual course data
+        const fullCourses = courseResponses.map((res) => res.data.course);
+    
+        setEnrolledCourses(fullCourses);
       } catch (error) {
         console.error("Error fetching enrolled courses:", error);
       } finally {
         setLoading(false);
       }
     };
-
+    
     if (student?._id) {
       fetchEnrolledCourses();
-    }
+    }    
   }, [student]);
 
   return (
@@ -93,7 +108,7 @@ const EnrolledCourses = () => {
                     variant="contained"
                     color="primary"
                     component={Link}
-                    to={`/coursePageStudent/${course._id}`}
+                    to={`/fullCourse/${course._id}`}
                     sx={{ borderRadius: 2, fontSize: "0.8rem", padding: "6px 12px" }}
                   >
                     Go to Course

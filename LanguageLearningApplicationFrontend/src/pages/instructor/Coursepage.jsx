@@ -137,6 +137,23 @@ const CoursePage = () => {
     }
   };
 
+  const handleDeleteResource = async (courseId, resourceId,) => {
+  
+    try {
+      const response = await axios.delete(`http://localhost:3000/instructor/course/${courseId}/resource/${resourceId}`);
+      
+      // Update course state to remove the deleted resource
+      setCourse(prevCourse => ({
+        ...prevCourse,
+        resources: prevCourse.resources.filter(resource => resource._id !== resourceId)
+      }));
+  
+    } catch (error) {
+      console.error("Error deleting resource:", error);
+      alert("Failed to delete resource. Please try again.");
+    }
+  };
+
 
   if (loading)
     return (
@@ -271,8 +288,9 @@ const CoursePage = () => {
                     startIcon={<CloudDownloadIcon />}
                     onClick={() => window.open(resource.resourceUrl, "_blank")}
                   >
-                    Download
+                    Open
                   </Button>
+                  <IconButton onClick={() => handleDeleteResource(courseId,resource._id)}><DeleteIcon color="error" /></IconButton>
                 </CardContent>
               </Card>
             ))

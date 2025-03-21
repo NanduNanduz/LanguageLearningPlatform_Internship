@@ -26,12 +26,20 @@ const userSchema = mongoose.Schema(
       {
         courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
         completedVideos: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed video IDs
-        completedResources: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed resources
         quizScores: [
           {
             quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" },
             score: Number,
             passed: Boolean,
+          },
+        ],
+        assignments: [
+          {
+            courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true }, // Course reference
+            assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Ref to assignment
+            fileUrl: { type: String, required: true }, // URL of submitted assignment file
+            submittedAt: { type: Date, default: Date.now }, // Submission timestamp
+            feedback: { type: String }, // Optional feedback from instructor
           },
         ],
         progressPercentage: { type: Number, default: 0 },
@@ -60,7 +68,6 @@ const userSchema = mongoose.Schema(
     mobile: { type: Number },
     profilePicture: { type: String, default: "" },
     qualification: { type: String, default: "" },
-    quizSubmissions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Submission" }],
     lastActive: { type: Date, default: Date.now }, // Tracks user's last activity
     watchHistory: [
       {
