@@ -52,7 +52,11 @@ export const login = async (req, res, next) => {
   try {
     const isCorrect = await bcrypt.compare(req.body.password, user.password);
     if (isCorrect) {
-      const payload = { Email: user.email, password: user.password };
+      const payload = {
+        _id: user._id,
+        Email: user.email,
+        password: user.password,
+      };
       const token = jwt.sign(payload, process.env.JWT_KEY);
       return res.status(200).send({ user: user, token: token });
     } else {
