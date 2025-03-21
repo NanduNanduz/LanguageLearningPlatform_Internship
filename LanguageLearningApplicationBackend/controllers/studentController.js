@@ -384,10 +384,7 @@ export const getUserQuizResults = async (req, res) => {
 
     // Format quiz scores with proper data
     const formattedQuizScores = enrolledCourse.quizScores.map((quiz) => ({
-      quizId: quiz.quizId._id,
-      quizTitle: quiz.quizId.title, 
-      score: quiz.score,
-      passed: quiz.passed,
+      score: quiz.score
     }));
 
     res.status(200).json({ success: true, quizScores: formattedQuizScores });

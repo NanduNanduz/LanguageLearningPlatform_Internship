@@ -43,14 +43,6 @@ useEffect(() => {
       const courseResponse = await axios.get(`http://localhost:3000/instructor/courseItems/${courseId}`);
       setCourse(courseResponse.data.course);
 
-      // Fetch quiz results
-      const quizResponse = await axios.get(`http://localhost:3000/student/quizResults/${userId}/${courseId}`);
-
-      if (quizResponse.data.success) {
-        setQuizResults(quizResponse.data.quizScores || []);
-      } else {
-        setQuizResults([]);
-      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
