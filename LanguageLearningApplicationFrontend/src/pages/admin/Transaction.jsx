@@ -131,7 +131,7 @@ const AdminTransactions = () => {
                       <TableRow key={t._id} hover>
                         <TableCell>{t.studentId?.name}</TableCell>
                         <TableCell>{t.courseId?.title}</TableCell>
-                        <TableCell>${t.amount}</TableCell>
+                        <TableCell>₹{t.amount}</TableCell>
                         <TableCell>{t.paymentStatus}</TableCell>
                         <TableCell align="center">
                           {t.paymentStatus === "Completed" &&
