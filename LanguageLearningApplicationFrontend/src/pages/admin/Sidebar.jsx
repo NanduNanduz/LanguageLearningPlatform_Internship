@@ -55,6 +55,12 @@ const Sidebar = () => {
           </ListItemIcon>
           <ListItemText primary="Transactions" />
         </ListItem>
+        <ListItem button component={Link} to="/send-announcement">
+          <ListItemIcon>
+            <PaymentIcon />
+          </ListItemIcon>
+          <ListItemText primary="Announcement" />
+        </ListItem>
       </List>
     </Drawer>
   );
