@@ -68,7 +68,6 @@ const userSchema = mongoose.Schema(
     mobile: { type: Number },
     profilePicture: { type: String, default: "" },
     qualification: { type: String, default: "" },
-    quizSubmissions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Submission" }],
     lastActive: { type: Date, default: Date.now }, // Tracks user's last activity
     watchHistory: [
       {

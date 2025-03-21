@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -23,6 +23,7 @@ import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 const StudentCoursePage = () => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     const userId = user._id;
+    const navigate = useNavigate();
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
@@ -34,19 +35,35 @@ const StudentCoursePage = () => {
 const [submittedQuiz, setSubmittedQuiz] = useState(null);
 const [quizResults, setQuizResults] = useState(null);
 
-  useEffect(() => {
-    const fetchCourseDetails = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/instructor/courseItems/${courseId}`);
-        setCourse(response.data.course);
-      } catch (error) {
-        console.error("Error fetching course data:", error);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Fetch course details
+      const courseResponse = await axios.get(`http://localhost:3000/instructor/courseItems/${courseId}`);
+      setCourse(courseResponse.data.course);
+
+      // Fetch quiz results
+      const quizResponse = await axios.get(`http://localhost:3000/student/quizResults/${userId}/${courseId}`);
+
+      if (quizResponse.data.success) {
+        setQuizResults(quizResponse.data.quizScores || []);
+      } else {
+        setQuizResults([]);
       }
-    };
-    fetchCourseDetails();
-  }, [courseId]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (courseId && userId) {
+    fetchData();
+  }
+}, [courseId, userId]);
+
+
 
   const fetchQuizzes = async () => {
     try {
@@ -85,6 +102,7 @@ const handleSubmitQuiz = async (quizId) => {
   
       setQuizResults(response.data);
       setSubmittedQuiz(quizId);
+      navigate(`/fullcourse/${courseId}`)
     } catch (error) {
       console.error("Quiz submission failed:", error);
       alert(error.response?.data?.message || "Quiz submission failed.");
@@ -115,6 +133,7 @@ const handleSubmitQuiz = async (quizId) => {
 
   if (loading) return <CircularProgress style={{ display: "block", margin: "auto" }} />;
 
+  
   return (
     <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
       <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
@@ -139,35 +158,56 @@ const handleSubmitQuiz = async (quizId) => {
         </Button>
       </Stack>
 
-      {selectedSection === "quizzes" && quizzes.map((quiz, index) => (
-  <Accordion key={quiz._id || index} sx={{ boxShadow: 2, marginBottom: 2 }}>
-    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-      <Typography variant="h6">Quiz {index + 1}</Typography>
-    </AccordionSummary>
-    <AccordionDetails>
-      {quiz.questions.map((question, qIndex) => (
-        <Card key={qIndex} sx={{ marginBottom: 2, padding: 2 }}>
-          <Typography variant="body1" fontWeight="bold">{qIndex + 1}. {question.questionText}</Typography>
-          <RadioGroup
-            value={selectedAnswers[quiz._id]?.[qIndex] ?? ""}
-            onChange={(e) => handleAnswerChange(quiz._id, qIndex, e.target.value)}
+      {selectedSection === "quizzes" && quizzes.map((quiz, index) => {
+  const quizResult = quizResults?.find(result => result.quizId === quiz._id);
+
+  return (
+    <Accordion key={quiz._id || index} sx={{ boxShadow: 2, marginBottom: 2 }}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography variant="h6">Quiz {index + 1}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {quiz.questions.map((question, qIndex) => (
+          <Card key={qIndex} sx={{ marginBottom: 2, padding: 2 }}>
+            <Typography variant="body1" fontWeight="bold">
+              {qIndex + 1}. {question.questionText}
+            </Typography>
+            <RadioGroup
+              value={selectedAnswers[quiz._id]?.[qIndex] ?? ""}
+              onChange={(e) => handleAnswerChange(quiz._id, qIndex, e.target.value)}
+            >
+              {question.options.map((option, oIndex) => (
+                <FormControlLabel key={oIndex} value={String(oIndex)} control={<Radio />} label={option.text} />
+              ))}
+            </RadioGroup>
+          </Card>
+        ))}
+        
+        {/* Hide submit button if quiz result exists */}
+        {!quizResult && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleSubmitQuiz(quiz._id)}
           >
-            {question.options.map((option, oIndex) => (
-              <FormControlLabel key={oIndex} value={String(oIndex)} control={<Radio />} label={option.text} />
-            ))}
-          </RadioGroup>
-        </Card>
-      ))}
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => handleSubmitQuiz(quiz._id)}
-      >
-        Submit Quiz
-      </Button>
-    </AccordionDetails>
-  </Accordion>
-))}
+            Submit Quiz
+          </Button>
+        )}
+
+        {/* Show quiz result if available */}
+        {quizResult ? (
+          <Typography variant="body1" sx={{ marginTop: 2, textAlign:"center" }}>
+            <strong >Score:</strong> {quizResult.score.toFixed(2)}%
+          </Typography>
+        ) : (
+          <Typography variant="body2" sx={{ marginTop: 2, color: "gray" }}>
+          </Typography>
+        )}
+      </AccordionDetails>
+    </Accordion>
+  );
+})}
+
 
 
       {selectedSection === "resources" && course.resources.map((resource) => (
