@@ -649,3 +649,19 @@ export const submitReview = async (req, res) => {
     res.status(500).json({ error: "Failed to submit review" });
   }
 };
+
+export const getReviewsForCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const reviews = await reviewModel.find({ courseId }).populate(
+      "studentId",
+      "name"
+    );
+
+    res.status(200).json({ reviews });
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+};
