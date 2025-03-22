@@ -72,7 +72,7 @@ const Studenthome = () => {
     "French",
     "German",
     "Portuguese",
-    "Mandarin Chinese",
+    "Chinese",
     "Cantonese",
     "Japanese",
     "Korean",
