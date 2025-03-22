@@ -278,7 +278,7 @@ const handleEnroll = async (courseId) => {
 
       {/* Main Content */}
       <Container
-        sx={{ flexGrow: 1, padding: 3, marginLeft: isMobile ? 0 : "240px" }}
+        sx={{ flexGrow: 1, padding: 3, marginLeft: isMobile ? 0 : "240px", width: isMobile ? "100%" : "calc(100% - 240px)",transition: "margin 0.3s" }}
       >
         <Typography variant="h4" gutterBottom align="center">
           Available Courses
