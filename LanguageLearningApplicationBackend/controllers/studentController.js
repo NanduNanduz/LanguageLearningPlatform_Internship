@@ -538,32 +538,48 @@ export const updateVideoProgress = async (req, res) => {
     const user = await userModel.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found." });
 
-    // Find enrolled course
+    // Find course
+    const course = await courseModel.findById(courseId);
+    if (!course) return res.status(404).json({ message: "Course not found." });
+
+    // Find enrolled course in user document
     const enrolledCourse = user.enrolledCourses.find((c) => c.courseId.toString() === courseId);
     if (!enrolledCourse) return res.status(404).json({ message: "Course not found for user." });
 
-    // Check if the video is already completed
+    // Find the student in the course's studentsEnrolled array
+    let enrolledStudent = course.studentsEnrolled.find((s) => s.studentId.toString() === userId);
+    if (!enrolledStudent) return res.status(404).json({ message: "Student not enrolled in course." });
+
+    // Check if the video is already marked as completed
     if (!enrolledCourse.completedVideos.includes(videoId)) {
       enrolledCourse.completedVideos.push(videoId);
+      enrolledStudent.completedVideos.push(videoId); // Update in course model too
 
       // Fetch total videos in the course
-      const course = await courseModel.findById(courseId);
       const totalVideos = course.videos.length;
 
       // Calculate progress percentage
-      enrolledCourse.progressPercentage = Math.round(
+      const progressPercentage = Math.round(
         (enrolledCourse.completedVideos.length / totalVideos) * 100
       );
 
+      enrolledCourse.progressPercentage = progressPercentage;
+      enrolledStudent.progressPercentage = progressPercentage; // Update in course model too
+
       // If progress reaches 100%, mark course as completed
-      if (enrolledCourse.progressPercentage === 100) {
+      if (progressPercentage === 100) {
         enrolledCourse.completedAt = new Date();
+        enrolledStudent.isCompleted = true;
       }
 
       await user.save();
+      await course.save();
     }
 
-    res.status(200).json({ message: "Progress updated successfully", progress: enrolledCourse.progressPercentage });
+    res.status(200).json({
+      message: "Progress updated successfully",
+      progress: enrolledCourse.progressPercentage,
+    });
 
   } catch (error) {
     console.error("Error updating progress:", error);

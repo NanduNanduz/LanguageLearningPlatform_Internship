@@ -120,7 +120,6 @@ const StudentCoursePage = () => {
         }
       );
 
-      setSubmittedQuiz(quizId);
 
       alert("Quiz submitted successfully");
       window.location.reload();
@@ -158,11 +157,33 @@ const StudentCoursePage = () => {
       );
       alert("Assignment submitted successfully!");
     } catch (error) {
-      console.error("Error uploading assignment:", error);
       alert("Failed to submit assignment. Try again.");
     }
   };
   
+  const handleDownloadCertificate = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/instructor/issueCertificate/${userId}/${courseId}`
+      );
+  
+      if (response.data.success) {
+        const certificateUrl = response.data.certificateUrl;
+        
+        if (certificateUrl) {
+          // ✅ Open the certificate URL in a new tab or download it
+          window.open(certificateUrl, "_blank");
+        } else {
+          alert("Certificate not found. Please try again later.");
+        }
+      } else {
+        alert(response.data.message || "Failed to fetch certificate.");
+      }
+    } catch (error) {
+      console.error("Error downloading certificate:", error);
+      alert("Failed to download certificate. Please try again.");
+    }
+  };
 
 
   if (loading)
@@ -218,10 +239,16 @@ const StudentCoursePage = () => {
           results
         </Button>
         <Button
-          variant={selectedSection === "Discuss" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("Discuss")}
+          variant={selectedSection === "Q&A" ? "contained" : "outlined"}
+          onClick={() => handleSectionChange("Q&A")}
         >
-          Queries
+          Q&A
+        </Button>
+        <Button
+          variant={selectedSection === "review" ? "contained" : "outlined"}
+          onClick={() => handleSectionChange("review")}
+        >
+          Post Review
         </Button>
       </Stack>
 
@@ -414,6 +441,7 @@ const StudentCoursePage = () => {
         <Button
           variant="contained"
           color="primary"
+          onClick={handleDownloadCertificate}
         // ✅ Function to download certificate
         >
           Download Certificate

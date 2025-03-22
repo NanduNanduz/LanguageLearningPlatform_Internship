@@ -223,6 +223,8 @@ const CoursePage = () => {
           Videos
         </Button>
         <Button variant={selectedSection === "students" ? "contained" : "outlined"} onClick={() => handleSectionChange("students")}>Enrolled Students</Button>
+        <Button variant={selectedSection === "Q&A" ? "contained" : "outlined"} onClick={() => handleSectionChange("Q&A")}>Q&A</Button>
+
       </Stack>
 
       {selectedSection === "quizzes" && (

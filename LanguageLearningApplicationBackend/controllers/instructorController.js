@@ -440,6 +440,8 @@ export const generateCertificate = async (userName, courseTitle) => {
 
 
 
+
+
       // Finalize PDF document
       doc.end();
     } catch (error) {
@@ -461,16 +463,27 @@ export const issueCertificate = async (req, res) => {
       return res.status(404).json({ success: false, message: "User or Course not found" });
     }
 
-    // Check if the user has completed the course
-    const student = course.studentsEnrolled.find((s) => s.userId.toString() === userId);
-    if (!student || !student.isCompleted) {
+    // Check if the studentsEnrolled array exists and is an array
+    if (!Array.isArray(course.studentsEnrolled)) {
+      return res.status(400).json({ success: false, message: "No enrolled students found for this course." });
+    }
+
+    // Find the student in the enrolled list
+    const student = course.studentsEnrolled.find((s) => s?.studentId?.toString() === userId);
+
+    if (!student) {
+      return res.status(400).json({ success: false, message: "User is not enrolled in this course" });
+    }
+
+    if (!student.isCompleted) {
       return res.status(400).json({ success: false, message: "Course not yet completed" });
     }
 
-    // Prevent duplicate certificate issuance
-    const existingCertificate = user.certificates.find(
+    // Check if the certificate already exists
+    const existingCertificate = user.certificates?.find(
       (cert) => cert.courseId.toString() === courseId
     );
+
     if (existingCertificate) {
       return res.status(200).json({
         success: true,
@@ -484,6 +497,11 @@ export const issueCertificate = async (req, res) => {
 
     // Store certificate details in the user's document
     user.certificates.push({ courseId, certificateUrl });
+
+    // Ensure completedStudents array exists in the course model
+    if (!Array.isArray(course.completedStudents)) {
+      course.completedStudents = [];
+    }
 
     // Store certificate details in the course's document
     course.completedStudents.push({ userId, certificateUrl });
@@ -503,6 +521,7 @@ export const issueCertificate = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 //Create Quiz
