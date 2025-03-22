@@ -53,15 +53,14 @@ router.put("/editCourse/:id",upload.fields([{name:"thumbnail", maxCount:1}]),edi
 router.delete("/delete-video/:courseId/:videoId", deleteVideoFromCourse); //Delete video inside a course
 
 router.put(
-  "/updateVideo/:courseId/:videoId", // updating title and thumbnail of a video
+  "/updateVideo/:courseId/:videoId", // updating title
   updateVideoInCourse
 );
   
 router.post(                        
   "/video-resources/:courseId",
   upload.fields([
-    { name: "videos", maxCount: 10 }, 
-    { name: "videoThumbnails", maxCount: 10 }, 
+    { name: "videos", maxCount: 10 },  
     { name: "resources", maxCount: 10 } 
   ]),
   addVideosAndResources

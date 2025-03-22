@@ -6,11 +6,18 @@ import Submission from "../models/submissionModel.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import notificationModel from "../models/notificationModel.js";
+import cloudinary from "cloudinary";
 
 dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Configure Cloudinary
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const enrollCourse = async (req, res) => {
   try {
@@ -459,5 +466,66 @@ export const getAllNotifications = async (req, res) => {
   } catch (error) {
     console.error("Error fetching notifications:", error);
     res.status(500).json({ error: "Failed to fetch notifications" });
+  }
+};
+
+
+export const uploadAssignment = async (req, res) => {
+  try {
+      const { studentId, courseId } = req.params;
+      const {title} = req.body;
+
+      // Ensure a file is uploaded
+      if (!req.file) {
+          return res.status(400).json({ message: "Please upload a PDF file." });
+      }
+
+      // Find student
+      const student = await userModel.findById(studentId);
+      if (!student) {
+          return res.status(404).json({ message: "Student not found." });
+      }
+
+      // Check if student is enrolled in the course
+      const enrolledCourse = student.enrolledCourses.find(course => course.courseId.toString() === courseId);
+      if (!enrolledCourse) {
+          return res.status(403).json({ message: "You are not enrolled in this course." });
+      }
+
+      // Upload file to Cloudinary
+      const result = await cloudinary.v2.uploader.upload(req.file.path, {
+          folder: "assignments",
+          resource_type: "raw"
+      });
+
+
+      // Add assignment to student model
+      const newAssignment = {
+          courseId,
+          title,
+          assignmentId: studentId, // Assuming assignmentId refers to the student who submitted
+          fileUrl: result.secure_url, // Cloudinary file URL
+          submittedAt: new Date(),
+          feedback: "" // Instructor can update feedback later
+      };
+      enrolledCourse.assignments.push(newAssignment);
+      await student.save();
+
+      // Add assignment to course model
+      const course = await courseModel.findById(courseId);
+      if (course) {
+          course.studentsEnrolled.forEach(studentData => {
+              if (studentData.studentId.toString() === studentId) {
+                  studentData.assignments.push(newAssignment);
+              }
+          });
+          await course.save();
+      }
+
+      return res.status(201).json({ message: "Assignment uploaded successfully!", fileUrl: result.secure_url });
+
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Server error, please try again." });
   }
 };

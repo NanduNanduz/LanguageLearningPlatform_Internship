@@ -35,7 +35,8 @@ const userSchema = mongoose.Schema(
         ],
         assignments: [
           {
-            courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true }, // Course reference
+            courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
+            title:{type:String, required:true},
             assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Ref to assignment
             fileUrl: { type: String, required: true }, // URL of submitted assignment file
             submittedAt: { type: Date, default: Date.now }, // Submission timestamp

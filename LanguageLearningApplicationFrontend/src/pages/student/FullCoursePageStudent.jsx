@@ -16,6 +16,7 @@ import {
   FormControlLabel,
   Radio,
   TextField,
+  Divider,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
@@ -30,10 +31,12 @@ const StudentCoursePage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState("videos");
   const [assignmentFile, setAssignmentFile] = useState(null);
+  const [assignmentTitle, setAssignmentTitle] = useState("");
   const [submittedAssignments, setSubmittedAssignments] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [submittedQuiz, setSubmittedQuiz] = useState(null);
   const [quizResults, setQuizResults] = useState(null);
+  const [message, setMessage]= useState("")
 
   useEffect(() => {
     const fetchData = async () => {
@@ -124,14 +127,22 @@ const StudentCoursePage = () => {
   };
 
   const handleAssignmentUpload = async () => {
-    if (!assignmentFile) return;
-
+    if (!assignmentFile || !assignmentTitle) {
+      alert("Please select a file and enter an assignment title.");
+      return;
+    }
+  
     const formData = new FormData();
-    formData.append("file", assignmentFile);
+    formData.append("assignment", assignmentFile);  // ✅ File
+    formData.append("title", assignmentTitle);      // ✅ Title
+  
     try {
       await axios.post(
-        `http://localhost:3000/student/upload-assignment/${courseId}`,
-        formData
+        `http://localhost:3000/student/upload/${userId}/${courseId}`,
+        formData, // ✅ Send FormData directly
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
       alert("Assignment submitted successfully!");
     } catch (error) {
@@ -139,6 +150,7 @@ const StudentCoursePage = () => {
       alert("Failed to submit assignment. Try again.");
     }
   };
+  
 
   if (loading)
     return <CircularProgress style={{ display: "block", margin: "auto" }} />;
@@ -274,47 +286,40 @@ const StudentCoursePage = () => {
           </Card>
         ))}
 
-      {selectedSection === "assignments" && (
-        <>
-          <Typography variant="h5" fontWeight="bold">
-            Submit Assignment
-          </Typography>
-          <input
-            type="file"
-            onChange={(e) => setAssignmentFile(e.target.files[0])}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAssignmentUpload}
-            sx={{ marginTop: 2 }}
-          >
-            Submit
-          </Button>
+{selectedSection === "assignments" && (
+  <>
+    {/* Submit Assignment Section */}
+    <Typography variant="h5" fontWeight="bold" gutterBottom>
+      Submit Assignment
+    </Typography>
 
-          <Typography variant="h6" marginTop={3}>
-            Your Submitted Assignments
-          </Typography>
-          {submittedAssignments.length > 0 ? (
-            submittedAssignments.map((assignment, index) => (
-              <Card key={index} sx={{ boxShadow: 2, marginBottom: 2 }}>
-                <CardContent>
-                  <Typography>{assignment.fileName}</Typography>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => window.open(assignment.fileUrl, "_blank")}
-                  >
-                    View Assignment
-                  </Button>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Typography>No assignments submitted yet.</Typography>
-          )}
-        </>
-      )}
+    <TextField
+      label="Assignment Title"
+      variant="outlined"
+      fullWidth
+      value={assignmentTitle}
+      onChange={(e) => setAssignmentTitle(e.target.value)}
+      sx={{ marginBottom: 2 }}
+    />
+
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => setAssignmentFile(e.target.files[0])}
+      style={{ display: "block", marginBottom: "10px" }}
+    />
+
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={handleAssignmentUpload}
+      sx={{ marginTop: 2 }}
+      disabled={!assignmentFile || !assignmentTitle}
+    >
+      Submit Assignment
+    </Button>
+  </>
+)}
 {selectedSection === "results" && (
   <>
     <Typography variant="h5" fontWeight="bold">
@@ -323,13 +328,10 @@ const StudentCoursePage = () => {
 
     {quizResults?.length > 0 ? (
       quizResults.map((result, index) => (
-        <Card key={index} sx={{ boxShadow: 2, marginBottom: 2, padding: 2 }}>
-          <CardContent>
-            <Typography variant="h6" color="green">
+            <Typography variant="h6" color="green" className="text-center">
               Score: {result?.score?.toFixed(2)} %
             </Typography>
-          </CardContent>
-        </Card>
+          
       ))
     ) : (
       <Typography>No quiz results available.</Typography>
