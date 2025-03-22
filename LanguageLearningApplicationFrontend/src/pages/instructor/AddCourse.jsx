@@ -195,7 +195,7 @@ const AddCourse = () => {
               borderRadius: "5px"}}
               fullWidth
               variant="filled"
-              label="Instructor Name"
+              label="Name That Will Be Displayed in the Certficates"
               name="instructorName"
               onChange={handleChange}
               required
