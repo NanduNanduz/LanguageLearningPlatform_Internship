@@ -127,45 +127,6 @@ const StudentDetailsPage = () => {
             <Typography>No assignments submitted yet.</Typography>
           )}
 
-          <Divider sx={{ marginY: 3 }} />
-
-          {/* Social Links */}
-          <Typography variant="h5">Social Links</Typography>
-          <Grid container spacing={2}>
-            <Grid item>
-              <Typography variant="body1">
-                <a
-                  href={student.socialLinks?.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  GitHub
-                </a>
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="body1">
-                <a
-                  href={student.socialLinks?.linkedIn}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  LinkedIn
-                </a>
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="body1">
-                <a
-                  href={student.socialLinks?.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Twitter
-                </a>
-              </Typography>
-            </Grid>
-          </Grid>
         </CardContent>
       </Card>
     </div>
