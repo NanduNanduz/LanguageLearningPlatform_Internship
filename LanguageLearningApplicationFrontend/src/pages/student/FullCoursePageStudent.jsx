@@ -17,6 +17,7 @@ import {
   Radio,
   TextField,
   Divider,
+  Rating,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
@@ -37,6 +38,8 @@ const StudentCoursePage = () => {
   const [message, setMessage]= useState("")
   const [completedVideos, setCompletedVideos] = useState([]);
   const [progressPercentage, setProgressPercentage] = useState(0);
+   const [rating, setRating] = useState(0);
+   const [comment, setComment] = useState("");
 
 
 
@@ -160,6 +163,37 @@ const StudentCoursePage = () => {
       alert("Failed to submit assignment. Try again.");
     }
   };
+
+
+   const handleSubmitReview = async () => {
+     try {
+       const token = sessionStorage.getItem("logintoken");
+       const user = JSON.parse(sessionStorage.getItem("user"));
+       const userId = user._id;
+
+       const response = await axios.post(
+         "http://localhost:3000/student/submit-review",
+         {
+           studentId: userId,
+           courseId: courseId,
+           rating,
+           comment,
+         },
+         {
+           headers: { Authorization: `Bearer ${token}` },
+         }
+       );
+
+       if (response.data.message) {
+         alert("Review submitted successfully!");
+         setRating(0);
+         setComment("");
+       }
+     } catch (error) {
+       console.error("Error submitting review:", error);
+       alert("Failed to submit review. Please try again.");
+     }
+   };
   
   const handleDownloadCertificate = async () => {
     try {
@@ -255,13 +289,10 @@ const StudentCoursePage = () => {
       {selectedSection === "quizzes" &&
         quizzes.map((quiz, index) => {
           return (
-
-            
             <Accordion
               key={quiz._id || index}
               sx={{ boxShadow: 2, marginBottom: 2 }}
             >
-            
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">Quiz</Typography>
               </AccordionSummary>
@@ -288,14 +319,13 @@ const StudentCoursePage = () => {
                     </RadioGroup>
                   </Card>
                 ))}
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleSubmitQuiz(quiz._id)}
-                  >
-                    Submit Quiz
-                  </Button>
-            
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleSubmitQuiz(quiz._id)}
+                >
+                  Submit Quiz
+                </Button>
               </AccordionDetails>
             </Accordion>
           );
@@ -318,140 +348,186 @@ const StudentCoursePage = () => {
           </Card>
         ))}
 
-{selectedSection === "videos" && (
-  <>
-    {/* ✅ Message at the Top */}
-    {progressPercentage === 100 && (
-      <Typography
-        variant="h6"
-        color="primary"
-        fontWeight="bold"
-        textAlign="center"
-        marginBottom={2}
-      >
-        🎉 Congratulations! Go to the Results section to download your certificate.
-      </Typography>
-    )}
+      {selectedSection === "videos" && (
+        <>
+          {/* ✅ Message at the Top */}
+          {progressPercentage === 100 && (
+            <Typography
+              variant="h6"
+              color="primary"
+              fontWeight="bold"
+              textAlign="center"
+              marginBottom={2}
+            >
+              🎉 Congratulations! Go to the Results section to download your
+              certificate.
+            </Typography>
+          )}
 
-    {/* ✅ Video List */}
-    {course.videos.map((video) => {
-      const isCompleted = completedVideos.includes(video._id); // ✅ Check if video is completed
+          {/* ✅ Video List */}
+          {course.videos.map((video) => {
+            const isCompleted = completedVideos.includes(video._id); // ✅ Check if video is completed
 
-      const markVideoAsCompleted = async () => {
-        if (isCompleted) return; // ✅ Avoid duplicate requests
+            const markVideoAsCompleted = async () => {
+              if (isCompleted) return; // ✅ Avoid duplicate requests
 
-        try {
-          await axios.post("http://localhost:3000/student/updateProgress", {
-            userId,
-            courseId,
-            videoId: video._id,
-          });
+              try {
+                await axios.post(
+                  "http://localhost:3000/student/updateProgress",
+                  {
+                    userId,
+                    courseId,
+                    videoId: video._id,
+                  }
+                );
 
-          setCompletedVideos((prev) => [...prev, video._id]); // ✅ Update UI immediately
-        } catch (error) {
-          console.error("Error updating progress:", error);
-        }
-      };
+                setCompletedVideos((prev) => [...prev, video._id]); // ✅ Update UI immediately
+              } catch (error) {
+                console.error("Error updating progress:", error);
+              }
+            };
 
-      return (
-        <Card key={video._id} sx={{ boxShadow: 3, marginBottom: 3 }}>
+            return (
+              <Card key={video._id} sx={{ boxShadow: 3, marginBottom: 3 }}>
+                <CardContent>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Typography variant="h6">{video.videoTitle}</Typography>
+                    {isCompleted && (
+                      <Typography
+                        color="green"
+                        fontWeight="bold"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        ✅ Completed
+                      </Typography>
+                    )}
+                  </Stack>
+
+                  <video
+                    src={video.videoUrl}
+                    controls
+                    style={{ width: "100%", borderRadius: "10px" }}
+                    onEnded={markVideoAsCompleted} // ✅ Mark video as completed when it ends
+                  />
+                </CardContent>
+              </Card>
+            );
+          })}
+        </>
+      )}
+
+      {selectedSection === "assignments" && (
+        <>
+          {/* Submit Assignment Section */}
+          <Typography variant="h5" fontWeight="bold" gutterBottom>
+            Submit Assignment
+          </Typography>
+
+          <TextField
+            label="Assignment Title"
+            variant="outlined"
+            fullWidth
+            value={assignmentTitle}
+            onChange={(e) => setAssignmentTitle(e.target.value)}
+            sx={{ marginBottom: 2 }}
+          />
+
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setAssignmentFile(e.target.files[0])}
+            style={{ display: "block", marginBottom: "10px" }}
+          />
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAssignmentUpload}
+            sx={{ marginTop: 2 }}
+            disabled={!assignmentFile || !assignmentTitle}
+          >
+            Submit Assignment
+          </Button>
+        </>
+      )}
+      {selectedSection === "results" && (
+        <>
+          {/* Quiz Results Section */}
+          <Typography variant="h5" fontWeight="bold" className="text-center">
+            Quiz Results
+          </Typography>
+
+          {quizResults?.length > 0 ? (
+            quizResults.map((result, index) => (
+              <Typography
+                key={index}
+                variant="h6"
+                color="green"
+                className="text-center"
+              >
+                Score: {result?.score?.toFixed(2)} %
+              </Typography>
+            ))
+          ) : (
+            <Typography>No quiz results available.</Typography>
+          )}
+
+          <Divider sx={{ marginY: 2 }} />
+
+          {/* ✅ Certificate Section (Only if progressPercentage === 100) */}
+          {progressPercentage === 100 && (
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                🎉 Certificate of Completion
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleDownloadCertificate}
+                // ✅ Function to download certificate
+              >
+                Download Certificate
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {selectedSection === "review" && (
+        <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
           <CardContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="h6">{video.videoTitle}</Typography>
-              {isCompleted && (
-                <Typography color="green" fontWeight="bold" sx={{ display: "flex", alignItems: "center" }}>
-                  ✅ Completed
-                </Typography>
-              )}
+            <Typography variant="h5" fontWeight="bold">
+              Submit a Review
+            </Typography>
+            <Stack spacing={2} marginTop={2}>
+              <Typography variant="body1">Rating:</Typography>
+              <Rating
+                value={rating}
+                onChange={(event, newValue) => setRating(newValue)}
+              />
+              <TextField
+                label="Comment"
+                multiline
+                rows={4}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                fullWidth
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmitReview}
+              >
+                Submit Review
+              </Button>
             </Stack>
-
-            <video
-              src={video.videoUrl}
-              controls
-              style={{ width: "100%", borderRadius: "10px" }}
-              onEnded={markVideoAsCompleted} // ✅ Mark video as completed when it ends
-            />
           </CardContent>
         </Card>
-      );
-    })}
-  </>
-)}
-
-
-{selectedSection === "assignments" && (
-  <>
-    {/* Submit Assignment Section */}
-    <Typography variant="h5" fontWeight="bold" gutterBottom>
-      Submit Assignment
-    </Typography>
-
-    <TextField
-      label="Assignment Title"
-      variant="outlined"
-      fullWidth
-      value={assignmentTitle}
-      onChange={(e) => setAssignmentTitle(e.target.value)}
-      sx={{ marginBottom: 2 }}
-    />
-
-    <input
-      type="file"
-      accept="application/pdf"
-      onChange={(e) => setAssignmentFile(e.target.files[0])}
-      style={{ display: "block", marginBottom: "10px" }}
-    />
-
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={handleAssignmentUpload}
-      sx={{ marginTop: 2 }}
-      disabled={!assignmentFile || !assignmentTitle}
-    >
-      Submit Assignment
-    </Button>
-  </>
-)}
-{selectedSection === "results" && (
-  <>
-    {/* Quiz Results Section */}
-    <Typography variant="h5" fontWeight="bold" className="text-center">
-      Quiz Results
-    </Typography>
-
-    {quizResults?.length > 0 ? (
-      quizResults.map((result, index) => (
-        <Typography key={index} variant="h6" color="green" className="text-center">
-          Score: {result?.score?.toFixed(2)} %
-        </Typography>
-      ))
-    ) : (
-      <Typography>No quiz results available.</Typography>
-    )}
-
-    <Divider sx={{ marginY: 2 }} />
-
-    {/* ✅ Certificate Section (Only if progressPercentage === 100) */}
-    {progressPercentage === 100 && (
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          🎉 Certificate of Completion
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleDownloadCertificate}
-        // ✅ Function to download certificate
-        >
-          Download Certificate
-        </Button>
-      </div>
-    )}
-  </>
-)}
-
-
+      )}
     </div>
   );
 };
