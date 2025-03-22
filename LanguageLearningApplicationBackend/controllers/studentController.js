@@ -621,7 +621,7 @@ export const getCourseProgress = async (req, res) => {
 // Search courses by category
 export const searchCoursesByCategory = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category } = req.params;
     if (!category) {
       return res.status(400).json({ message: "Category is required" });
     }
@@ -636,13 +636,13 @@ export const searchCoursesByCategory = async (req, res) => {
 // Search courses by name
 export const searchCoursesByName = async (req, res) => {
   try {
-    const { name } = req.query;
+    const { name } = req.params;
     if (!name) {
       return res.status(400).json({ message: "Course name is required" });
     }
     
     const courses = await courseModel.find({ 
-      name: { $regex: name, $options: "i" }, // Case-insensitive search
+      title: { $regex: name, $options: "i" }, // Case-insensitive search
       status: "Approved" 
     });
     res.status(200).json(courses);
