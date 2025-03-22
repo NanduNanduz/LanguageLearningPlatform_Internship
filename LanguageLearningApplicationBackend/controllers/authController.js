@@ -9,34 +9,49 @@ import crypto from "crypto"; // Import crypto for generating OTP
 export const register = async (req, res, next) => {
   const { name, email, password, confirmPassword, role } = req.body;
 
+  // Check for missing fields
+  if (!name) return res.status(400).json({ message: "Name is required." });
+  if (!email) return res.status(400).json({ message: "Email is required." });
+  if (!password) return res.status(400).json({ message: "Password is required." });
+  if (!confirmPassword) return res.status(400).json({ message: "Confirm Password is required." });
+  if (!role) return res.status(400).json({ message: "Role is required." });
+
+  // Password validation regex: Minimum 8 characters, at least 1 uppercase, 1 lowercase, 1 number, and 1 special character
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({ 
+      message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character." 
+    });
+  }
+
   // Check if password and confirmPassword match
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords do not match." });
   }
 
-
-  // Check if the email already exists
-  const existingEmail = await userModel.findOne({ email });
-  if (existingEmail) {
-    return res.status(400).json({ message: "Email already registered." });
-  }
-
   try {
-    // Hash the password using bcrypt (async version)
-    const hash = await bcrypt.hash(password, 5);
+    // Check if the email already exists
+    const existingEmail = await userModel.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Email already registered." });
+    }
 
-    // Create a new user with hashed password
+    // Hash the password
+    const hash = await bcrypt.hash(password, 10);
+
+    // Create a new user
     const newUser = new userModel({
       name,
       email,
       password: hash,
-      role // Store the hashed password
+      role
     });
 
-    // Save the user to the database
+    // Save user to the database
     await newUser.save();
 
-    res.status(201).json({ message: "User has been created" });
+    res.status(201).json({ message: "User has been created successfully" });
   } catch (err) {
     next(err);
   }

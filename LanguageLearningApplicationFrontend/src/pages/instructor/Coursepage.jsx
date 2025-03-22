@@ -16,7 +16,8 @@ import {
   FormControlLabel,
   Radio,
   TextField,
-  IconButton
+  IconButton,
+  Avatar
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
@@ -86,6 +87,9 @@ const CoursePage = () => {
     if (section === "quizzes" && quizzes.length === 0) {
       fetchQuizzes();
     }
+    else if (section === "students" && students.length === 0) {
+      fetchEnrolledStudents();
+    }
   };
 
   const handleDeleteVideo = async (videoId) => {
@@ -128,7 +132,7 @@ const CoursePage = () => {
     try {
       const response = await axios.get(`http://localhost:3000/instructor/enrolled-students/${courseId}`);
       if (response.data.success) {
-        setStudents(response.data.students);
+        setStudents(response.data.enrolledStudents);
       } else {
         throw new Error("No students found.");
       }
@@ -153,6 +157,7 @@ const CoursePage = () => {
       alert("Failed to delete resource. Please try again.");
     }
   };
+
 
 
   if (loading)
@@ -223,7 +228,7 @@ const CoursePage = () => {
       {selectedSection === "quizzes" && (
         <>
           <Typography variant="h5" fontWeight="bold" marginBottom={2}>
-            Quizzes
+            Quiz
           </Typography>
           {quizLoading ? (
             <CircularProgress style={{ display: "block", margin: "auto" }} />
@@ -234,7 +239,7 @@ const CoursePage = () => {
                 sx={{ boxShadow: 2, marginBottom: 2 }}
               >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="h6">Quiz {index + 1}</Typography>
+                  <Typography variant="h6">Quiz</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   {quiz.questions.map((question, qIndex) => (
@@ -337,15 +342,20 @@ const CoursePage = () => {
           </Grid>
         </>
       )}
-       {selectedSection === "students" && (
+        {selectedSection === "students" && (
         <>
           <Typography variant="h5" fontWeight="bold" marginBottom={2}>Enrolled Students</Typography>
           {students.length > 0 ? (
             <Grid container spacing={2}>
               {students.map((student) => (
-                <Grid item xs={12} sm={6} key={student._id}>
-                  <Card sx={{ boxShadow: 2 }}>
-                    <CardContent>
+                <Grid item xs={12} sm={6} key={student.studentId}>
+                  <Card sx={{ boxShadow: 2, display: "flex", alignItems: "center", padding: "10px", cursor:"pointer" }} onClick={() => navigate(`/student-details/${student.studentId}/course/${courseId}`)}>
+                    <Avatar
+                      src={student.profilePicture}
+                      alt={student.name}
+                      sx={{ width: 50, height: 50, marginRight: 2 }}
+                    />
+                    <CardContent sx={{ flexGrow: 1 }}>
                       <Typography variant="h6">{student.name}</Typography>
                       <Typography variant="body2" color="textSecondary">{student.email}</Typography>
                     </CardContent>

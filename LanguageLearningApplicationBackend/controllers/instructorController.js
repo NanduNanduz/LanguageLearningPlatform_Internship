@@ -728,3 +728,39 @@ export const deleteResource = async (req, res) => {
 };
 
 
+export const getEnrolledStudents = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    // Find the course with enrolled students
+    const course = await courseModel.findById(courseId).populate("studentsEnrolled.studentId");
+
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // Fetch additional details from the User model
+    const enrolledStudents = await Promise.all(
+      course.studentsEnrolled.map(async (student) => {
+        const user = await userModel.findById(student.studentId._id).select("name email profilePicture enrolledCourses");
+        return {
+          studentId: user._id,
+          name: user.name,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          enrolledCourses: user.enrolledCourses,
+          completedVideos: student.completedVideos,
+          quizScores: student.quizScores,
+          assignments: student.assignments,
+          progressPercentage: student.progressPercentage,
+          isCompleted: student.isCompleted,
+        };
+      })
+    );
+
+    res.status(200).json({ success: true, enrolledStudents });
+  } catch (error) {
+    console.error("Error fetching enrolled students:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

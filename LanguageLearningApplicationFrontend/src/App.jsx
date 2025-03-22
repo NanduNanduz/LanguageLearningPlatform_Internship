@@ -26,6 +26,7 @@ import PaymentSuccess from "./pages/student/PaymentSuccess";
 import FullCoursePageStudent from "./pages/student/FullCoursePageStudent";
 import SendAnnouncement from "./pages/admin/SendAnnouncement";
 import Notifications from "./pages/student/Notifications";
+import StudentDetailsPage from "./pages/instructor/StudentDetailsPage";
 
 
 
@@ -65,7 +66,8 @@ function App() {
         />
         <Route path="/send-announcement" element={<SendAnnouncement />} />
         <Route path="/notifications" element={<Notifications />} />
-      </Route>
+        <Route path="/student-details/:studentId/course/:courseId" element={<StudentDetailsPage />} />
+        </Route>
     </Routes>
   );
 }

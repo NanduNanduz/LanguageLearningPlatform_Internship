@@ -49,7 +49,7 @@ export const enrollCourse = async (req, res) => {
     // If the course is free, enroll the user immediately
     if (course.price === 0) {
       user.enrolledCourses.push({ courseId });
-      course.studentsEnrolled.push({ userId: studentId });
+      course.studentsEnrolled.push({ studentId });
 
       console.log("Saving user and course...");
       await user.save();
@@ -148,7 +148,7 @@ export const verifyPayment = async (req, res) => {
 
     // Enroll the user
     user.enrolledCourses.push({ courseId });
-    course.studentsEnrolled.push({ userId });
+    course.studentsEnrolled.push({ studentId : userId });
 
     // Save the updated user and course
     await user.save();
@@ -232,7 +232,6 @@ export const submitQuiz = async (req, res) => {
     const { userId, quizId } = req.body;
     let selectedAnswers = req.body.selectedAnswers;
 
-    console.log("Raw selectedAnswers:", selectedAnswers); // Debugging
 
     // ✅ Check if the student has already attempted this quiz
     const existingAttempt = await Submission.findOne({ userId, quizId });
