@@ -40,6 +40,24 @@ const StudentCoursePage = () => {
   const [progressPercentage, setProgressPercentage] = useState(0);
    const [rating, setRating] = useState(0);
    const [comment, setComment] = useState("");
+   const [reviews, setReviews] = useState([]);
+
+   useEffect(() => {
+     const fetchReviews = async () => {
+       try {
+         const response = await axios.get(
+           `http://localhost:3000/student/reviews/${courseId}`
+         );
+         setReviews(response.data.reviews);
+       } catch (error) {
+         console.error("Error fetching reviews:", error);
+       }
+     };
+
+     if (selectedSection === "review") {
+       fetchReviews();
+     }
+   }, [selectedSection, courseId]);
 
 
 
@@ -525,6 +543,30 @@ const StudentCoursePage = () => {
                 Submit Review
               </Button>
             </Stack>
+
+            {/* Display Existing Reviews */}
+            <Typography variant="h5" fontWeight="bold" marginTop={4}>
+              Reviews
+            </Typography>
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <Card
+                  key={review._id}
+                  sx={{ boxShadow: 2, marginBottom: 2, padding: 2 }}
+                >
+                  <CardContent>
+                    <Typography variant="body1">
+                      <strong>Rating:</strong> {review.rating}/5
+                    </Typography>
+                    <Typography variant="body1">
+                      <strong>Comment:</strong> {review.comment}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Typography>No reviews yet.</Typography>
+            )}
           </CardContent>
         </Card>
       )}
