@@ -438,25 +438,6 @@ export const generateCertificate = async (userName, courseTitle) => {
         .fillColor("#555")
         .text("Issued on: " + new Date().toDateString(), 0, 350, { align: "center" });
 
-      // Signature Placeholder
-      doc
-        .moveTo(250, 450)
-        .lineTo(400, 450)
-        .lineWidth(2)
-        .stroke();
-
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(14)
-        .text("Authorized Signature", 250, 460, { align: "center" });
-
-
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(12)
-        .fillColor("#fff")
-        .text("Official Seal", 670, 390, { align: "right" });
-
 
 
       // Finalize PDF document
