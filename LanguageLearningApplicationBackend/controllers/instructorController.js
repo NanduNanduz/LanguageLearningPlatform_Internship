@@ -438,24 +438,7 @@ export const generateCertificate = async (userName, courseTitle) => {
         .fillColor("#555")
         .text("Issued on: " + new Date().toDateString(), 0, 350, { align: "center" });
 
-      // Signature Placeholder
-      doc
-        .moveTo(250, 450)
-        .lineTo(400, 450)
-        .lineWidth(2)
-        .stroke();
 
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(14)
-        .text("Authorized Signature", 250, 460, { align: "center" });
-
-
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(12)
-        .fillColor("#fff")
-        .text("Official Seal", 670, 390, { align: "right" });
 
 
 
@@ -480,16 +463,27 @@ export const issueCertificate = async (req, res) => {
       return res.status(404).json({ success: false, message: "User or Course not found" });
     }
 
-    // Check if the user has completed the course
-    const student = course.studentsEnrolled.find((s) => s.userId.toString() === userId);
-    if (!student || !student.isCompleted) {
+    // Check if the studentsEnrolled array exists and is an array
+    if (!Array.isArray(course.studentsEnrolled)) {
+      return res.status(400).json({ success: false, message: "No enrolled students found for this course." });
+    }
+
+    // Find the student in the enrolled list
+    const student = course.studentsEnrolled.find((s) => s?.studentId?.toString() === userId);
+
+    if (!student) {
+      return res.status(400).json({ success: false, message: "User is not enrolled in this course" });
+    }
+
+    if (!student.isCompleted) {
       return res.status(400).json({ success: false, message: "Course not yet completed" });
     }
 
-    // Prevent duplicate certificate issuance
-    const existingCertificate = user.certificates.find(
+    // Check if the certificate already exists
+    const existingCertificate = user.certificates?.find(
       (cert) => cert.courseId.toString() === courseId
     );
+
     if (existingCertificate) {
       return res.status(200).json({
         success: true,
@@ -503,6 +497,11 @@ export const issueCertificate = async (req, res) => {
 
     // Store certificate details in the user's document
     user.certificates.push({ courseId, certificateUrl });
+
+    // Ensure completedStudents array exists in the course model
+    if (!Array.isArray(course.completedStudents)) {
+      course.completedStudents = [];
+    }
 
     // Store certificate details in the course's document
     course.completedStudents.push({ userId, certificateUrl });
@@ -522,6 +521,7 @@ export const issueCertificate = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 //Create Quiz
@@ -728,3 +728,39 @@ export const deleteResource = async (req, res) => {
 };
 
 
+export const getEnrolledStudents = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    // Find the course with enrolled students
+    const course = await courseModel.findById(courseId).populate("studentsEnrolled.studentId");
+
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    // Fetch additional details from the User model
+    const enrolledStudents = await Promise.all(
+      course.studentsEnrolled.map(async (student) => {
+        const user = await userModel.findById(student.studentId._id).select("name email profilePicture enrolledCourses");
+        return {
+          studentId: user._id,
+          name: user.name,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          enrolledCourses: user.enrolledCourses,
+          completedVideos: student.completedVideos,
+          quizScores: student.quizScores,
+          assignments: student.assignments,
+          progressPercentage: student.progressPercentage,
+          isCompleted: student.isCompleted,
+        };
+      })
+    );
+
+    res.status(200).json({ success: true, enrolledStudents });
+  } catch (error) {
+    console.error("Error fetching enrolled students:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

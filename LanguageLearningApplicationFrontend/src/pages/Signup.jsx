@@ -184,6 +184,7 @@ const Signup = ({ onClose }) => {
             </DialogTitle>
             <DialogContent>
               <TextField
+              required
                 label="Name"
                 name="name"
                 fullWidth
@@ -191,6 +192,7 @@ const Signup = ({ onClose }) => {
                 onChange={handleChange}
               />
               <TextField
+              required
                 label="Email"
                 name="email"
                 type="email"
@@ -199,6 +201,7 @@ const Signup = ({ onClose }) => {
                 onChange={handleChange}
               />
               <TextField
+              required
                 label="Password"
                 name="password"
                 type="password"
@@ -207,6 +210,7 @@ const Signup = ({ onClose }) => {
                 onChange={handleChange}
               />
               <TextField
+              required
                 label="Confirm Password"
                 name="confirmPassword"
                 type="password"

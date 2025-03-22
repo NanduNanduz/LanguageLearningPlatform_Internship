@@ -14,7 +14,8 @@ import {
   editQuizQuestion,
   getQuizzesByCourse,
   getInstuctors,
-  deleteResource
+  deleteResource,
+  getEnrolledStudents
 } from "../controllers/instructorController.js";
 
 import { upload , parseFormData} from "../utils/multer.js";
@@ -52,15 +53,14 @@ router.put("/editCourse/:id",upload.fields([{name:"thumbnail", maxCount:1}]),edi
 router.delete("/delete-video/:courseId/:videoId", deleteVideoFromCourse); //Delete video inside a course
 
 router.put(
-  "/updateVideo/:courseId/:videoId", // updating title and thumbnail of a video
+  "/updateVideo/:courseId/:videoId", // updating title
   updateVideoInCourse
 );
   
 router.post(                        
   "/video-resources/:courseId",
   upload.fields([
-    { name: "videos", maxCount: 10 }, 
-    { name: "videoThumbnails", maxCount: 10 }, 
+    { name: "videos", maxCount: 10 },  
     { name: "resources", maxCount: 10 } 
   ]),
   addVideosAndResources
@@ -80,7 +80,7 @@ router.put("/editQuestion/:quizId/:questionId",parseFormData, editQuizQuestion);
 router.get("/quiz/:courseId", getQuizzesByCourse);
 
 router.delete("/course/:courseId/resource/:resourceId", deleteResource);
-
-
+//getting enrolled students of a course
+router.get("/enrolled-students/:courseId", getEnrolledStudents);
 
 export default router;

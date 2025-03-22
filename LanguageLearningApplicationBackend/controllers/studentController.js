@@ -6,11 +6,18 @@ import Submission from "../models/submissionModel.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import notificationModel from "../models/notificationModel.js";
+import cloudinary from "cloudinary";
 
 dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Configure Cloudinary
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const enrollCourse = async (req, res) => {
   try {
@@ -49,7 +56,7 @@ export const enrollCourse = async (req, res) => {
     // If the course is free, enroll the user immediately
     if (course.price === 0) {
       user.enrolledCourses.push({ courseId });
-      course.studentsEnrolled.push({ userId: studentId });
+      course.studentsEnrolled.push({ studentId });
 
       console.log("Saving user and course...");
       await user.save();
@@ -148,7 +155,7 @@ export const verifyPayment = async (req, res) => {
 
     // Enroll the user
     user.enrolledCourses.push({ courseId });
-    course.studentsEnrolled.push({ userId });
+    course.studentsEnrolled.push({ studentId : userId });
 
     // Save the updated user and course
     await user.save();
@@ -232,7 +239,6 @@ export const submitQuiz = async (req, res) => {
     const { userId, quizId } = req.body;
     let selectedAnswers = req.body.selectedAnswers;
 
-    console.log("Raw selectedAnswers:", selectedAnswers); // Debugging
 
     // ✅ Check if the student has already attempted this quiz
     const existingAttempt = await Submission.findOne({ userId, quizId });
@@ -460,5 +466,154 @@ export const getAllNotifications = async (req, res) => {
   } catch (error) {
     console.error("Error fetching notifications:", error);
     res.status(500).json({ error: "Failed to fetch notifications" });
+  }
+};
+
+
+export const uploadAssignment = async (req, res) => {
+  try {
+      const { studentId, courseId } = req.params;
+      const {title} = req.body;
+
+      // Ensure a file is uploaded
+      if (!req.file) {
+          return res.status(400).json({ message: "Please upload a PDF file." });
+      }
+
+      // Find student
+      const student = await userModel.findById(studentId);
+      if (!student) {
+          return res.status(404).json({ message: "Student not found." });
+      }
+
+      // Check if student is enrolled in the course
+      const enrolledCourse = student.enrolledCourses.find(course => course.courseId.toString() === courseId);
+      if (!enrolledCourse) {
+          return res.status(403).json({ message: "You are not enrolled in this course." });
+      }
+
+      // Upload file to Cloudinary
+      const result = await cloudinary.v2.uploader.upload(req.file.path, {
+          folder: "assignments",
+          resource_type: "raw"
+      });
+
+
+      // Add assignment to student model
+      const newAssignment = {
+          courseId,
+          title,
+          assignmentId: studentId, // Assuming assignmentId refers to the student who submitted
+          fileUrl: result.secure_url, // Cloudinary file URL
+          submittedAt: new Date(),
+          feedback: "" // Instructor can update feedback later
+      };
+      enrolledCourse.assignments.push(newAssignment);
+      await student.save();
+
+      // Add assignment to course model
+      const course = await courseModel.findById(courseId);
+      if (course) {
+          course.studentsEnrolled.forEach(studentData => {
+              if (studentData.studentId.toString() === studentId) {
+                  studentData.assignments.push(newAssignment);
+              }
+          });
+          await course.save();
+      }
+
+      return res.status(201).json({ message: "Assignment uploaded successfully!", fileUrl: result.secure_url });
+
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Server error, please try again." });
+  }
+};
+
+export const updateVideoProgress = async (req, res) => {
+  try {
+    const { userId, courseId, videoId } = req.body;
+
+    // Find user
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    // Find course
+    const course = await courseModel.findById(courseId);
+    if (!course) return res.status(404).json({ message: "Course not found." });
+
+    // Find enrolled course in user document
+    const enrolledCourse = user.enrolledCourses.find((c) => c.courseId.toString() === courseId);
+    if (!enrolledCourse) return res.status(404).json({ message: "Course not found for user." });
+
+    // Find the student in the course's studentsEnrolled array
+    let enrolledStudent = course.studentsEnrolled.find((s) => s.studentId.toString() === userId);
+    if (!enrolledStudent) return res.status(404).json({ message: "Student not enrolled in course." });
+
+    // Check if the video is already marked as completed
+    if (!enrolledCourse.completedVideos.includes(videoId)) {
+      enrolledCourse.completedVideos.push(videoId);
+      enrolledStudent.completedVideos.push(videoId); // Update in course model too
+
+      // Fetch total videos in the course
+      const totalVideos = course.videos.length;
+
+      // Calculate progress percentage
+      const progressPercentage = Math.round(
+        (enrolledCourse.completedVideos.length / totalVideos) * 100
+      );
+
+      enrolledCourse.progressPercentage = progressPercentage;
+      enrolledStudent.progressPercentage = progressPercentage; // Update in course model too
+
+      // If progress reaches 100%, mark course as completed
+      if (progressPercentage === 100) {
+        enrolledCourse.completedAt = new Date();
+        enrolledStudent.isCompleted = true;
+      }
+
+      await user.save();
+      await course.save();
+    }
+
+    res.status(200).json({
+      message: "Progress updated successfully",
+      progress: enrolledCourse.progressPercentage,
+    });
+
+  } catch (error) {
+    console.error("Error updating progress:", error);
+    res.status(500).json({ message: "Server error while updating progress" });
+  }
+};
+
+export const getCourseProgress = async (req, res) => {
+  try {
+    const { userId, courseId } = req.params;
+
+    // Find user and get enrolled courses
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find progress for the specific course
+    const enrolledCourse = user.enrolledCourses.find(
+      (course) => course.courseId.toString() === courseId
+    );
+
+    if (!enrolledCourse) {
+      return res.status(404).json({ message: "Progress not found for this course" });
+    }
+
+    // Send progress data
+    res.status(200).json({
+      completedVideos: enrolledCourse.completedVideos || [],
+      progressPercentage: enrolledCourse.progressPercentage || 0,
+    });
+  } catch (error) {
+    console.error("Error fetching course progress:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

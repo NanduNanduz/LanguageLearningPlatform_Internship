@@ -1,8 +1,8 @@
 import express from "express";
-import { enrollCourse, getAllNotifications, getEnrolledCourses, getStudentDetails, getUserQuizResults, submitQuiz, verifyPayment } from "../controllers/studentController.js";
+import { enrollCourse, getAllNotifications, getCourseProgress, getEnrolledCourses, getStudentDetails, getUserQuizResults, submitQuiz, updateVideoProgress, uploadAssignment, verifyPayment } from "../controllers/studentController.js";
 import {getUserDetails} from "../controllers/studentController.js";
 import { getAllStudents , getQuizByCourse, getApprovedCourses} from "../controllers/studentController.js";
-import { parseFormData } from "../utils/multer.js";
+import {upload, parseFormData } from "../utils/multer.js";
 import { verifyToken } from "../middlewares/jwt.js";
 // import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -21,6 +21,9 @@ router.get("/approved-courses", getApprovedCourses);
 router.get("/verify-payment", verifyPayment);
 router.get("/enrolledCourse/:studentId", getEnrolledCourses);
 router.get("/notifications",verifyToken, getAllNotifications);
+router.post("/upload/:studentId/:courseId", upload.single("assignment") ,uploadAssignment);
+router.post("/updateProgress", updateVideoProgress);
+router.get("/:userId/progress/:courseId", getCourseProgress);
 
 
 

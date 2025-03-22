@@ -122,6 +122,7 @@ const CourseSchema = new mongoose.Schema(
         assignments: [
           {
             studentId : { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+            title:{type:String, required:true},
             assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Ref to assignment
             fileUrl: { type: String, required: true }, // URL of submitted assignment file
             submittedAt: { type: Date, default: Date.now }, // Submission timestamp
