@@ -529,3 +529,75 @@ export const uploadAssignment = async (req, res) => {
       return res.status(500).json({ message: "Server error, please try again." });
   }
 };
+
+export const updateVideoProgress = async (req, res) => {
+  try {
+    const { userId, courseId, videoId } = req.body;
+
+    // Find user
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    // Find enrolled course
+    const enrolledCourse = user.enrolledCourses.find((c) => c.courseId.toString() === courseId);
+    if (!enrolledCourse) return res.status(404).json({ message: "Course not found for user." });
+
+    // Check if the video is already completed
+    if (!enrolledCourse.completedVideos.includes(videoId)) {
+      enrolledCourse.completedVideos.push(videoId);
+
+      // Fetch total videos in the course
+      const course = await courseModel.findById(courseId);
+      const totalVideos = course.videos.length;
+
+      // Calculate progress percentage
+      enrolledCourse.progressPercentage = Math.round(
+        (enrolledCourse.completedVideos.length / totalVideos) * 100
+      );
+
+      // If progress reaches 100%, mark course as completed
+      if (enrolledCourse.progressPercentage === 100) {
+        enrolledCourse.completedAt = new Date();
+      }
+
+      await user.save();
+    }
+
+    res.status(200).json({ message: "Progress updated successfully", progress: enrolledCourse.progressPercentage });
+
+  } catch (error) {
+    console.error("Error updating progress:", error);
+    res.status(500).json({ message: "Server error while updating progress" });
+  }
+};
+
+export const getCourseProgress = async (req, res) => {
+  try {
+    const { userId, courseId } = req.params;
+
+    // Find user and get enrolled courses
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find progress for the specific course
+    const enrolledCourse = user.enrolledCourses.find(
+      (course) => course.courseId.toString() === courseId
+    );
+
+    if (!enrolledCourse) {
+      return res.status(404).json({ message: "Progress not found for this course" });
+    }
+
+    // Send progress data
+    res.status(200).json({
+      completedVideos: enrolledCourse.completedVideos || [],
+      progressPercentage: enrolledCourse.progressPercentage || 0,
+    });
+  } catch (error) {
+    console.error("Error fetching course progress:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

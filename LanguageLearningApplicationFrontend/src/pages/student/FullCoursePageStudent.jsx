@@ -32,11 +32,13 @@ const StudentCoursePage = () => {
   const [selectedSection, setSelectedSection] = useState("videos");
   const [assignmentFile, setAssignmentFile] = useState(null);
   const [assignmentTitle, setAssignmentTitle] = useState("");
-  const [submittedAssignments, setSubmittedAssignments] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [submittedQuiz, setSubmittedQuiz] = useState(null);
   const [quizResults, setQuizResults] = useState(null);
   const [message, setMessage]= useState("")
+  const [completedVideos, setCompletedVideos] = useState([]);
+  const [progressPercentage, setProgressPercentage] = useState(0);
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,28 +48,38 @@ const StudentCoursePage = () => {
           `http://localhost:3000/instructor/courseItems/${courseId}`
         );
         setCourse(courseResponse.data.course);
-
-        // Fetch quizzes
+  
         const quizResponse = await axios.get(
           `http://localhost:3000/instructor/quiz/${courseId}`
         );
         setQuizzes(quizResponse.data.quizzes || []);
-
+  
         const quizResult = await axios.get(
           `http://localhost:3000/student/quizResults/${userId}/${courseId}`
         );
         setQuizResults(quizResult.data.quizScores);
+  
+        // ✅ Fetch Progress (Percentage)
+        const progressResponse = await axios.get(
+          `http://localhost:3000/student/${userId}/progress/${courseId}`
+        );
+  
+        const progressData = progressResponse.data;
+        setCompletedVideos(progressData.completedVideos || []);
+        setProgressPercentage(progressData.progressPercentage || 0);
+  
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     if (courseId && userId) {
       fetchData();
     }
   }, [courseId, userId]);
+  
 
   const fetchQuizzes = async () => {
     try {
@@ -152,6 +164,7 @@ const StudentCoursePage = () => {
   };
   
 
+
   if (loading)
     return <CircularProgress style={{ display: "block", margin: "auto" }} />;
 
@@ -203,6 +216,12 @@ const StudentCoursePage = () => {
           onClick={() => handleSectionChange("results")}
         >
           results
+        </Button>
+        <Button
+          variant={selectedSection === "Discuss" ? "contained" : "outlined"}
+          onClick={() => handleSectionChange("Discuss")}
+        >
+          Queries
         </Button>
       </Stack>
 
@@ -272,19 +291,66 @@ const StudentCoursePage = () => {
           </Card>
         ))}
 
-      {selectedSection === "videos" &&
-        course.videos.map((video) => (
-          <Card key={video._id} sx={{ boxShadow: 3, marginBottom: 3 }}>
-            <CardContent>
+{selectedSection === "videos" && (
+  <>
+    {/* ✅ Message at the Top */}
+    {progressPercentage === 100 && (
+      <Typography
+        variant="h6"
+        color="primary"
+        fontWeight="bold"
+        textAlign="center"
+        marginBottom={2}
+      >
+        🎉 Congratulations! Go to the Results section to download your certificate.
+      </Typography>
+    )}
+
+    {/* ✅ Video List */}
+    {course.videos.map((video) => {
+      const isCompleted = completedVideos.includes(video._id); // ✅ Check if video is completed
+
+      const markVideoAsCompleted = async () => {
+        if (isCompleted) return; // ✅ Avoid duplicate requests
+
+        try {
+          await axios.post("http://localhost:3000/student/updateProgress", {
+            userId,
+            courseId,
+            videoId: video._id,
+          });
+
+          setCompletedVideos((prev) => [...prev, video._id]); // ✅ Update UI immediately
+        } catch (error) {
+          console.error("Error updating progress:", error);
+        }
+      };
+
+      return (
+        <Card key={video._id} sx={{ boxShadow: 3, marginBottom: 3 }}>
+          <CardContent>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Typography variant="h6">{video.videoTitle}</Typography>
-              <video
-                src={video.videoUrl}
-                controls
-                style={{ width: "100%", borderRadius: "10px" }}
-              />
-            </CardContent>
-          </Card>
-        ))}
+              {isCompleted && (
+                <Typography color="green" fontWeight="bold" sx={{ display: "flex", alignItems: "center" }}>
+                  ✅ Completed
+                </Typography>
+              )}
+            </Stack>
+
+            <video
+              src={video.videoUrl}
+              controls
+              style={{ width: "100%", borderRadius: "10px" }}
+              onEnded={markVideoAsCompleted} // ✅ Mark video as completed when it ends
+            />
+          </CardContent>
+        </Card>
+      );
+    })}
+  </>
+)}
+
 
 {selectedSection === "assignments" && (
   <>
@@ -322,22 +388,41 @@ const StudentCoursePage = () => {
 )}
 {selectedSection === "results" && (
   <>
-    <Typography variant="h5" fontWeight="bold">
+    {/* Quiz Results Section */}
+    <Typography variant="h5" fontWeight="bold" className="text-center">
       Quiz Results
     </Typography>
 
     {quizResults?.length > 0 ? (
       quizResults.map((result, index) => (
-            <Typography variant="h6" color="green" className="text-center">
-              Score: {result?.score?.toFixed(2)} %
-            </Typography>
-          
+        <Typography key={index} variant="h6" color="green" className="text-center">
+          Score: {result?.score?.toFixed(2)} %
+        </Typography>
       ))
     ) : (
       <Typography>No quiz results available.</Typography>
     )}
+
+    <Divider sx={{ marginY: 2 }} />
+
+    {/* ✅ Certificate Section (Only if progressPercentage === 100) */}
+    {progressPercentage === 100 && (
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          🎉 Certificate of Completion
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+        // ✅ Function to download certificate
+        >
+          Download Certificate
+        </Button>
+      </div>
+    )}
   </>
 )}
+
 
     </div>
   );
