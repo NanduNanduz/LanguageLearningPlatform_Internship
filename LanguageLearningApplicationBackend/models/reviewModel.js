@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -26,5 +26,6 @@ const reviewSchema = new mongoose.Schema(
   },
   { timestamps: true } // Auto adds createdAt & updatedAt
 );
+
 
 export default mongoose.model("Review", reviewSchema);
