@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-
 import {
   Button,
   Dialog,
@@ -19,17 +18,19 @@ const Signup = ({ onClose }) => {
   const navigate = useNavigate();
   const [openFormModal, setOpenFormModal] = useState(false);
   const [role, setRole] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // Separate error message state
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role:role
+    role: role,
   });
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
-    setFormData(prevData => ({ ...prevData, role: selectedRole }));
+    setFormData((prevData) => ({ ...prevData, role: selectedRole }));
     setOpenFormModal(true);
   };
 
@@ -38,18 +39,27 @@ const Signup = ({ onClose }) => {
   };
 
   const handleSubmit = async () => {
+    // Reset previous error message
+    setErrorMessage("");
+
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setErrorMessage("All fields are required.");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
     try {
-      const response = await axios
-        .post("http://localhost:3000/auth/register", formData)
-        .then((res)=>{
-          alert('Signup Success')
-          navigate('/')
-        }).catch((error)=>{
-          const errorMessage = error.response?.data?.message
-          alert(errorMessage)
-        })
+      await axios.post("http://localhost:3000/auth/register", formData);
+      alert("Signup Success");
+      navigate("/");
     } catch (error) {
-      console.error("There was an error registering!", error); // Handle error response
+      const errorMsg = error.response?.data?.message || "Signup failed. Please try again.";
+      setErrorMessage(errorMsg);
     }
   };
 
@@ -58,7 +68,6 @@ const Signup = ({ onClose }) => {
       {/* Role Selection Dialog */}
       <Dialog open={!openFormModal} onClose={onClose} maxWidth="md" fullWidth>
         <Grid container>
-          {/* Left Side - Motivational Text */}
           <Grid
             item
             xs={5}
@@ -73,32 +82,24 @@ const Signup = ({ onClose }) => {
             }}
           >
             <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Learning is a process ,not an event. Let's Make it Happen
-              Together!
+              Learning is a process, not an event. Let's Make it Happen Together!
             </Typography>
-            <Typography variant="body1">
-              Join us and start your journey today.
-            </Typography>
+            <Typography variant="body1">Join us and start your journey today.</Typography>
           </Grid>
 
-          {/* Right Side - Role Selection */}
           <Grid item xs={7} sx={{ padding: 4 }}>
             <DialogTitle textAlign="center" fontSize={22} fontWeight="bold">
               Join as a Student or Instructor
             </DialogTitle>
             <DialogContent>
               <Box display="flex" justifyContent="center" gap={2} mt={2}>
-                {/* Student Selection */}
                 <Paper
                   onClick={() => handleRoleSelect("student")}
                   sx={{
                     width: 230,
                     padding: 3,
                     cursor: "pointer",
-                    border:
-                      role === "student"
-                        ? "2px solid #FCA311"
-                        : "1px solid #ccc",
+                    border: role === "student" ? "2px solid #FCA311" : "1px solid #ccc",
                     borderRadius: 2,
                     "&:hover": { border: "2px solid #FCA311" },
                   }}
@@ -111,17 +112,13 @@ const Signup = ({ onClose }) => {
                   </Typography>
                 </Paper>
 
-                {/* Instructor Selection */}
                 <Paper
                   onClick={() => handleRoleSelect("instructor")}
                   sx={{
                     width: 230,
                     padding: 3,
                     cursor: "pointer",
-                    border:
-                      role === "instructor"
-                        ? "2px solid #FCA311"
-                        : "1px solid #ccc",
+                    border: role === "instructor" ? "2px solid #FCA311" : "1px solid #ccc",
                     borderRadius: 2,
                     "&:hover": { border: "2px solid #FCA311" },
                   }}
@@ -136,18 +133,16 @@ const Signup = ({ onClose }) => {
               </Box>
             </DialogContent>
             <DialogActions sx={{ justifyContent: "center" }}>
-  <Typography variant="body2" sx={{ cursor: "pointer", color: "rgb(41, 39, 35)" }}>
-    Already have an account?{" "}
-    <span
-      style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-      onClick={() => navigate("/login")}
-    >
-      Login
-    </span>
-  </Typography>
-</DialogActions>
-
-           
+              <Typography variant="body2" sx={{ cursor: "pointer", color: "rgb(41, 39, 35)" }}>
+                Already have an account?{" "}
+                <span
+                  style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </span>
+              </Typography>
+            </DialogActions>
           </Grid>
         </Grid>
       </Dialog>
@@ -155,7 +150,6 @@ const Signup = ({ onClose }) => {
       {/* Signup Form Dialog */}
       <Dialog open={openFormModal} onClose={onClose} maxWidth="md" fullWidth>
         <Grid container>
-          {/* Left Side - Motivational Text */}
           <Grid
             item
             xs={5}
@@ -172,55 +166,28 @@ const Signup = ({ onClose }) => {
             <Typography variant="h4" fontWeight="bold" gutterBottom>
               Welcome {role === "student" ? "Student" : "Instructor"}!
             </Typography>
-            <Typography variant="body1">
-              Fill in your details to continue.
-            </Typography>
+            <Typography variant="body1">Fill in your details to continue.</Typography>
           </Grid>
 
-          {/* Right Side - Form */}
           <Grid item xs={7} sx={{ padding: 4 }}>
             <DialogTitle textAlign="center" fontSize={22} fontWeight="bold">
               {role === "student" ? "Student Signup" : "Instructor Signup"}
             </DialogTitle>
             <DialogContent>
-              <TextField
-              required
-                label="Name"
-                name="name"
-                fullWidth
-                margin="dense"
-                onChange={handleChange}
-              />
-              <TextField
-              required
-                label="Email"
-                name="email"
-                type="email"
-                fullWidth
-                margin="dense"
-                onChange={handleChange}
-              />
-              <TextField
-              required
-                label="Password"
-                name="password"
-                type="password"
-                fullWidth
-                margin="dense"
-                onChange={handleChange}
-              />
-              <TextField
-              required
-                label="Confirm Password"
-                name="confirmPassword"
-                type="password"
-                fullWidth
-                margin="dense"
-                onChange={handleChange}
-              />
+              <TextField required label="Name" name="name" fullWidth margin="dense" onChange={handleChange} />
+              <TextField required label="Email" name="email" type="email" fullWidth margin="dense" onChange={handleChange} />
+              <TextField required label="Password" name="password" type="password" fullWidth margin="dense" onChange={handleChange} />
+              <TextField required label="Confirm Password" name="confirmPassword" type="password" fullWidth margin="dense" onChange={handleChange} />
+
+              {/* Error Message as Separate Text */}
+              {errorMessage && (
+                <Typography color="error" variant="body2" sx={{ mt: 1 , textAlign:"center"}}>
+                  {errorMessage}
+                </Typography>
+              )}
             </DialogContent>
             <DialogActions>
-            <Button onClick={() => navigate("/")}>Cancel</Button>
+              <Button onClick={() => navigate("/")}>Cancel</Button>
               <Button
                 variant="contained"
                 sx={{ backgroundColor: "#FCA311", color: "#14213D" }}
