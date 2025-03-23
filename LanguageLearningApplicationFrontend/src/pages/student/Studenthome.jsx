@@ -256,29 +256,11 @@ const handleEnroll = async (courseId) => {
         </Toolbar>
       </AppBar>
 
-      {/* Sidebar */}
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        sx={{
-          [`& .MuiDrawer-paper`]: {
-            width: 240,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <List>
-          <ListItem>
-            <ListItemText primary={`Welcome, ${student?.name}`} />
-          </ListItem>
-          
-        </List>
-      </Drawer>
+    
 
       {/* Main Content */}
       <Container
-        sx={{ flexGrow: 1, padding: 3, marginLeft: isMobile ? 0 : "240px", width: isMobile ? "100%" : "calc(100% - 240px)",transition: "margin 0.3s" }}
+        sx={{ flexGrow: 1, padding: 3 }}
       >
         <Typography variant="h4" gutterBottom align="center">
           Available Courses

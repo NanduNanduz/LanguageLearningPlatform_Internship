@@ -665,3 +665,36 @@ export const getReviewsForCourse = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch reviews" });
   }
 };
+
+// Search courses by category
+export const searchCoursesByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    if (!category) {
+      return res.status(400).json({ message: "Category is required" });
+    }
+    
+    const courses = await courseModel.find({ category, status: "Approved" });
+    res.status(200).json(courses);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// Search courses by name
+export const searchCoursesByName = async (req, res) => {
+  try {
+    const { name } = req.params;
+    if (!name) {
+      return res.status(400).json({ message: "Course name is required" });
+    }
+    
+    const courses = await courseModel.find({ 
+      title: { $regex: name, $options: "i" }, // Case-insensitive search
+      status: "Approved" 
+    });
+    res.status(200).json(courses);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
