@@ -111,7 +111,7 @@ const InstructorHome = () => {
             <ListItemText primary={`Welcome, ${instructor?.name}`} sx={{ textAlign: "center" }} />
           </ListItem>
           <ListItem button component={Link} to="/addCourse" state={{ instructor }}>
-            <ListItemText primary="Add Course" />
+            <ListItemText primary="Add Course" className="text-center" />
           </ListItem>
         </List>
       </Drawer>
