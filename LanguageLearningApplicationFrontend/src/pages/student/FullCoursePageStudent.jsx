@@ -208,8 +208,8 @@ const StudentCoursePage = () => {
          setComment("");
        }
      } catch (error) {
-       console.error("Error submitting review:", error);
-       alert("Failed to submit review. Please try again.");
+      const errorMessage = error.response?.data?.error
+      alert(errorMessage);
      }
    };
   
