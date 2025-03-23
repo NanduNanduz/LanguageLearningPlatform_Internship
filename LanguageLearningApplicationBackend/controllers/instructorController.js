@@ -357,7 +357,7 @@ export const addVideosAndResources = async (req, res) => {
 
 
 //generating certificate
-export const generateCertificate = async (userName, courseTitle) => {
+export const generateCertificate = async (userName, courseTitle, instructorName) => {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ size: [842, 595], margin: 50 }); // Landscape A4
@@ -396,7 +396,6 @@ export const generateCertificate = async (userName, courseTitle) => {
       doc.moveTo(50, 80).lineTo(792, 80).lineWidth(3).stroke("#003366"); // Top line
       doc.moveTo(50, 515).lineTo(792, 515).lineWidth(3).stroke("#003366"); // Bottom line
 
-
       // Certificate Title
       doc
         .font("Helvetica-Bold")
@@ -431,16 +430,19 @@ export const generateCertificate = async (userName, courseTitle) => {
         .fillColor("#d9534f")
         .text(courseTitle, 0, 300, { align: "center", underline: true });
 
+      // Instructor Name
+      doc
+        .font("Helvetica")
+        .fontSize(16)
+        .fillColor("#333")
+        .text(`Course by: ${instructorName}`, 0, 340, { align: "center" });
+
       // Issue Date
       doc
         .font("Helvetica")
         .fontSize(14)
         .fillColor("#555")
-        .text("Issued on: " + new Date().toDateString(), 0, 350, { align: "center" });
-
-
-
-
+        .text("Issued on: " + new Date().toDateString(), 0, 380, { align: "center" });
 
       // Finalize PDF document
       doc.end();
@@ -449,6 +451,8 @@ export const generateCertificate = async (userName, courseTitle) => {
     }
   });
 };
+
+
 
 //certificate issue
 export const issueCertificate = async (req, res) => {
@@ -493,7 +497,7 @@ export const issueCertificate = async (req, res) => {
     }
 
     // Generate and upload certificate (returns Cloudinary URL)
-    const certificateUrl = await generateCertificate(user.name, course.title);
+    const certificateUrl = await generateCertificate(user.name, course.title, course.instructorName);
 
     // Store certificate details in the user's document
     user.certificates.push({ courseId, certificateUrl });

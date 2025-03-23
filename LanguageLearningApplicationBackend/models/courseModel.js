@@ -46,7 +46,7 @@ const CourseSchema = new mongoose.Schema(
         "French",
         "German",
         "Portuguese",
-        "Mandarin Chinese",
+        "Chinese",
         "Cantonese",
         "Japanese",
         "Korean",

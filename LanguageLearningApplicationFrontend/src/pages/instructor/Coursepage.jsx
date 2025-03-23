@@ -17,7 +17,8 @@ import {
   Radio,
   TextField,
   IconButton,
-  Avatar
+  Avatar,
+  Box
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
@@ -179,53 +180,82 @@ const CoursePage = () => {
     </Typography>
     
     {/* Using Stack to align buttons properly */}
-    <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => navigate(`/addresources/${courseId}`)}
-      >
-        Add Videos & Resources
-      </Button>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={() => navigate(`/addquiz/${courseId}`)}
-      >
-        Add Quiz
-      </Button>
-    </Stack>
+    <Stack 
+  direction={{ xs: "column", sm: "row" }} 
+  spacing={2}
+  sx={{ width: "100%", alignItems: { xs: "stretch", sm: "center" } }} // Ensures full width alignment
+>
+  <Box sx={{ width: "100%" }}> 
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={() => navigate(`/addresources/${courseId}`)}
+      sx={{ width: "100%" }} // Full width on small screens
+    >
+      Add Videos & Resources
+    </Button>
+  </Box>
+  <Box sx={{ width: "100%" }}>
+    <Button
+      variant="contained"
+      color="secondary"
+      onClick={() => navigate(`/addquiz/${courseId}`)}
+      sx={{ width: "100%" }} // Full width on small screens
+    >
+      Add Quiz
+    </Button>
+  </Box>
+</Stack>
+
+
   </CardContent>
 </Card>
 
-      <Stack
-        direction="row"
-        spacing={2}
-        justifyContent="center"
-        marginBottom={3}
-      >
-        <Button
-          variant={selectedSection === "quizzes" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("quizzes")}
-        >
-          Quizzes
-        </Button>
-        <Button
-          variant={selectedSection === "resources" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("resources")}
-        >
-          Resources
-        </Button>
-        <Button
-          variant={selectedSection === "videos" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("videos")}
-        >
-          Videos
-        </Button>
-        <Button variant={selectedSection === "students" ? "contained" : "outlined"} onClick={() => handleSectionChange("students")}>Enrolled Students</Button>
-        <Button variant={selectedSection === "Q&A" ? "contained" : "outlined"} onClick={() => handleSectionChange("Q&A")}>Q&A</Button>
+<Stack
+  direction={{ xs: "column", sm: "row" }} // Column for small screens, row for larger
+  spacing={2}
+  justifyContent="center"
+  alignItems="center"
+  flexWrap="wrap" // Ensures wrapping instead of overflowing
+  marginBottom={3}
+>
+  <Button
+    variant={selectedSection === "quizzes" ? "contained" : "outlined"}
+    onClick={() => handleSectionChange("quizzes")}
+    sx={{ width: { xs: "100%", sm: "auto" } }} // Full width on small screens
+  >
+    Quizzes
+  </Button>
+  <Button
+    variant={selectedSection === "resources" ? "contained" : "outlined"}
+    onClick={() => handleSectionChange("resources")}
+    sx={{ width: { xs: "100%", sm: "auto" } }}
+  >
+    Resources
+  </Button>
+  <Button
+    variant={selectedSection === "videos" ? "contained" : "outlined"}
+    onClick={() => handleSectionChange("videos")}
+    sx={{ width: { xs: "100%", sm: "auto" } }}
+  >
+    Videos
+  </Button>
+  <Button
+    variant={selectedSection === "students" ? "contained" : "outlined"}
+    onClick={() => handleSectionChange("students")}
+    sx={{ width: { xs: "100%", sm: "auto" } }}
+  >
+    Enrolled Students
+  </Button>
+  <Button
+    variant={selectedSection === "Q&A" ? "contained" : "outlined"}
+    onClick={() => handleSectionChange("Q&A")}
+    sx={{ width: { xs: "100%", sm: "auto" } }}
+  >
+    Q&A
+  </Button>
+</Stack>
 
-      </Stack>
 
       {selectedSection === "quizzes" && (
         <>

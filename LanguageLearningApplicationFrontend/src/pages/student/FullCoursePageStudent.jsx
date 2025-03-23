@@ -208,8 +208,8 @@ const StudentCoursePage = () => {
          setComment("");
        }
      } catch (error) {
-       console.error("Error submitting review:", error);
-       alert("Failed to submit review. Please try again.");
+      const errorMessage = error.response?.data?.error
+      alert(errorMessage);
      }
    };
   
@@ -255,54 +255,38 @@ const StudentCoursePage = () => {
       </Card>
 
       <Stack
-        direction="row"
-        spacing={2}
-        justifyContent="center"
-        marginBottom={3}
-      >
-        <Button
-          variant={selectedSection === "quizzes" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("quizzes")}
-        >
-          Quizzes
-        </Button>
-        <Button
-          variant={selectedSection === "resources" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("resources")}
-        >
-          Resources
-        </Button>
-        <Button
-          variant={selectedSection === "videos" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("videos")}
-        >
-          Videos
-        </Button>
-        <Button
-          variant={selectedSection === "assignments" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("assignments")}
-        >
-          Assignments
-        </Button>
-        <Button
-          variant={selectedSection === "results" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("results")}
-        >
-          results
-        </Button>
-        <Button
-          variant={selectedSection === "Q&A" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("Q&A")}
-        >
-          Q&A
-        </Button>
-        <Button
-          variant={selectedSection === "review" ? "contained" : "outlined"}
-          onClick={() => handleSectionChange("review")}
-        >
-          Post Review
-        </Button>
-      </Stack>
+  direction={{ xs: "column", sm: "row" }} // Column layout for small screens, row for larger
+  spacing={1}
+  justifyContent="center"
+  marginBottom={3}
+  alignItems="center"
+  sx={{ width: "100%" }} // Ensures buttons adjust correctly
+>
+  {[
+    { label: "Quizzes", key: "quizzes" },
+    { label: "Resources", key: "resources" },
+    { label: "Videos", key: "videos" },
+    { label: "Assignments", key: "assignments" },
+    { label: "Results", key: "results" },
+    { label: "Q&A", key: "Q&A" },
+    { label: "Post Review", key: "review" },
+  ].map((item) => (
+    <Button
+      key={item.key}
+      variant={selectedSection === item.key ? "contained" : "outlined"}
+      onClick={() => handleSectionChange(item.key)}
+      sx={{
+        fontSize: { xs: "0.75rem", sm: "0.875rem" }, // Reduce font size on small screens
+        padding: { xs: "6px 8px", sm: "8px 16px" }, // Adjust padding
+        width: { xs: "100%", sm: "auto" }, // Full width on small screens
+        whiteSpace: "nowrap", // Prevent text wrapping
+      }}
+    >
+      {item.label}
+    </Button>
+  ))}
+</Stack>
+
 
       {selectedSection === "quizzes" &&
         quizzes.map((quiz, index) => {
@@ -400,6 +384,7 @@ const StudentCoursePage = () => {
                 );
 
                 setCompletedVideos((prev) => [...prev, video._id]); // ✅ Update UI immediately
+                window.location.reload();
               } catch (error) {
                 console.error("Error updating progress:", error);
               }

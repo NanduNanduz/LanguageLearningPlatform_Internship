@@ -1,5 +1,5 @@
 import express from "express";
-import { enrollCourse, getAllNotifications, getCourseProgress, getEnrolledCourses, getReviewsForCourse, getStudentDetails, getUserQuizResults, submitQuiz, submitReview, updateVideoProgress, uploadAssignment, verifyPayment } from "../controllers/studentController.js";
+import { enrollCourse, getAllNotifications, getCourseProgress, getEnrolledCourses, getReviewsForCourse, getStudentDetails, getUserQuizResults, searchCoursesByCategory, searchCoursesByName, submitQuiz, submitReview, updateVideoProgress, uploadAssignment, verifyPayment } from "../controllers/studentController.js";
 import {getUserDetails} from "../controllers/studentController.js";
 import { getAllStudents , getQuizByCourse, getApprovedCourses} from "../controllers/studentController.js";
 import {upload, parseFormData } from "../utils/multer.js";
@@ -26,6 +26,9 @@ router.post("/updateProgress", updateVideoProgress);
 router.get("/:userId/progress/:courseId", getCourseProgress);
 router.post("/submit-review", verifyToken, submitReview);
 router.get("/reviews/:courseId", getReviewsForCourse);
+router.get("/search/category/:category", searchCoursesByCategory);
+router.get("/search/name/:name", searchCoursesByName);
+
 
 
 

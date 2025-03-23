@@ -7,6 +7,10 @@ import {
   Grid,
   IconButton,
   Paper,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import AddIcon from "@mui/icons-material/Add";
@@ -34,6 +38,16 @@ const AddCourse = () => {
   const [videoTitles, setVideoTitles] = useState([""]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const categories = [
+    "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati",
+    "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili", "Santali",
+    "Kashmiri", "Konkani", "Sindhi", "Dogri", "Manipuri", "Bodo", "Sanskrit",
+    "Nepali", "English", "Spanish", "French", "German", "Portuguese", "Chinese",
+    "Cantonese", "Japanese", "Korean", "Russian", "Italian", "Turkish", "Dutch",
+    "Polish", "Greek", "Hebrew", "Arabic", "Persian (Farsi)", "Thai", "Vietnamese",
+    "Malay", "Swedish", "Danish", "Finnish", "Norwegian", "Hungarian", "Czech",
+    "Slovak", "Romanian", "Ukrainian", "Filipino (Tagalog)", "Swahili"
+  ];
 
   const handleChange = (e) => {
     setCourseData({ ...courseData, [e.target.name]: e.target.value });
@@ -175,18 +189,22 @@ const AddCourse = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <TextField
-            sx={{
-              backgroundColor: "white", 
-              borderRadius: "5px"}}
-              fullWidth
-              variant="filled"
-              label="Category"
-              name="category"
-              onChange={handleChange}
-              required
-            />
-          </Grid>
+  <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
+    <InputLabel>Category</InputLabel>
+    <Select
+      name="category"
+      value={courseData.category}
+      onChange={handleChange}
+      required
+    >
+      {categories.map((category, index) => (
+        <MenuItem key={index} value={category}>
+          {category}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+</Grid>
 
           <Grid item xs={12}>
             <TextField
@@ -195,7 +213,7 @@ const AddCourse = () => {
               borderRadius: "5px"}}
               fullWidth
               variant="filled"
-              label="Instructor Name"
+              label="Name That Will Be Displayed in the Certficates"
               name="instructorName"
               onChange={handleChange}
               required
@@ -212,7 +230,7 @@ const AddCourse = () => {
                     sx={{ color: "black" }}
                   >
                     Upload Thumbnail{" "}
-                    <span style={{ color: "rgb(161, 57, 57)" }}>(Required)</span>
+                    <span style={{ color: "rgb(211, 42, 42)" }}>(Required)</span>
             </Button>
 
             </label>

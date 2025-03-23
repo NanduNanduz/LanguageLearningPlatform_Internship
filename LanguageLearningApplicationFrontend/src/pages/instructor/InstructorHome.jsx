@@ -20,11 +20,14 @@ import {
   MenuItem,
   Avatar,
   useMediaQuery,
-  useTheme
+  useTheme,
+  CssBaseline
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
+const drawerWidth = 240; // Sidebar width
 
 const InstructorHome = () => {
   const location = useLocation();
@@ -32,11 +35,10 @@ const InstructorHome = () => {
   const instructor = location.state?.user;
   const [courseDetails, setCourseDetails] = useState([]);
   const [profilePicture, setProfilePicture] = useState(null);
-  const [error, setError] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -88,29 +90,8 @@ const InstructorHome = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* Top Bar */}
-      <AppBar position="static">
-        <Toolbar>
-          {isMobile && (
-            <IconButton color="inherit" edge="start" onClick={() => setMobileOpen(!mobileOpen)}>
-              <MenuIcon />
-            </IconButton>
-          )}
-          <Typography variant="h6" sx={{ flexGrow: 1, textAlign: isMobile ? "center" : "left" }}>
-            Instructor Dashboard
-          </Typography>
-          <IconButton color="inherit" onClick={handleProfileClick}>
-            <Avatar src={profilePicture || ""} alt="Profile">
-              {!profilePicture && <AccountCircleIcon />}
-            </Avatar>
-          </IconButton>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-            <MenuItem onClick={goToProfile}>Profile</MenuItem>
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      <CssBaseline />
 
       {/* Sidebar */}
       <Drawer
@@ -119,57 +100,110 @@ const InstructorHome = () => {
         onClose={() => setMobileOpen(false)}
         sx={{
           [`& .MuiDrawer-paper`]: {
-            width: 240,
+            width: drawerWidth,
             boxSizing: "border-box",
+            backgroundColor: "#f5f5f5",
           },
         }}
       >
         <List>
           <ListItem>
-            <ListItemText primary={`Welcome, ${instructor?.name}`} />
+            <ListItemText primary={`Welcome, ${instructor?.name}`} sx={{ textAlign: "center" }} />
           </ListItem>
           <ListItem button component={Link} to="/addCourse" state={{ instructor }}>
-            <ListItemText primary="Add Course" />
+            <ListItemText primary="Add Course" className="text-center" />
           </ListItem>
-          
         </List>
       </Drawer>
 
       {/* Main Content */}
-      <Container sx={{ flexGrow: 1, padding: 3, marginLeft: isMobile ? 0 : "240px" }}>
-        <Typography variant="h4" gutterBottom align="center">
-          Your Courses
-        </Typography>
-        <Grid container spacing={3} justifyContent="center">
-          {courseDetails.length > 0 ? (
-            courseDetails.map((course) => (
-              <Grid item key={course._id} xs={12} sm={6} md={4}>
-                <Card sx={{ minWidth: 250 }}>
-                  <CardContent>
-                    <Typography variant="h6">{course.title}</Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size="small" variant="contained" color="primary" component={Link} to={`/coursePage/${course._id}`}>
-                      View
-                    </Button>
-                    <Button size="small" variant="contained" color="secondary" onClick={() => handleUpdate(course._id)}>
-                      Update
-                    </Button>
-                    <Button size="small" variant="contained" color="error" onClick={() => handleDelete(course._id)}>
-                      Delete
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))
-          ) : (
-            <Typography color="textSecondary" align="center">
-              No courses found.
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          transition: "margin 0.3s",
+          marginLeft: isMobile ? 0 : `${drawerWidth}px`, // Push content if sidebar is visible
+          width: isMobile ? "100%" : `calc(100% - ${drawerWidth}px)`, // Adjust width
+        }}
+      >
+        {/* Top Bar */}
+        <AppBar position="static">
+          <Toolbar>
+            {isMobile && (
+              <IconButton color="inherit" edge="start" onClick={() => setMobileOpen(!mobileOpen)}>
+                <MenuIcon />
+              </IconButton>
+            )}
+            <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "left" }}>
+              Instructor Dashboard
             </Typography>
-          )}
-        </Grid>
-        {error && <Typography color="error" align="center" marginTop={2}>{error}</Typography>}
-      </Container>
+            <IconButton color="inherit" onClick={handleProfileClick}>
+              <Avatar src={profilePicture || ""} alt="Profile">
+                {!profilePicture && <AccountCircleIcon />}
+              </Avatar>
+            </IconButton>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+              <MenuItem onClick={goToProfile}>Profile</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
+          </Toolbar>
+        </AppBar>
+
+        {/* Course Section */}
+        <Container
+          sx={{
+            flexGrow: 1,
+            padding: 3,
+            maxWidth: isMobile ? "100%" : "85%",
+            margin: "auto",
+          }}
+        >
+          <Typography variant="h4" gutterBottom align="center">
+            Your Courses
+          </Typography>
+
+          <Grid container spacing={4} justifyContent="center">
+            {courseDetails.length > 0 ? (
+              courseDetails.map((course) => (
+                <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
+                  <Card
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      height: "100%",
+                      padding: 1,
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                        {course.title}
+                      </Typography>
+                    </CardContent>
+                    <CardActions sx={{ justifyContent: "center" }}>
+                      <Button size="small" variant="contained" color="primary" component={Link} to={`/coursePage/${course._id}`}>
+                        View
+                      </Button>
+                      <Button size="small" variant="contained" color="secondary" onClick={() => handleUpdate(course._id)}>
+                        Update
+                      </Button>
+                      <Button size="small" variant="contained" color="error" onClick={() => handleDelete(course._id)}>
+                        Delete
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))
+            ) : (
+              <Typography color="textSecondary" align="center">
+                No courses found.
+              </Typography>
+            )}
+          </Grid>
+        </Container>
+      </Box>
     </Box>
   );
 };

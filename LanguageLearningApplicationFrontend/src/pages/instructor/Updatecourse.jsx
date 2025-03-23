@@ -9,6 +9,10 @@ import {
   Input,
   Card,
   CardMedia,
+  Select,
+  FormControl,
+  InputLabel,
+  MenuItem
 } from "@mui/material";
 
 const UpdateCourse = () => {
@@ -23,6 +27,17 @@ const UpdateCourse = () => {
     category: "",
     thumbnail: "",
   });
+
+  const categories = [
+    "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati",
+    "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili", "Santali",
+    "Kashmiri", "Konkani", "Sindhi", "Dogri", "Manipuri", "Bodo", "Sanskrit",
+    "Nepali", "English", "Spanish", "French", "German", "Portuguese", "Chinese",
+    "Cantonese", "Japanese", "Korean", "Russian", "Italian", "Turkish", "Dutch",
+    "Polish", "Greek", "Hebrew", "Arabic", "Persian (Farsi)", "Thai", "Vietnamese",
+    "Malay", "Swedish", "Danish", "Finnish", "Norwegian", "Hungarian", "Czech",
+    "Slovak", "Romanian", "Ukrainian", "Filipino (Tagalog)", "Swahili"
+  ];
 
   const [thumbnailFile, setThumbnailFile] = useState(null);
 
@@ -146,15 +161,21 @@ const UpdateCourse = () => {
             </Grid>
 
             <Grid item xs={6}>
-              <TextField
-                label="Category"
-                name="category"
-                value={courseDetails.category}
-                onChange={handleChange}
-                fullWidth
-                required
-                InputProps={{ style: { backgroundColor: "white" } }}
-              />
+              <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    name="category"
+                    value={courseDetails.category}
+                    onChange={handleChange}
+                    required
+                  >
+                    {categories.map((category, index) => (
+                      <MenuItem key={index} value={category}>
+                        {category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
             </Grid>
 
             <Grid item xs={12}>
