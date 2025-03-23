@@ -1,5 +1,6 @@
 import courseModel from "../models/courseModel.js";
 import userModel from "../models/userModel.js";
+import reviewModel from "../models/reviewModel.js"
 import paymentModel from "../models/paymentModel.js";
 import Quiz from "../models/quizModel.js";
 import Submission from "../models/submissionModel.js";  
@@ -618,35 +619,49 @@ export const getCourseProgress = async (req, res) => {
   }
 };
 
-// Search courses by category
-export const searchCoursesByCategory = async (req, res) => {
+export const submitReview = async (req, res) => {
   try {
-    const { category } = req.params;
-    if (!category) {
-      return res.status(400).json({ message: "Category is required" });
+    const { studentId, courseId, rating, comment } = req.body;
+
+    // Check if the student has already submitted a review for this course
+    const existingReview = await reviewModel.findOne({ studentId, courseId });
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({
+          error: "You have already submitted a review for this course.",
+        });
     }
-    
-    const courses = await courseModel.find({ category, status: "Approved" });
-    res.status(200).json(courses);
+
+    // Create a new review
+    const review = new reviewModel({
+      studentId,
+      courseId,
+      rating,
+      comment,
+    });
+
+    await review.save();
+
+    res.status(201).json({ message: "Review submitted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error submitting review:", error);
+    res.status(500).json({ error: "Failed to submit review" });
   }
 };
 
-// Search courses by name
-export const searchCoursesByName = async (req, res) => {
+export const getReviewsForCourse = async (req, res) => {
   try {
-    const { name } = req.params;
-    if (!name) {
-      return res.status(400).json({ message: "Course name is required" });
-    }
-    
-    const courses = await courseModel.find({ 
-      title: { $regex: name, $options: "i" }, // Case-insensitive search
-      status: "Approved" 
-    });
-    res.status(200).json(courses);
+    const { courseId } = req.params;
+
+    const reviews = await reviewModel.find({ courseId }).populate(
+      "studentId",
+      "name"
+    );
+
+    res.status(200).json({ reviews });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ error: "Failed to fetch reviews" });
   }
 };
