@@ -384,6 +384,7 @@ const StudentCoursePage = () => {
                 );
 
                 setCompletedVideos((prev) => [...prev, video._id]); // ✅ Update UI immediately
+                window.location.reload();
               } catch (error) {
                 console.error("Error updating progress:", error);
               }
