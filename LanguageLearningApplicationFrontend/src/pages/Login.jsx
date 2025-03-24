@@ -27,6 +27,7 @@ const Login = ({onClose}) => {
   const [resetOpen, setResetOpen] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [message,setMessage] = useState("")
+  const [message2,setMessage2]= useState("")
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -108,7 +109,7 @@ const Login = ({onClose}) => {
       setOtpOpen(true);
       } catch (error) {
         const errorMessage = error.response?.data?.message
-        setMessage(errorMessage)
+        setMessage2(errorMessage)
         }
   };
 
@@ -270,7 +271,9 @@ const Login = ({onClose}) => {
             >
               Enter your registered email to reset your password.
             </Typography>
-
+            {message2 && (
+            <div className="message text-center text-danger">{message2}</div>
+          )}
             <DialogContent sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               <TextField
                 label="Email Address"
@@ -290,7 +293,6 @@ const Login = ({onClose}) => {
                 }}
               />
             </DialogContent>
-                
             <DialogActions sx={{ justifyContent: "center", pb: 3, flexDirection: "column", width: "100%" }}>
               <Button
                 variant="contained"
