@@ -1,0 +1,253 @@
+
+.featured {
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    background-color:#205781;
+    color: white;
+    
+    .container {
+        width: 1300px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+
+        .left {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            max-width: 600px;
+
+            h1 {
+                font-size: 50px;
+                font-weight: 300;
+                line-height: 1.2;
+            }
+
+            .search {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background-color: white;
+                border-radius: 5px;
+                padding: 5px;
+                width: 100%;
+                max-width: 500px;
+
+                .searchInput {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex: 1;
+
+                    img {
+                        width: 20px;
+                        height: 20px;
+                        margin-left: 10px;
+                    }
+
+                    input {
+                        border: none;
+                        outline: none;
+                        width: 100%;
+                        font-size: 16px;
+                        padding: 10px;
+                    }
+                }
+
+                button {
+                    width: 90px;
+                    height: 50px;
+                    border: none;
+                    background-color: #205781;
+                    color: white;
+                    font-size: 16px;
+                    cursor: pointer;
+                    transition: 0.3s;
+
+                    &:hover {
+                        background-color: #4F959D;
+                    }
+                }
+            }
+
+            .popular {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 20px;
+                
+
+                span {
+                    font-family: "Montserrat", sans-serif;
+                }
+
+                button {
+                    color: white;
+                    background-color: transparent;
+                    border: 1px solid white;
+                    padding: 15px 20px;
+                    border-radius: 20px;
+                    font-size: 19px;
+                    cursor: pointer;
+                    font-family: "Montserrat", sans-serif;
+                    transition: 0.3s;
+
+                    &:hover {
+                        background-color: white;
+                        color: rgb(0, 41, 0);
+                    }
+                }
+            }
+        }
+
+        .right {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+
+            img {
+                height: 100%;
+                max-width: 500px;
+                object-fit: contain;
+            }
+        }
+    }
+
+    // Tablet
+    @media (max-width: 1024px) {
+        height: auto;
+        padding: 50px 0;
+        
+        .container {
+            width: 90%;
+            flex-direction: column;
+            text-align: center;
+            align-items: center;
+
+            .left {
+                h1 {
+                    font-size: 40px;
+                }
+
+                .search {
+                    flex-direction: column;
+                    width: 100%;
+
+                    .searchInput {
+                        justify-content: center;
+                    }
+
+                    button {
+                        width: 100%;
+                        margin-top: 10px;
+                    }
+                }
+
+                .popular {
+                    justify-content: center;
+                }
+            }
+
+            .right {
+                margin-top: 20px;
+
+                img {
+                    max-width: 400px;
+                }
+            }
+        }
+    }
+
+    // Mobile
+    @media (max-width: 768px) {
+        .container {
+            .left {
+                h1 {
+                    font-size: 32px;
+                }
+
+                .search {
+                    padding: 8px;
+
+                    .searchInput {
+                        img {
+                            width: 16px;
+                            height: 16px;
+                        }
+
+                        input {
+                            font-size: 14px;
+                        }
+                    }
+
+                    button {
+                        height: 45px;
+                        font-size: 14px;
+                    }
+                }
+
+                .popular {
+                    flex-wrap: wrap;
+                    gap: 8px;
+
+                    button {
+                        font-size: 12px;
+                        padding: 4px 8px;
+                    }
+                }
+            }
+
+            .right {
+                img {
+                    max-width: 300px;
+                }
+            }
+        }
+    }
+
+    // Small Mobile
+    @media (max-width: 480px) {
+        .container {
+            .left {
+                h1 {
+                    font-size: 26px;
+                }
+
+                .search {
+                    .searchInput {
+                        img {
+                            width: 14px;
+                            height: 14px;
+                        }
+
+                        input {
+                            font-size: 12px;
+                        }
+                    }
+
+                    button {
+                        height: 40px;
+                        font-size: 12px;
+                    }
+                }
+
+                .popular {
+                    gap: 5px;
+
+                    button {
+                        font-size: 10px;
+                        padding: 3px 6px;
+                    }
+                }
+            }
+
+            .right {
+                img {
+                    max-width: 250px;
+                }
+            }
+        }
+    }
+}

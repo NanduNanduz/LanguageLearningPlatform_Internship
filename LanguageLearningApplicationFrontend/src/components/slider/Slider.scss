@@ -1,0 +1,80 @@
+
+
+.slide {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0px;
+  
+    .container {
+      width: 100%;
+      max-width: 1300px;
+      position: relative;
+      overflow: hidden;
+    }
+  
+    .swiper {
+      padding-bottom: 40px; // Space for pagination dots
+    }
+  
+    .swiper-slide {
+      display: flex;
+      justify-content: center;
+    }
+  
+    /* Custom Navigation Buttons */
+    .custom-prev,
+    .custom-next {
+      width: 50px;
+      height: 50px;
+      background-color: rgba(243, 243, 243, 0.9);
+      border-radius: 50%;
+      border: none;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.3s;
+  
+      &:hover {
+        background-color: rgba(200, 200, 200, 0.9);
+      }
+    }
+  
+    .custom-prev {
+      left: 0px;
+    }
+  
+    .custom-next {
+      right: 0px;
+    }
+  
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .custom-prev {
+        left: -20px;
+      }
+      .custom-next {
+        right: -20px;
+      }
+    }
+  
+    @media (max-width: 768px) {
+      padding: 50px 0px;
+      .custom-prev,
+      .custom-next {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+    }
+  
+    @media (max-width: 640px) {
+      .custom-prev,
+      .custom-next {
+        display: none; // Hide navigation buttons on very small screens
+      }
+    }
+  }
+  
