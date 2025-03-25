@@ -126,7 +126,7 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
           <Link className="link" to="/courses">
             Courses
           </Link>
-          <Link className="link" to="/terms-of-service">
+          <Link className="link" to="/contactus">
             Contact Us
           </Link>
 
