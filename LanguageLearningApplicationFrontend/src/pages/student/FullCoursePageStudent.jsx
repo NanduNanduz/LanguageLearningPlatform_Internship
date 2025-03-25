@@ -210,6 +210,7 @@ const StudentCoursePage = () => {
 
        if (response.data.message) {
          alert("Review submitted successfully!");
+         window.location.reload();
          setRating(0);
          setComment("");
        }
