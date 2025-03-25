@@ -42,6 +42,15 @@ const CoursePage = () => {
   const [newVideoTitle, setNewVideoTitle] = useState("");
   const [students, setStudents] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+const [editFormData, setEditFormData] = useState({
+  questionText: '',
+  option1: '',
+  option2: '',
+  option3: '',
+  option4: '',
+  correctAnswer: ''
+});
 
   const navigate = useNavigate();
 
@@ -178,6 +187,80 @@ const CoursePage = () => {
     }
   };
 
+  const handleEditQuestion = (question) => {
+    setEditingQuestion(question._id);
+    setEditFormData({
+      questionText: question.questionText,
+      option1: question.options[0].text,
+      option2: question.options[1].text,
+      option3: question.options[2].text,
+      option4: question.options[3].text,
+      correctAnswer: question.correctAnswerIndex.toString()
+    });
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCancelEdit = () => {
+    setEditingQuestion(null);
+    setEditFormData({
+      questionText: '',
+      option1: '',
+      option2: '',
+      option3: '',
+      option4: '',
+      correctAnswer: ''
+    });
+  };
+
+  const handleUpdateQuestion = async (quizId, questionId) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/instructor/editQuestion/${quizId}/${questionId}`,
+        editFormData
+      );
+  
+      if (response.data.success) {
+        // Update the quizzes state with the edited question
+        setQuizzes(prevQuizzes => 
+          prevQuizzes.map(quiz => {
+            if (quiz._id === quizId) {
+              return {
+                ...quiz,
+                questions: quiz.questions.map(question => {
+                  if (question._id === questionId) {
+                    return {
+                      ...question,
+                      questionText: editFormData.questionText,
+                      options: [
+                        { text: editFormData.option1 },
+                        { text: editFormData.option2 },
+                        { text: editFormData.option3 },
+                        { text: editFormData.option4 }
+                      ],
+                      correctAnswerIndex: parseInt(editFormData.correctAnswer)
+                    };
+                  }
+                  return question;
+                })
+              };
+            }
+            return quiz;
+          })
+        );
+        setEditingQuestion(null);
+      }
+    } catch (error) {
+      console.error("Error updating question:", error);
+    }
+  };
+
   if (loading)
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
@@ -295,85 +378,161 @@ const CoursePage = () => {
         padding: 3
       }}>
         {selectedSection === "quizzes" && (
-          <>
-            <Typography variant="h5" fontWeight="bold" marginBottom={3} sx={{ color: '#2c3e50' }}>
-              Course Quizzes
+  <>
+    <Typography variant="h5" fontWeight="bold" marginBottom={3} sx={{ color: '#2c3e50' }}>
+      Course Quizzes
+    </Typography>
+    {quizLoading ? (
+      <Box display="flex" justifyContent="center" py={4}>
+        <CircularProgress size={50} />
+      </Box>
+    ) : quizzes.length > 0 ? (
+      quizzes.map((quiz, index) => (
+        <Accordion
+          key={quiz._id || index}
+          sx={{ 
+            boxShadow: 2, 
+            marginBottom: 2,
+            '&:before': {
+              display: 'none'
+            }
+          }}
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMoreIcon />}
+            sx={{
+              backgroundColor: '#f8f9fa',
+              borderRadius: 1
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Quiz {index + 1}
             </Typography>
-            {quizLoading ? (
-              <Box display="flex" justifyContent="center" py={4}>
-                <CircularProgress size={50} />
-              </Box>
-            ) : quizzes.length > 0 ? (
-              quizzes.map((quiz, index) => (
-                <Accordion
-                  key={quiz._id || index}
-                  sx={{ 
-                    boxShadow: 2, 
-                    marginBottom: 2,
-                    '&:before': {
-                      display: 'none'
-                    }
-                  }}
-                >
-                  <AccordionSummary 
-                    expandIcon={<ExpandMoreIcon />}
-                    sx={{
-                      backgroundColor: '#f8f9fa',
-                      borderRadius: 1
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                      Quiz {index + 1}
+          </AccordionSummary>
+          <AccordionDetails>
+            {quiz.questions.map((question, qIndex) => (
+              <Card
+                key={question._id || qIndex}
+                sx={{ 
+                  marginBottom: 3, 
+                  padding: 2,
+                  borderLeft: '4px solid #3f51b5'
+                }}
+              >
+                {editingQuestion === question._id ? (
+                  <Box>
+                    <TextField
+                      fullWidth
+                      label="Question Text"
+                      name="questionText"
+                      value={editFormData.questionText}
+                      onChange={handleEditFormChange}
+                      sx={{ mb: 2 }}
+                    />
+                    <Grid container spacing={2}>
+                      {['option1', 'option2', 'option3', 'option4'].map((option, idx) => (
+                        <Grid item xs={12} sm={6} key={option}>
+                          <TextField
+                            fullWidth
+                            label={`Option ${idx + 1}`}
+                            name={option}
+                            value={editFormData[option]}
+                            onChange={handleEditFormChange}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                    <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
+                      Correct Answer:
                     </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {quiz.questions.map((question, qIndex) => (
-                      <Card
-                        key={question._id || qIndex}
-                        sx={{ 
-                          marginBottom: 3, 
-                          padding: 2,
-                          borderLeft: '4px solid #3f51b5'
+                    <RadioGroup
+                      name="correctAnswer"
+                      value={editFormData.correctAnswer}
+                      onChange={handleEditFormChange}
+                      row
+                    >
+                      {[0, 1, 2, 3].map((value) => (
+                        <FormControlLabel
+                          key={value}
+                          value={value.toString()}
+                          control={<Radio />}
+                          label={`Option ${value + 1}`}
+                        />
+                      ))}
+                    </RadioGroup>
+                    <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleUpdateQuestion(quiz._id, question._id)}
+                      >
+                        Save Changes
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={handleCancelEdit}
+                      >
+                        Cancel
+                      </Button>
+                    </Stack>
+                  </Box>
+                ) : (
+                  <>
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography variant="body1" fontWeight="bold" gutterBottom>
+                        {qIndex + 1}. {question.questionText}
+                      </Typography>
+                      <IconButton
+                        onClick={() => handleEditQuestion(question)}
+                        sx={{
+                          backgroundColor: 'primary.light',
+                          '&:hover': {
+                            backgroundColor: 'primary.main',
+                            color: 'white'
+                          }
                         }}
                       >
-                        <Typography variant="body1" fontWeight="bold" gutterBottom>
-                          {qIndex + 1}. {question.questionText}
-                        </Typography>
-                        <RadioGroup sx={{ marginY: 1 }}>
-                          {question.options.map((option, oIndex) => (
-                            <FormControlLabel
-                              key={option._id || oIndex}
-                              value={option.text}
-                              control={<Radio color="primary" />}
-                              label={option.text}
-                              sx={{ marginY: 0.5 }}
-                            />
-                          ))}
-                        </RadioGroup>
-                        <Box sx={{
-                          backgroundColor: '#e8f5e9',
-                          padding: 1.5,
-                          borderRadius: 1,
-                          marginTop: 1.5
-                        }}>
-                          <Typography fontWeight="bold" color="success.dark">
-                            Correct Answer: {question.options[question.correctAnswerIndex].text}
-                          </Typography>
-                        </Box>
-                      </Card>
-                    ))}
-                  </AccordionDetails>
-                </Accordion>
-              ))
-            ) : (
-              <Box textAlign="center" py={4}>
-                <Typography variant="h6" color="textSecondary">
-                  No quizzes available for this course
-                </Typography>
-              </Box>
-            )}
-          </>
-        )}
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    <RadioGroup sx={{ marginY: 1 }}>
+                      {question.options.map((option, oIndex) => (
+                        <FormControlLabel
+                          key={option._id || oIndex}
+                          value={option.text}
+                          control={<Radio color="primary" />}
+                          label={option.text}
+                          sx={{ marginY: 0.5 }}
+                        />
+                      ))}
+                    </RadioGroup>
+                    <Box sx={{
+                      backgroundColor: '#e8f5e9',
+                      padding: 1.5,
+                      borderRadius: 1,
+                      marginTop: 1.5
+                    }}>
+                      <Typography fontWeight="bold" color="success.dark">
+                        Correct Answer: {question.options[question.correctAnswerIndex].text}
+                      </Typography>
+                    </Box>
+                  </>
+                )}
+              </Card>
+            ))}
+          </AccordionDetails>
+        </Accordion>
+      ))
+    ) : (
+      <Box textAlign="center" py={4}>
+        <Typography variant="h6" color="textSecondary">
+          No quizzes available for this course
+        </Typography>
+      </Box>
+    )}
+  </>
+)}
 
         {selectedSection === "resources" && (
           <>
