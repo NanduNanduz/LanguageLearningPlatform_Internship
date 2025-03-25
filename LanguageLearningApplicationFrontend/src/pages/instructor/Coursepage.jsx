@@ -21,7 +21,11 @@ import {
   Box,
   Divider,
   Chip,
-  Rating
+  Rating,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
@@ -43,14 +47,19 @@ const CoursePage = () => {
   const [students, setStudents] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
-const [editFormData, setEditFormData] = useState({
-  questionText: '',
-  option1: '',
-  option2: '',
-  option3: '',
-  option4: '',
-  correctAnswer: ''
-});
+  const [editFormData, setEditFormData] = useState({
+    questionText: "",
+    option1: "",
+    option2: "",
+    option3: "",
+    option4: "",
+    correctAnswer: "",
+  });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState({
+    quizId: "",
+    questionId: "",
+  });
 
   const navigate = useNavigate();
 
@@ -118,8 +127,7 @@ const [editFormData, setEditFormData] = useState({
     setSelectedSection(section);
     if (section === "quizzes" && quizzes.length === 0) {
       fetchQuizzes();
-    }
-    else if (section === "students" && students.length === 0) {
+    } else if (section === "students" && students.length === 0) {
       fetchEnrolledStudents();
     }
   };
@@ -144,14 +152,19 @@ const [editFormData, setEditFormData] = useState({
 
   const handleUpdateVideoTitle = async (videoId) => {
     try {
-      await axios.put(`http://localhost:3000/instructor/updateVideo/${courseId}/${videoId}`, {
-        newVideoTitle,
-      });
+      await axios.put(
+        `http://localhost:3000/instructor/updateVideo/${courseId}/${videoId}`,
+        {
+          newVideoTitle,
+        }
+      );
       setCourse({
         ...course,
-        videos: course.videos.map(video =>
-          video._id === videoId ? { ...video, videoTitle: newVideoTitle } : video
-        )
+        videos: course.videos.map((video) =>
+          video._id === videoId
+            ? { ...video, videoTitle: newVideoTitle }
+            : video
+        ),
       });
       setEditingVideoId(null);
       setNewVideoTitle("");
@@ -162,7 +175,9 @@ const [editFormData, setEditFormData] = useState({
 
   const fetchEnrolledStudents = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/instructor/enrolled-students/${courseId}`);
+      const response = await axios.get(
+        `http://localhost:3000/instructor/enrolled-students/${courseId}`
+      );
       if (response.data.success) {
         setStudents(response.data.enrolledStudents);
       } else {
@@ -173,13 +188,17 @@ const [editFormData, setEditFormData] = useState({
     }
   };
 
-  const handleDeleteResource = async (courseId, resourceId,) => {
+  const handleDeleteResource = async (courseId, resourceId) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/instructor/course/${courseId}/resource/${resourceId}`);
-      
-      setCourse(prevCourse => ({
+      const response = await axios.delete(
+        `http://localhost:3000/instructor/course/${courseId}/resource/${resourceId}`
+      );
+
+      setCourse((prevCourse) => ({
         ...prevCourse,
-        resources: prevCourse.resources.filter(resource => resource._id !== resourceId)
+        resources: prevCourse.resources.filter(
+          (resource) => resource._id !== resourceId
+        ),
       }));
     } catch (error) {
       console.error("Error deleting resource:", error);
@@ -195,27 +214,27 @@ const [editFormData, setEditFormData] = useState({
       option2: question.options[1].text,
       option3: question.options[2].text,
       option4: question.options[3].text,
-      correctAnswer: question.correctAnswerIndex.toString()
+      correctAnswer: question.correctAnswerIndex.toString(),
     });
   };
 
   const handleEditFormChange = (e) => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleCancelEdit = () => {
     setEditingQuestion(null);
     setEditFormData({
-      questionText: '',
-      option1: '',
-      option2: '',
-      option3: '',
-      option4: '',
-      correctAnswer: ''
+      questionText: "",
+      option1: "",
+      option2: "",
+      option3: "",
+      option4: "",
+      correctAnswer: "",
     });
   };
 
@@ -225,15 +244,15 @@ const [editFormData, setEditFormData] = useState({
         `http://localhost:3000/instructor/editQuestion/${quizId}/${questionId}`,
         editFormData
       );
-  
+
       if (response.data.success) {
         // Update the quizzes state with the edited question
-        setQuizzes(prevQuizzes => 
-          prevQuizzes.map(quiz => {
+        setQuizzes((prevQuizzes) =>
+          prevQuizzes.map((quiz) => {
             if (quiz._id === quizId) {
               return {
                 ...quiz,
-                questions: quiz.questions.map(question => {
+                questions: quiz.questions.map((question) => {
                   if (question._id === questionId) {
                     return {
                       ...question,
@@ -242,13 +261,13 @@ const [editFormData, setEditFormData] = useState({
                         { text: editFormData.option1 },
                         { text: editFormData.option2 },
                         { text: editFormData.option3 },
-                        { text: editFormData.option4 }
+                        { text: editFormData.option4 },
                       ],
-                      correctAnswerIndex: parseInt(editFormData.correctAnswer)
+                      correctAnswerIndex: parseInt(editFormData.correctAnswer),
                     };
                   }
                   return question;
-                })
+                }),
               };
             }
             return quiz;
@@ -261,36 +280,93 @@ const [editFormData, setEditFormData] = useState({
     }
   };
 
+  const handleDeleteQuestion = async (quizId, questionId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:3000/instructor/deleteQuestion/${quizId}/${questionId}`
+      );
+
+      if (response.data.success) {
+        // Update the quizzes state to remove the deleted question
+        setQuizzes((prevQuizzes) =>
+          prevQuizzes.map((quiz) => {
+            if (quiz._id === quizId) {
+              return {
+                ...quiz,
+                questions: quiz.questions.filter(
+                  (question) => question._id !== questionId
+                ),
+              };
+            }
+            return quiz;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting question:", error);
+    }
+  };
+
+  const handleDeleteClick = (quizId, questionId) => {
+    setQuestionToDelete({ quizId, questionId });
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    await handleDeleteQuestion(
+      questionToDelete.quizId,
+      questionToDelete.questionId
+    );
+    setDeleteConfirmOpen(false);
+  };
   if (loading)
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <CircularProgress size={60} thickness={4} />
       </Box>
     );
 
   return (
-    <Box sx={{ padding: { xs: 2, md: 4 }, maxWidth: "1200px", margin: "0 auto" }}>
+    <Box
+      sx={{ padding: { xs: 2, md: 4 }, maxWidth: "1200px", margin: "0 auto" }}
+    >
       {/* Course Header Card */}
-      <Card sx={{ 
-        boxShadow: 3, 
-        marginBottom: 4, 
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-        borderLeft: '5px solid #3f51b5'
-      }}>
+      <Card
+        sx={{
+          boxShadow: 3,
+          marginBottom: 4,
+          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          borderLeft: "5px solid #3f51b5",
+        }}
+      >
         <CardContent>
-          <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: '#2c3e50' }}>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            gutterBottom
+            sx={{ color: "#2c3e50" }}
+          >
             {course.title}
           </Typography>
-          <Typography variant="body1" color="textSecondary" sx={{ 
-            marginBottom: 3,
-            fontSize: '1.1rem',
-            lineHeight: 1.6
-          }}>
+          <Typography
+            variant="body1"
+            color="textSecondary"
+            sx={{
+              marginBottom: 3,
+              fontSize: "1.1rem",
+              lineHeight: 1.6,
+            }}
+          >
             {course.description}
           </Typography>
-          
-          <Stack 
-            direction={{ xs: "column", sm: "row" }} 
+
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
             spacing={2}
             sx={{ width: "100%" }}
           >
@@ -298,14 +374,14 @@ const [editFormData, setEditFormData] = useState({
               variant="contained"
               color="primary"
               onClick={() => navigate(`/addresources/${courseId}`)}
-              sx={{ 
+              sx={{
                 flex: 1,
                 py: 1.5,
-                fontWeight: 'bold',
+                fontWeight: "bold",
                 boxShadow: 2,
-                '&:hover': {
-                  boxShadow: 4
-                }
+                "&:hover": {
+                  boxShadow: 4,
+                },
               }}
             >
               Add Videos & Resources
@@ -314,14 +390,14 @@ const [editFormData, setEditFormData] = useState({
               variant="contained"
               color="secondary"
               onClick={() => navigate(`/addquiz/${courseId}`)}
-              sx={{ 
+              sx={{
                 flex: 1,
                 py: 1.5,
-                fontWeight: 'bold',
+                fontWeight: "bold",
                 boxShadow: 2,
-                '&:hover': {
-                  boxShadow: 4
-                }
+                "&:hover": {
+                  boxShadow: 4,
+                },
               }}
             >
               Add Quiz
@@ -331,228 +407,285 @@ const [editFormData, setEditFormData] = useState({
       </Card>
 
       {/* Navigation Tabs */}
-      <Box sx={{ 
-        marginBottom: 4,
-        borderRadius: 2,
-        overflow: 'hidden',
-        boxShadow: 2
-      }}>
+      <Box
+        sx={{
+          marginBottom: 4,
+          borderRadius: 2,
+          overflow: "hidden",
+          boxShadow: 2,
+        }}
+      >
         <Stack
           direction="row"
           sx={{
-            overflowX: 'auto',
-            '&::-webkit-scrollbar': {
-              display: 'none'
+            overflowX: "auto",
+            "&::-webkit-scrollbar": {
+              display: "none",
             },
-            scrollbarWidth: 'none'
+            scrollbarWidth: "none",
           }}
         >
-          {["quizzes", "resources", "videos", "students", "Q&A", "reviews"].map((section) => (
-            <Button
-              key={section}
-              variant={selectedSection === section ? "contained" : "text"}
-              onClick={() => handleSectionChange(section)}
-              sx={{
-                minWidth: 120,
-                fontWeight: 'bold',
-                borderRadius: 0,
-                borderBottom: selectedSection === section ? '3px solid #3f51b5' : 'none',
-                color: selectedSection === section ? 'white' : 'text.primary',
-                backgroundColor: selectedSection === section ? '#3f51b5' : 'background.paper',
-                '&:hover': {
-                  backgroundColor: selectedSection === section ? '#303f9f' : '#f5f5f5'
-                }
-              }}
-            >
-              {section.charAt(0).toUpperCase() + section.slice(1)}
-            </Button>
-          ))}
+          {["quizzes", "resources", "videos", "students", "Q&A", "reviews"].map(
+            (section) => (
+              <Button
+                key={section}
+                variant={selectedSection === section ? "contained" : "text"}
+                onClick={() => handleSectionChange(section)}
+                sx={{
+                  minWidth: 120,
+                  fontWeight: "bold",
+                  borderRadius: 0,
+                  borderBottom:
+                    selectedSection === section ? "3px solid #3f51b5" : "none",
+                  color: selectedSection === section ? "white" : "text.primary",
+                  backgroundColor:
+                    selectedSection === section
+                      ? "#3f51b5"
+                      : "background.paper",
+                  "&:hover": {
+                    backgroundColor:
+                      selectedSection === section ? "#303f9f" : "#f5f5f5",
+                  },
+                }}
+              >
+                {section.charAt(0).toUpperCase() + section.slice(1)}
+              </Button>
+            )
+          )}
         </Stack>
       </Box>
 
       {/* Content Sections */}
-      <Box sx={{ 
-        backgroundColor: 'background.paper',
-        borderRadius: 2,
-        boxShadow: 2,
-        padding: 3
-      }}>
+      <Box
+        sx={{
+          backgroundColor: "background.paper",
+          borderRadius: 2,
+          boxShadow: 2,
+          padding: 3,
+        }}
+      >
         {selectedSection === "quizzes" && (
-  <>
-    <Typography variant="h5" fontWeight="bold" marginBottom={3} sx={{ color: '#2c3e50' }}>
-      Course Quizzes
-    </Typography>
-    {quizLoading ? (
-      <Box display="flex" justifyContent="center" py={4}>
-        <CircularProgress size={50} />
-      </Box>
-    ) : quizzes.length > 0 ? (
-      quizzes.map((quiz, index) => (
-        <Accordion
-          key={quiz._id || index}
-          sx={{ 
-            boxShadow: 2, 
-            marginBottom: 2,
-            '&:before': {
-              display: 'none'
-            }
-          }}
-        >
-          <AccordionSummary 
-            expandIcon={<ExpandMoreIcon />}
-            sx={{
-              backgroundColor: '#f8f9fa',
-              borderRadius: 1
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Quiz {index + 1}
+          <>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              marginBottom={3}
+              sx={{ color: "#2c3e50" }}
+            >
+              Course Quizzes
             </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {quiz.questions.map((question, qIndex) => (
-              <Card
-                key={question._id || qIndex}
-                sx={{ 
-                  marginBottom: 3, 
-                  padding: 2,
-                  borderLeft: '4px solid #3f51b5'
-                }}
-              >
-                {editingQuestion === question._id ? (
-                  <Box>
-                    <TextField
-                      fullWidth
-                      label="Question Text"
-                      name="questionText"
-                      value={editFormData.questionText}
-                      onChange={handleEditFormChange}
-                      sx={{ mb: 2 }}
-                    />
-                    <Grid container spacing={2}>
-                      {['option1', 'option2', 'option3', 'option4'].map((option, idx) => (
-                        <Grid item xs={12} sm={6} key={option}>
-                          <TextField
-                            fullWidth
-                            label={`Option ${idx + 1}`}
-                            name={option}
-                            value={editFormData[option]}
-                            onChange={handleEditFormChange}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                    <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
-                      Correct Answer:
+            {quizLoading ? (
+              <Box display="flex" justifyContent="center" py={4}>
+                <CircularProgress size={50} />
+              </Box>
+            ) : quizzes.length > 0 ? (
+              quizzes.map((quiz, index) => (
+                <Accordion
+                  key={quiz._id || index}
+                  sx={{
+                    boxShadow: 2,
+                    marginBottom: 2,
+                    "&:before": {
+                      display: "none",
+                    },
+                  }}
+                >
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    sx={{
+                      backgroundColor: "#f8f9fa",
+                      borderRadius: 1,
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                      Quiz {index + 1}
                     </Typography>
-                    <RadioGroup
-                      name="correctAnswer"
-                      value={editFormData.correctAnswer}
-                      onChange={handleEditFormChange}
-                      row
-                    >
-                      {[0, 1, 2, 3].map((value) => (
-                        <FormControlLabel
-                          key={value}
-                          value={value.toString()}
-                          control={<Radio />}
-                          label={`Option ${value + 1}`}
-                        />
-                      ))}
-                    </RadioGroup>
-                    <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleUpdateQuestion(quiz._id, question._id)}
-                      >
-                        Save Changes
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={handleCancelEdit}
-                      >
-                        Cancel
-                      </Button>
-                    </Stack>
-                  </Box>
-                ) : (
-                  <>
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography variant="body1" fontWeight="bold" gutterBottom>
-                        {qIndex + 1}. {question.questionText}
-                      </Typography>
-                      <IconButton
-                        onClick={() => handleEditQuestion(question)}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    {quiz.questions.map((question, qIndex) => (
+                      <Card
+                        key={question._id || qIndex}
                         sx={{
-                          backgroundColor: 'primary.light',
-                          '&:hover': {
-                            backgroundColor: 'primary.main',
-                            color: 'white'
-                          }
+                          marginBottom: 3,
+                          padding: 2,
+                          borderLeft: "4px solid #3f51b5",
                         }}
                       >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                    <RadioGroup sx={{ marginY: 1 }}>
-                      {question.options.map((option, oIndex) => (
-                        <FormControlLabel
-                          key={option._id || oIndex}
-                          value={option.text}
-                          control={<Radio color="primary" />}
-                          label={option.text}
-                          sx={{ marginY: 0.5 }}
-                        />
-                      ))}
-                    </RadioGroup>
-                    <Box sx={{
-                      backgroundColor: '#e8f5e9',
-                      padding: 1.5,
-                      borderRadius: 1,
-                      marginTop: 1.5
-                    }}>
-                      <Typography fontWeight="bold" color="success.dark">
-                        Correct Answer: {question.options[question.correctAnswerIndex].text}
-                      </Typography>
-                    </Box>
-                  </>
-                )}
-              </Card>
-            ))}
-          </AccordionDetails>
-        </Accordion>
-      ))
-    ) : (
-      <Box textAlign="center" py={4}>
-        <Typography variant="h6" color="textSecondary">
-          No quizzes available for this course
-        </Typography>
-      </Box>
-    )}
-  </>
-)}
+                        {editingQuestion === question._id ? (
+                          <Box>
+                            <TextField
+                              fullWidth
+                              label="Question Text"
+                              name="questionText"
+                              value={editFormData.questionText}
+                              onChange={handleEditFormChange}
+                              sx={{ mb: 2 }}
+                            />
+                            <Grid container spacing={2}>
+                              {["option1", "option2", "option3", "option4"].map(
+                                (option, idx) => (
+                                  <Grid item xs={12} sm={6} key={option}>
+                                    <TextField
+                                      fullWidth
+                                      label={`Option ${idx + 1}`}
+                                      name={option}
+                                      value={editFormData[option]}
+                                      onChange={handleEditFormChange}
+                                    />
+                                  </Grid>
+                                )
+                              )}
+                            </Grid>
+                            <Typography
+                              variant="subtitle1"
+                              sx={{ mt: 2, mb: 1 }}
+                            >
+                              Correct Answer:
+                            </Typography>
+                            <RadioGroup
+                              name="correctAnswer"
+                              value={editFormData.correctAnswer}
+                              onChange={handleEditFormChange}
+                              row
+                            >
+                              {[0, 1, 2, 3].map((value) => (
+                                <FormControlLabel
+                                  key={value}
+                                  value={value.toString()}
+                                  control={<Radio />}
+                                  label={`Option ${value + 1}`}
+                                />
+                              ))}
+                            </RadioGroup>
+                            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() =>
+                                  handleUpdateQuestion(quiz._id, question._id)
+                                }
+                              >
+                                Save Changes
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={handleCancelEdit}
+                              >
+                                Cancel
+                              </Button>
+                            </Stack>
+                          </Box>
+                        ) : (
+                          <>
+                            <Box display="flex" justifyContent="space-between">
+                              <Typography
+                                variant="body1"
+                                fontWeight="bold"
+                                gutterBottom
+                              >
+                                {qIndex + 1}. {question.questionText}
+                              </Typography>
+                              <IconButton
+                                onClick={() => handleEditQuestion(question)}
+                                sx={{
+                                  backgroundColor: "primary.light",
+                                  "&:hover": {
+                                    backgroundColor: "primary.main",
+                                    color: "white",
+                                  },
+                                }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                onClick={() =>
+                                  handleDeleteClick(quiz._id, question._id)
+                                }
+                                sx={{
+                                  backgroundColor: "error.light",
+                                  "&:hover": {
+                                    backgroundColor: "error.main",
+                                    color: "white",
+                                  },
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                            <RadioGroup sx={{ marginY: 1 }}>
+                              {question.options.map((option, oIndex) => (
+                                <FormControlLabel
+                                  key={option._id || oIndex}
+                                  value={option.text}
+                                  control={<Radio color="primary" />}
+                                  label={option.text}
+                                  sx={{ marginY: 0.5 }}
+                                />
+                              ))}
+                            </RadioGroup>
+                            <Box
+                              sx={{
+                                backgroundColor: "#e8f5e9",
+                                padding: 1.5,
+                                borderRadius: 1,
+                                marginTop: 1.5,
+                              }}
+                            >
+                              <Typography
+                                fontWeight="bold"
+                                color="success.dark"
+                              >
+                                Correct Answer:{" "}
+                                {
+                                  question.options[question.correctAnswerIndex]
+                                    .text
+                                }
+                              </Typography>
+                            </Box>
+                          </>
+                        )}
+                      </Card>
+                    ))}
+                  </AccordionDetails>
+                </Accordion>
+              ))
+            ) : (
+              <Box textAlign="center" py={4}>
+                <Typography variant="h6" color="textSecondary">
+                  No quizzes available for this course
+                </Typography>
+              </Box>
+            )}
+          </>
+        )}
 
         {selectedSection === "resources" && (
           <>
-            <Typography variant="h5" fontWeight="bold" marginBottom={3} sx={{ color: '#2c3e50' }}>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              marginBottom={3}
+              sx={{ color: "#2c3e50" }}
+            >
               Course Resources
             </Typography>
             {course.resources.length > 0 ? (
               <Grid container spacing={3}>
                 {course.resources.map((resource) => (
                   <Grid item xs={12} sm={6} md={4} key={resource._id}>
-                    <Card sx={{ 
-                      boxShadow: 3,
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      transition: 'transform 0.3s',
-                      '&:hover': {
-                        transform: 'translateY(-5px)'
-                      }
-                    }}>
+                    <Card
+                      sx={{
+                        boxShadow: 3,
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        transition: "transform 0.3s",
+                        "&:hover": {
+                          transform: "translateY(-5px)",
+                        },
+                      }}
+                    >
                       <CardContent sx={{ flexGrow: 1 }}>
                         <Box display="flex" alignItems="center" mb={2}>
                           <CloudDownloadIcon color="primary" sx={{ mr: 1 }} />
@@ -566,19 +699,23 @@ const [editFormData, setEditFormData] = useState({
                             color="primary"
                             size="small"
                             startIcon={<CloudDownloadIcon />}
-                            onClick={() => window.open(resource.resourceUrl, "_blank")}
+                            onClick={() =>
+                              window.open(resource.resourceUrl, "_blank")
+                            }
                             sx={{ flex: 1 }}
                           >
                             Download
                           </Button>
-                          <IconButton 
-                            onClick={() => handleDeleteResource(courseId, resource._id)}
-                            sx={{ 
-                              backgroundColor: 'error.light',
-                              '&:hover': {
-                                backgroundColor: 'error.main',
-                                color: 'white'
-                              }
+                          <IconButton
+                            onClick={() =>
+                              handleDeleteResource(courseId, resource._id)
+                            }
+                            sx={{
+                              backgroundColor: "error.light",
+                              "&:hover": {
+                                backgroundColor: "error.main",
+                                color: "white",
+                              },
                             }}
                           >
                             <DeleteIcon fontSize="small" />
@@ -601,20 +738,27 @@ const [editFormData, setEditFormData] = useState({
 
         {selectedSection === "videos" && (
           <>
-            <Typography variant="h5" fontWeight="bold" marginBottom={3} sx={{ color: '#2c3e50' }}>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              marginBottom={3}
+              sx={{ color: "#2c3e50" }}
+            >
               Course Videos
             </Typography>
             <Grid container spacing={3}>
               {course.videos.length > 0 ? (
-                course.videos.map(video => (
+                course.videos.map((video) => (
                   <Grid item xs={12} sm={6} md={4} key={video._id}>
-                    <Card sx={{ 
-                      boxShadow: 3,
-                      transition: 'transform 0.3s',
-                      '&:hover': {
-                        transform: 'translateY(-5px)'
-                      }
-                    }}>
+                    <Card
+                      sx={{
+                        boxShadow: 3,
+                        transition: "transform 0.3s",
+                        "&:hover": {
+                          transform: "translateY(-5px)",
+                        },
+                      }}
+                    >
                       <CardContent>
                         {editingVideoId === video._id ? (
                           <TextField
@@ -630,48 +774,58 @@ const [editFormData, setEditFormData] = useState({
                             {video.videoTitle}
                           </Typography>
                         )}
-                        <Box sx={{ 
-                          position: 'relative',
-                          borderRadius: 2,
-                          overflow: 'hidden',
-                          mb: 2
-                        }}>
-                          <video 
-                            src={video.videoUrl} 
-                            controls 
-                            style={{ 
-                              width: "100%", 
-                              display: 'block',
-                              backgroundColor: '#000'
-                            }} 
+                        <Box
+                          sx={{
+                            position: "relative",
+                            borderRadius: 2,
+                            overflow: "hidden",
+                            mb: 2,
+                          }}
+                        >
+                          <video
+                            src={video.videoUrl}
+                            controls
+                            style={{
+                              width: "100%",
+                              display: "block",
+                              backgroundColor: "#000",
+                            }}
                           />
-                          <Box sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: 'rgba(0,0,0,0.3)',
-                            opacity: 0,
-                            transition: 'opacity 0.3s',
-                            '&:hover': {
-                              opacity: 1
-                            }
-                          }}>
-                            <PlayCircleOutlineIcon sx={{ 
-                              fontSize: 60, 
-                              color: 'white' 
-                            }} />
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "rgba(0,0,0,0.3)",
+                              opacity: 0,
+                              transition: "opacity 0.3s",
+                              "&:hover": {
+                                opacity: 1,
+                              },
+                            }}
+                          >
+                            <PlayCircleOutlineIcon
+                              sx={{
+                                fontSize: 60,
+                                color: "white",
+                              }}
+                            />
                           </Box>
                         </Box>
-                        <Stack direction="row" spacing={1} justifyContent="space-between">
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          justifyContent="space-between"
+                        >
                           {editingVideoId === video._id ? (
-                            <Button 
-                              variant="contained" 
-                              color="primary" 
+                            <Button
+                              variant="contained"
+                              color="primary"
                               size="small"
                               onClick={() => handleUpdateVideoTitle(video._id)}
                               sx={{ flex: 1 }}
@@ -680,29 +834,29 @@ const [editFormData, setEditFormData] = useState({
                             </Button>
                           ) : (
                             <>
-                              <IconButton 
-                                onClick={() => { 
-                                  setEditingVideoId(video._id); 
-                                  setNewVideoTitle(video.videoTitle); 
+                              <IconButton
+                                onClick={() => {
+                                  setEditingVideoId(video._id);
+                                  setNewVideoTitle(video.videoTitle);
                                 }}
                                 sx={{
-                                  backgroundColor: 'primary.light',
-                                  '&:hover': {
-                                    backgroundColor: 'primary.main',
-                                    color: 'white'
-                                  }
+                                  backgroundColor: "primary.light",
+                                  "&:hover": {
+                                    backgroundColor: "primary.main",
+                                    color: "white",
+                                  },
                                 }}
                               >
                                 <EditIcon fontSize="small" />
                               </IconButton>
-                              <IconButton 
+                              <IconButton
                                 onClick={() => handleDeleteVideo(video._id)}
                                 sx={{
-                                  backgroundColor: 'error.light',
-                                  '&:hover': {
-                                    backgroundColor: 'error.main',
-                                    color: 'white'
-                                  }
+                                  backgroundColor: "error.light",
+                                  "&:hover": {
+                                    backgroundColor: "error.main",
+                                    color: "white",
+                                  },
                                 }}
                               >
                                 <DeleteIcon fontSize="small" />
@@ -726,38 +880,68 @@ const [editFormData, setEditFormData] = useState({
             </Grid>
           </>
         )}
+        <Dialog
+          open={deleteConfirmOpen}
+          onClose={() => setDeleteConfirmOpen(false)}
+        >
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Are you sure you want to delete this question?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleConfirmDelete}
+              color="error"
+              variant="contained"
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {selectedSection === "students" && (
           <>
-            <Typography variant="h5" fontWeight="bold" marginBottom={3} sx={{ color: '#2c3e50' }}>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              marginBottom={3}
+              sx={{ color: "#2c3e50" }}
+            >
               Enrolled Students
             </Typography>
             {students.length > 0 ? (
               <Grid container spacing={3}>
                 {students.map((student) => (
                   <Grid item xs={12} sm={6} key={student.studentId}>
-                    <Card 
-                      sx={{ 
-                        boxShadow: 2, 
-                        display: "flex", 
-                        alignItems: "center", 
+                    <Card
+                      sx={{
+                        boxShadow: 2,
+                        display: "flex",
+                        alignItems: "center",
                         padding: "10px",
-                        transition: 'transform 0.3s, box-shadow 0.3s',
-                        '&:hover': {
-                          transform: 'translateY(-3px)',
-                          boxShadow: 4
-                        }
-                      }} 
-                      onClick={() => navigate(`/student-details/${student.studentId}/course/${courseId}`)}
+                        transition: "transform 0.3s, box-shadow 0.3s",
+                        "&:hover": {
+                          transform: "translateY(-3px)",
+                          boxShadow: 4,
+                        },
+                      }}
+                      onClick={() =>
+                        navigate(
+                          `/student-details/${student.studentId}/course/${courseId}`
+                        )
+                      }
                     >
                       <Avatar
                         src={student.profilePicture}
                         alt={student.name}
-                        sx={{ 
-                          width: 56, 
-                          height: 56, 
+                        sx={{
+                          width: 56,
+                          height: 56,
                           marginRight: 2,
-                          border: '2px solid #3f51b5'
+                          border: "2px solid #3f51b5",
                         }}
                       />
                       <Box>
@@ -767,10 +951,10 @@ const [editFormData, setEditFormData] = useState({
                         <Typography variant="body2" color="textSecondary">
                           {student.email}
                         </Typography>
-                        <Chip 
-                          label="View Progress" 
-                          size="small" 
-                          color="primary" 
+                        <Chip
+                          label="View Progress"
+                          size="small"
+                          color="primary"
                           sx={{ mt: 1 }}
                         />
                       </Box>
@@ -790,32 +974,44 @@ const [editFormData, setEditFormData] = useState({
 
         {selectedSection === "reviews" && (
           <>
-            <Typography variant="h5" fontWeight="bold" marginBottom={3} sx={{ color: '#2c3e50' }}>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              marginBottom={3}
+              sx={{ color: "#2c3e50" }}
+            >
               Student Reviews
             </Typography>
             {reviews.length > 0 ? (
               <Grid container spacing={3}>
                 {reviews.map((review) => (
                   <Grid item xs={12} key={review._id}>
-                    <Card sx={{ 
-                      boxShadow: 2,
-                      transition: 'transform 0.3s',
-                      '&:hover': {
-                        transform: 'translateY(-3px)'
-                      }
-                    }}>
+                    <Card
+                      sx={{
+                        boxShadow: 2,
+                        transition: "transform 0.3s",
+                        "&:hover": {
+                          transform: "translateY(-3px)",
+                        },
+                      }}
+                    >
                       <CardContent>
-                        <Box display="flex" alignItems="center" gap={2} marginBottom={2}>
-                          <Avatar 
-                            src={review.profilePicture} 
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          gap={2}
+                          marginBottom={2}
+                        >
+                          <Avatar
+                            src={review.profilePicture}
                             alt={review.studentName}
                             sx={{ width: 56, height: 56 }}
                           />
                           <Box>
-                            <Typography 
-                              variant="body1" 
+                            <Typography
+                              variant="body1"
                               fontWeight="bold"
-                              sx={{ textTransform: 'uppercase' }}
+                              sx={{ textTransform: "uppercase" }}
                             >
                               {review.studentName}
                             </Typography>
@@ -823,21 +1019,30 @@ const [editFormData, setEditFormData] = useState({
                               value={review.rating}
                               readOnly
                               precision={0.5}
-                              emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                              emptyIcon={
+                                <StarIcon
+                                  style={{ opacity: 0.55 }}
+                                  fontSize="inherit"
+                                />
+                              }
                             />
                           </Box>
                         </Box>
-                        <Typography variant="body1" sx={{ 
-                          fontStyle: 'italic',
-                          padding: 2,
-                          backgroundColor: '#f8f9fa',
-                          borderRadius: 1
-                        }}>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontStyle: "italic",
+                            padding: 2,
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: 1,
+                          }}
+                        >
                           "{review.comment}"
                         </Typography>
                         <Divider sx={{ my: 2 }} />
                         <Typography variant="caption" color="textSecondary">
-                          Posted on: {new Date(review.createdAt).toLocaleDateString()}
+                          Posted on:{" "}
+                          {new Date(review.createdAt).toLocaleDateString()}
                         </Typography>
                       </CardContent>
                     </Card>
