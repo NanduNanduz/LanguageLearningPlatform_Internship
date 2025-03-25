@@ -445,8 +445,8 @@ export const generateCertificate = async (userName, courseTitle, instructorName)
         .fillColor("#555")
         .text("Issued on: " + new Date().toDateString(), 0, 380, { align: "center" });
 
-        doc.image("./public/logo.jpg", 50, 450, { width: 120 });
-        doc.image("./public/verified.png", 680, 450, { width: 120 });
+        doc.image("./public/logo.png", 50, 450, { width: 120 });
+        doc.image("./public/verified.png", 650, 395, { width: 120 });
 
       // Finalize PDF document
       doc.end();

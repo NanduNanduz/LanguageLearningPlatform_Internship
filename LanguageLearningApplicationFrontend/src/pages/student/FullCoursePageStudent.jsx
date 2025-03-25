@@ -263,7 +263,7 @@ const StudentCoursePage = () => {
   sx={{ width: "100%" }} // Ensures buttons adjust correctly
 >
   {[
-    { label: "Quizzes", key: "quizzes" },
+    { label: "Quizz", key: "quizzes" },
     { label: "Resources", key: "resources" },
     { label: "Videos", key: "videos" },
     { label: "Assignments", key: "assignments" },
