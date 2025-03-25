@@ -772,3 +772,46 @@ export const getEnrolledStudents = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Controller to delete a specific question from a quiz
+export const deleteQuizQuestion = async (req, res) => {
+  try {
+    const { quizId, questionId } = req.params;
+
+    // Find the quiz
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Quiz not found" });
+    }
+
+    // Find the question index
+    const questionIndex = quiz.questions.findIndex(
+      q => q._id.toString() === questionId
+    );
+    
+    if (questionIndex === -1) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Question not found in quiz" 
+      });
+    }
+
+    // Remove the question from the array
+    quiz.questions.splice(questionIndex, 1);
+
+    // Save the updated quiz
+    await quiz.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Question deleted successfully",
+      updatedQuiz: quiz
+    });
+  } catch (error) {
+    console.error("Error deleting quiz question:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};

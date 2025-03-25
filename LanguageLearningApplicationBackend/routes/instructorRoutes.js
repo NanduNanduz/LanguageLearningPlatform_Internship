@@ -15,7 +15,8 @@ import {
   getQuizzesByCourse,
   getInstuctors,
   deleteResource,
-  getEnrolledStudents
+  getEnrolledStudents,
+  deleteQuizQuestion
 } from "../controllers/instructorController.js";
 
 import { upload , parseFormData} from "../utils/multer.js";
@@ -82,5 +83,10 @@ router.get("/quiz/:courseId", getQuizzesByCourse);
 router.delete("/course/:courseId/resource/:resourceId", deleteResource);
 //getting enrolled students of a course
 router.get("/enrolled-students/:courseId", getEnrolledStudents);
+
+router.delete(
+  '/deleteQuestion/:quizId/:questionId',
+  deleteQuizQuestion
+);
 
 export default router;
