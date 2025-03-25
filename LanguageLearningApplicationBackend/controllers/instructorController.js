@@ -4,6 +4,7 @@ import userModel from "../models/userModel.js";
 import streamifier from "streamifier";
 import PDFDocument from "pdfkit";
 import Quiz from "../models/quizModel.js";
+import fs from "fs";
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -443,6 +444,9 @@ export const generateCertificate = async (userName, courseTitle, instructorName)
         .fontSize(14)
         .fillColor("#555")
         .text("Issued on: " + new Date().toDateString(), 0, 380, { align: "center" });
+
+        doc.image("./public/logo.png", 50, 450, { width: 120 });
+        doc.image("./public/verified.png", 650, 395, { width: 120 });
 
       // Finalize PDF document
       doc.end();

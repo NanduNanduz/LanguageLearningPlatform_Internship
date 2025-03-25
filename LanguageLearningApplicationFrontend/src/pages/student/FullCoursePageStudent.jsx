@@ -18,6 +18,8 @@ import {
   TextField,
   Divider,
   Rating,
+  Box,
+  Avatar,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
@@ -25,6 +27,8 @@ import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 const StudentCoursePage = () => {
   const user = JSON.parse(sessionStorage.getItem("user"));
   const userId = user._id;
+  const studentName = user.name;
+  const profilePicture = user.profilePicture;
   const navigate = useNavigate();
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
@@ -194,6 +198,8 @@ const StudentCoursePage = () => {
          {
            studentId: userId,
            courseId: courseId,
+           studentName,
+           profilePicture,
            rating,
            comment,
          },
@@ -204,6 +210,7 @@ const StudentCoursePage = () => {
 
        if (response.data.message) {
          alert("Review submitted successfully!");
+         window.location.reload();
          setRating(0);
          setComment("");
        }
@@ -263,7 +270,7 @@ const StudentCoursePage = () => {
   sx={{ width: "100%" }} // Ensures buttons adjust correctly
 >
   {[
-    { label: "Quizzes", key: "quizzes" },
+    { label: "Quizz", key: "quizzes" },
     { label: "Resources", key: "resources" },
     { label: "Videos", key: "videos" },
     { label: "Assignments", key: "assignments" },
@@ -530,28 +537,38 @@ const StudentCoursePage = () => {
             </Stack>
 
             {/* Display Existing Reviews */}
-            <Typography variant="h5" fontWeight="bold" marginTop={4}>
-              Reviews
-            </Typography>
-            {reviews.length > 0 ? (
-              reviews.map((review) => (
-                <Card
-                  key={review._id}
-                  sx={{ boxShadow: 2, marginBottom: 2, padding: 2 }}
-                >
-                  <CardContent>
-                    <Typography variant="body1">
-                      <strong>Rating:</strong> {review.rating}/5
-                    </Typography>
-                    <Typography variant="body1">
-                      <strong>Comment:</strong> {review.comment}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <Typography>No reviews yet.</Typography>
-            )}
+<Typography variant="h5" fontWeight="bold" marginTop={4}>
+  Reviews
+</Typography>
+{reviews.length > 0 ? (
+  reviews.map((review) => (
+    <Card
+      key={review._id}
+      sx={{ boxShadow: 2, marginBottom: 2, padding: 2 }}
+    >
+      <CardContent>
+        <Box display="flex" alignItems="center" gap={2} marginBottom={1}>
+          <Avatar src={review.profilePicture} alt={review.studentName} />
+          <Typography 
+            variant="body1" 
+            fontWeight="bold" 
+            sx={{ textTransform: 'uppercase' }}
+          >
+            {review.studentName}
+          </Typography>
+        </Box>
+        <Typography variant="body1">
+          <strong>Rating:</strong> {review.rating}/5
+        </Typography>
+        <Typography variant="body1">
+          <strong>Comment:</strong> {review.comment}
+        </Typography>
+      </CardContent>
+    </Card>
+  ))
+) : (
+  <Typography>No reviews yet.</Typography>
+)}
           </CardContent>
         </Card>
       )}

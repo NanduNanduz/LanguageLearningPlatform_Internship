@@ -37,8 +37,26 @@ const CoursePage = () => {
   const [editingVideoId, setEditingVideoId] = useState(null);
   const [newVideoTitle, setNewVideoTitle] = useState("");
   const [students, setStudents] = useState([]);
+  const [reviews,setReviews] = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+       const fetchReviews = async () => {
+         try {
+           const response = await axios.get(
+             `http://localhost:3000/student/reviews/${courseId}`
+           );
+           setReviews(response.data.reviews);
+         } catch (error) {
+           console.error("Error fetching reviews:", error);
+         }
+       };
+  
+       if (selectedSection === "reviews") {
+         fetchReviews();
+       }
+     }, [selectedSection, courseId]);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -254,6 +272,13 @@ const CoursePage = () => {
   >
     Q&A
   </Button>
+  <Button
+    variant={selectedSection === "reviews" ? "contained" : "outlined"}
+    onClick={() => handleSectionChange("reviews")}
+    sx={{ width: { xs: "100%", sm: "auto" } }}
+  >
+    REVIEWS
+  </Button>
 </Stack>
 
 
@@ -401,6 +426,42 @@ const CoursePage = () => {
         </>
       )}
 
+{selectedSection === "reviews" && (
+        <>
+          <Typography variant="h5" fontWeight="bold" marginTop={4}>
+            Reviews
+          </Typography>
+          {reviews.length > 0 ? (
+            reviews.map((review) => (
+              <Card
+                key={review._id}
+                sx={{ boxShadow: 2, marginBottom: 2, padding: 2 }}
+              >
+                <CardContent>
+                  <Box display="flex" alignItems="center" gap={2} marginBottom={1}>
+                    <Avatar src={review.profilePicture} alt={review.studentName} />
+                    <Typography 
+                      variant="body1" 
+                      fontWeight="bold" 
+                      sx={{ textTransform: 'uppercase' }}
+                    >
+                      {review.studentName}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body1">
+                    <strong>Rating:</strong> {review.rating}/5
+                  </Typography>
+                  <Typography variant="body1">
+                    <strong>Comment:</strong> {review.comment}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Typography>No reviews yet.</Typography>
+          )}
+        </>
+      )}
     </div>
   );
 };
