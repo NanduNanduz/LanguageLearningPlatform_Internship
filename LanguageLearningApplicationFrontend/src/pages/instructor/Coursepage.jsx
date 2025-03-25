@@ -34,6 +34,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import StarIcon from "@mui/icons-material/Star";
 
+
+
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+
+
+
+
 const CoursePage = () => {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
@@ -65,7 +72,39 @@ const CoursePage = () => {
   const [deleteVideoDialogOpen, setDeleteVideoDialogOpen] = useState(false);
   const [videoDeleting, setVideoDeleting] = useState(false);
 
+  // Q&A State
+  const [questions, setQuestions] = useState([]);
+  const [newAnswer, setNewAnswer] = useState("");
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [isLoadingQA, setIsLoadingQA] = useState(false);
+  const [qaError, setQAError] = useState(null);
+
   const navigate = useNavigate();
+
+  // Fetch questions for instructor's course
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      setIsLoadingQA(true);
+      setQAError(null);
+      try {
+        const token = sessionStorage.getItem("logintoken");
+        const response = await axios.get(
+          `http://localhost:3000/instructor/${courseId}/questions`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setQuestions(response.data);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+        setQAError(error.response?.data?.message || "Failed to load questions");
+      } finally {
+        setIsLoadingQA(false);
+      }
+    };
+
+    if (selectedSection === "Q&A") {
+      fetchQuestions();
+    }
+  }, [selectedSection, courseId]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -354,6 +393,47 @@ const CoursePage = () => {
     setDeleteVideoDialogOpen(false);
     setVideoToDelete(null);
   };
+
+  // Post answer as instructor
+  const handlePostAnswer = async (questionId) => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const response = await axios.post(
+        `http://localhost:3000/instructor/${courseId}/questions/${questionId}/answers`,
+        { answer: newAnswer },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setQuestions(
+        questions.map((q) => (q._id === questionId ? response.data : q))
+      );
+      setNewAnswer("");
+      setSelectedQuestion(null);
+    } catch (error) {
+      console.error("Error posting answer:", error);
+      alert(error.response?.data?.message || "Failed to post answer");
+    }
+  };
+
+  // Mark question as resolved
+  const handleResolve = async (questionId) => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const response = await axios.put(
+        `http://localhost:3000/qa/instructor/questions/${questionId}/resolve`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setQuestions(
+        questions.map((q) => (q._id === questionId ? response.data : q))
+      );
+    } catch (error) {
+      console.error("Error resolving question:", error);
+      alert(error.response?.data?.message || "Failed to resolve question");
+    }
+  };
+
   if (loading)
     return (
       <Box
@@ -1055,6 +1135,210 @@ const CoursePage = () => {
               </Box>
             )}
           </>
+        )}
+
+        {selectedSection === "Q&A" && (
+          <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
+            <CardContent>
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Course Q&A
+              </Typography>
+
+              {isLoadingQA ? (
+                <CircularProgress />
+              ) : qaError ? (
+                <Typography color="error">{qaError}</Typography>
+              ) : questions.length > 0 ? (
+                questions.map((question) => (
+                  <Card
+                    key={question._id}
+                    sx={{
+                      boxShadow: 2,
+                      marginBottom: 3,
+                      padding: 2,
+                      borderLeft: question.resolved
+                        ? "4px solid #4caf50"
+                        : "4px solid #1976d2",
+                    }}
+                  >
+                    <CardContent>
+                      {/* Question Header */}
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="flex-start"
+                      >
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Avatar
+                            src={question.studentId?.profilePicture}
+                            alt={question.studentId?.name}
+                          />
+                          <Box>
+                            <Typography variant="subtitle1" fontWeight="bold">
+                              {question.studentId?.name || "Student"}
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary">
+                              {new Date(question.createdAt).toLocaleString()}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        {question.resolved && (
+                          <Chip
+                            label="Resolved"
+                            color="success"
+                            size="small"
+                            sx={{ ml: 1 }}
+                          />
+                        )}
+                      </Stack>
+
+                      {/* Question Content */}
+                      <Box
+                        sx={{
+                          mt: 2,
+                          mb: 3,
+                          p: 2,
+                          backgroundColor: "#f9f9f9",
+                          borderRadius: 1,
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{ whiteSpace: "pre-wrap" }}
+                        >
+                          {question.question}
+                        </Typography>
+                      </Box>
+
+                      {/* Answers Section */}
+                      {question.answers.length > 0 && (
+                        <Box sx={{ mt: 3 }}>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            gutterBottom
+                          >
+                            Answers ({question.answers.length})
+                          </Typography>
+                          {question.answers.map((answer) => (
+                            <Box
+                              key={answer._id}
+                              sx={{
+                                mt: 2,
+                                p: 2,
+                                backgroundColor: answer.isInstructorAnswer
+                                  ? "#e3f2fd"
+                                  : "#f5f5f5",
+                                borderRadius: 1,
+                                borderLeft: answer.isInstructorAnswer
+                                  ? "3px solid #1976d2"
+                                  : "3px solid #9e9e9e",
+                              }}
+                            >
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={2}
+                              >
+                                <Avatar
+                                  src={answer.userId?.profilePicture}
+                                  alt={answer.userId?.name}
+                                  sx={{ width: 32, height: 32 }}
+                                />
+                                <Box>
+                                  <Typography variant="body1" fontWeight="bold">
+                                    {answer.userId?.name}
+                                    {answer.isInstructorAnswer && (
+                                      <Chip
+                                        label="Instructor"
+                                        color="primary"
+                                        size="small"
+                                        sx={{ ml: 1 }}
+                                      />
+                                    )}
+                                  </Typography>
+                                  <Typography
+                                    variant="caption"
+                                    color="textSecondary"
+                                  >
+                                    {new Date(
+                                      answer.createdAt
+                                    ).toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              </Stack>
+                              <Typography
+                                variant="body1"
+                                sx={{ mt: 1, whiteSpace: "pre-wrap" }}
+                              >
+                                {answer.answer}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+
+                      {/* Answer Form */}
+                      {selectedQuestion === question._id ? (
+                        <Box sx={{ mt: 3 }}>
+                          <TextField
+                            label="Your answer as instructor"
+                            multiline
+                            rows={4}
+                            value={newAnswer}
+                            onChange={(e) => setNewAnswer(e.target.value)}
+                            fullWidth
+                            sx={{ mb: 2 }}
+                          />
+                          <Stack direction="row" spacing={2}>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handlePostAnswer(question._id)}
+                              disabled={!newAnswer.trim()}
+                            >
+                              Post Answer
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              onClick={() => setSelectedQuestion(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </Stack>
+                        </Box>
+                      ) : (
+                        <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+                          <Button
+                            variant="contained"
+                            onClick={() => {
+                              setSelectedQuestion(question._id);
+                              setNewAnswer("");
+                            }}
+                            startIcon={<EditIcon />}
+                          >
+                            Answer Question
+                          </Button>
+                          {!question.resolved && (
+                            <Button
+                              variant="contained"
+                              color="success"
+                              onClick={() => handleResolve(question._id)}
+                              startIcon={<CheckCircleOutlineIcon />}
+                            >
+                              Mark Resolved
+                            </Button>
+                          )}
+                        </Stack>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Typography>No questions have been asked yet.</Typography>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {selectedSection === "reviews" && (
