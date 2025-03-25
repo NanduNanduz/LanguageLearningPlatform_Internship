@@ -8,6 +8,7 @@ import Stripe from "stripe";
 import dotenv from "dotenv";
 import notificationModel from "../models/notificationModel.js";
 import cloudinary from "cloudinary";
+import qaModel from "../models/qaModel.js";
 
 dotenv.config();
 
@@ -700,3 +701,179 @@ export const searchCoursesByName = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+
+
+
+
+
+
+// Post a new question
+export const postQuestion = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { question, tags } = req.body;
+    const studentId = req.user._id;
+
+    const newQuestion = new qaModel({
+      courseId,
+      studentId,
+      question,
+      tags: tags || [],
+    });
+
+    await newQuestion.save();
+
+    res.status(201).json(newQuestion);
+  } catch (error) {
+    console.error("Error posting question:", error);
+    res.status(500).json({ error: "Failed to post question" });
+  }
+};
+
+// Post an answer
+export const postAnswer = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const { answer } = req.body;
+    const userId = req.user._id;
+
+    const isInstructor = req.user.role === "instructor";
+
+    const updatedQuestion = await qaModel
+      .findByIdAndUpdate(
+        questionId,
+        {
+          $push: {
+            answers: {
+              userId,
+              answer,
+              isInstructorAnswer: isInstructor,
+            },
+          },
+        },
+        { new: true }
+      )
+      .populate("answers.userId", "name role");
+
+    res.status(201).json(updatedQuestion);
+  } catch (error) {
+    console.error("Error posting answer:", error);
+    res.status(500).json({ error: "Failed to post answer" });
+  }
+};
+
+
+
+
+export const getCourseQuestions = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const studentId = req.user._id;
+
+    // 1. Verify student enrollment
+    const isEnrolled = await userModel.findOne({
+      _id: studentId,
+      "enrolledCourses.courseId": courseId,
+    });
+
+    if (!isEnrolled) {
+      return res.status(403).json({
+        error: "You must be enrolled in this course to view Q&A",
+      });
+    }
+
+    // 2. Fetch questions with deep population
+    const questions = await qaModel
+      .find({ courseId })
+      .populate({
+        path: "studentId",
+        select: "name profilePicture",
+        model: "User",
+      })
+      .populate({
+        path: "answers.userId",
+        select: "name profilePicture role",
+        model: "User",
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 3. Transform data for frontend
+    const transformedQuestions = questions.map((question) => ({
+      ...question,
+      student: question.studentId, // Flatten student object
+      answers: question.answers.map((answer) => ({
+        ...answer,
+        user: answer.userId, // Flatten user object
+      })),
+    }));
+
+    res.status(200).json(transformedQuestions);
+  } catch (error) {
+    console.error("Detailed Q&A fetch error:", {
+      message: error.message,
+      stack: error.stack,
+      courseId: req.params.courseId,
+      studentId: req.user?._id,
+    });
+    res.status(500).json({
+      error: "Failed to fetch questions",
+      details: process.env.NODE_ENV === "development" ? error.message : null,
+    });
+  }
+};
+
+// Upvote an answer
+export const upvoteAnswer = async (req, res) => {
+  try {
+    const { answerId } = req.params;
+    const userId = req.user._id;
+
+    const question = await qaModel.findOne({ "answers._id": answerId });
+
+    if (!question) {
+      return res.status(404).json({ error: "Answer not found" });
+    }
+
+    const answer = question.answers.id(answerId);
+
+    // Check if user already upvoted
+    const hasUpvoted = answer.upvotes.includes(userId);
+
+    if (hasUpvoted) {
+      // Remove upvote
+      answer.upvotes.pull(userId);
+    } else {
+      // Add upvote
+      answer.upvotes.push(userId);
+    }
+
+    await question.save();
+
+    res.status(200).json(question);
+  } catch (error) {
+    console.error("Error upvoting answer:", error);
+    res.status(500).json({ error: "Failed to upvote answer" });
+  }
+};
+
+// Mark question as resolved
+export const markAsResolved = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+
+    const question = await qaModel.findByIdAndUpdate(
+      questionId,
+      { resolved: true },
+      { new: true }
+    );
+
+    res.status(200).json(question);
+  } catch (error) {
+    console.error("Error marking question as resolved:", error);
+    res.status(500).json({ error: "Failed to mark question as resolved" });
+  }
+};
+

@@ -5,6 +5,7 @@ import streamifier from "streamifier";
 import PDFDocument from "pdfkit";
 import Quiz from "../models/quizModel.js";
 import fs from "fs";
+import qaModel from "../models/qaModel.js";
 
 // Configure Cloudinary
 cloudinary.v2.config({
@@ -813,5 +814,85 @@ export const deleteQuizQuestion = async (req, res) => {
       success: false, 
       message: error.message 
     });
+  }
+};
+
+
+
+
+
+export const getInstructorQuestions = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const instructorId = req.user._id;
+
+    console.log("Fetching questions for course:", courseId);
+    console.log("Authenticated instructor:", instructorId);
+
+    // Verify the course exists and belongs to this instructor
+    const course = await courseModel.findOne({
+      _id: courseId,
+      instructorId: instructorId,
+    });
+
+    if (!course) {
+      console.log(
+        "Authorization failed - course not found or doesn't belong to instructor"
+      );
+      return res.status(403).json({
+        error: "Not authorized for this course or course not found",
+      });
+    }
+
+    const questions = await qaModel
+      .find({ courseId })
+      .populate("studentId", "name profilePicture")
+      .populate("answers.userId", "name profilePicture role")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error("Error fetching questions:", error);
+    res.status(500).json({ error: "Failed to fetch questions" });
+  }
+};
+
+// Instructor posts an answer
+export const postInstructorAnswer = async (req, res) => {
+  try {
+    const { courseId, questionId } = req.params;
+    const { answer } = req.body;
+    const instructorId = req.user._id;
+
+    // Verify the instructor owns this course
+    const course = await courseModel.findOne({
+      _id: courseId,
+      instructorId: instructorId,
+    });
+
+    if (!course) {
+      return res.status(403).json({ error: "Not authorized for this course" });
+    }
+
+    const updatedQuestion = await qaModel
+      .findByIdAndUpdate(
+        questionId,
+        {
+          $push: {
+            answers: {
+              userId: instructorId,
+              answer,
+              isInstructorAnswer: true,
+            },
+          },
+        },
+        { new: true }
+      )
+      .populate("answers.userId", "name profilePicture role");
+
+    res.status(201).json(updatedQuestion);
+  } catch (error) {
+    console.error("Error posting answer:", error);
+    res.status(500).json({ error: "Failed to post answer" });
   }
 };
