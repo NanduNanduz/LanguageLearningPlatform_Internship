@@ -61,6 +61,10 @@ const CoursePage = () => {
     questionId: "",
   });
 
+  const [videoToDelete, setVideoToDelete] = useState(null);
+  const [deleteVideoDialogOpen, setDeleteVideoDialogOpen] = useState(false);
+  const [videoDeleting, setVideoDeleting] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -137,16 +141,24 @@ const CoursePage = () => {
       const response = await axios.delete(
         `http://localhost:3000/instructor/delete-video/${courseId}/${videoId}`
       );
+
       if (response.data.success) {
         setCourse((prevCourse) => ({
           ...prevCourse,
           videos: prevCourse.videos.filter((video) => video._id !== videoId),
         }));
+        // Optional: Show success message
+        setError(null);
       } else {
-        throw new Error("Failed to delete video.");
+        throw new Error(response.data.message || "Failed to delete video.");
       }
     } catch (error) {
-      setError(error.response?.data?.message || "Error deleting video.");
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Error deleting video."
+      );
+      throw error; // Re-throw to handle in the confirmation dialog
     }
   };
 
@@ -318,6 +330,29 @@ const CoursePage = () => {
       questionToDelete.questionId
     );
     setDeleteConfirmOpen(false);
+  };
+
+  const handleDeleteVideoClick = (videoId) => {
+    setVideoToDelete(videoId);
+    setDeleteVideoDialogOpen(true);
+  };
+
+  const handleConfirmVideoDelete = async () => {
+    if (!videoToDelete) return;
+
+    setVideoDeleting(true);
+    try {
+      await handleDeleteVideo(videoToDelete);
+    } finally {
+      setVideoDeleting(false);
+      setDeleteVideoDialogOpen(false);
+      setVideoToDelete(null);
+    }
+  };
+
+  const handleCancelVideoDelete = () => {
+    setDeleteVideoDialogOpen(false);
+    setVideoToDelete(null);
   };
   if (loading)
     return (
@@ -578,7 +613,11 @@ const CoursePage = () => {
                           </Box>
                         ) : (
                           <>
-                            <Box display="flex" justifyContent="space-between">
+                            <Box
+                              display="flex"
+                              justifyContent="space-between"
+                              alignItems="flex-start"
+                            >
                               <Typography
                                 variant="body1"
                                 fontWeight="bold"
@@ -586,32 +625,42 @@ const CoursePage = () => {
                               >
                                 {qIndex + 1}. {question.questionText}
                               </Typography>
-                              <IconButton
-                                onClick={() => handleEditQuestion(question)}
-                                sx={{
-                                  backgroundColor: "primary.light",
-                                  "&:hover": {
-                                    backgroundColor: "primary.main",
-                                    color: "white",
-                                  },
-                                }}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                onClick={() =>
-                                  handleDeleteClick(quiz._id, question._id)
-                                }
-                                sx={{
-                                  backgroundColor: "error.light",
-                                  "&:hover": {
-                                    backgroundColor: "error.main",
-                                    color: "white",
-                                  },
-                                }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
+                              <Box display="flex" gap={0.5}>
+                                {" "}
+                                {/* Changed from IconButton spacing to Box with gap */}
+                                <IconButton
+                                  onClick={() => handleEditQuestion(question)}
+                                  sx={{
+                                    backgroundColor: "primary.light",
+                                    "&:hover": {
+                                      backgroundColor: "primary.main",
+                                      color: "white",
+                                    },
+                                    p: 0.6, // Reduced padding
+                                    fontSize: "medium",
+                                  }}
+                                >
+                                  <EditIcon fontSize="inherit" />{" "}
+                                  {/* Use inherit to match parent size */}
+                                </IconButton>
+                                <IconButton
+                                  onClick={() =>
+                                    handleDeleteClick(quiz._id, question._id)
+                                  }
+                                  sx={{
+                                    backgroundColor: "error.light",
+                                    "&:hover": {
+                                      backgroundColor: "error.main",
+                                      color: "white",
+                                    },
+                                    p: 0.6, // Reduced padding
+                                    fontSize: "medium",
+                                  }}
+                                >
+                                  <DeleteIcon fontSize="inherit" />{" "}
+                                  {/* Use inherit to match parent size */}
+                                </IconButton>
+                              </Box>
                             </Box>
                             <RadioGroup sx={{ marginY: 1 }}>
                               {question.options.map((option, oIndex) => (
@@ -735,6 +784,39 @@ const CoursePage = () => {
             )}
           </>
         )}
+        <Dialog
+          open={deleteVideoDialogOpen}
+          onClose={handleCancelVideoDelete}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Confirm Video Deletion</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" gutterBottom>
+              Are you sure you want to delete this video?
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              This action cannot be undone. All video data will be permanently
+              removed.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelVideoDelete} disabled={videoDeleting}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmVideoDelete}
+              color="error"
+              variant="contained"
+              disabled={videoDeleting}
+              startIcon={
+                videoDeleting ? <CircularProgress size={20} /> : <DeleteIcon />
+              }
+            >
+              {videoDeleting ? "Deleting..." : "Delete Video"}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {selectedSection === "videos" && (
           <>
@@ -850,7 +932,9 @@ const CoursePage = () => {
                                 <EditIcon fontSize="small" />
                               </IconButton>
                               <IconButton
-                                onClick={() => handleDeleteVideo(video._id)}
+                                onClick={() =>
+                                  handleDeleteVideoClick(video._id)
+                                }
                                 sx={{
                                   backgroundColor: "error.light",
                                   "&:hover": {
@@ -858,6 +942,7 @@ const CoursePage = () => {
                                     color: "white",
                                   },
                                 }}
+                                disabled={videoDeleting}
                               >
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
