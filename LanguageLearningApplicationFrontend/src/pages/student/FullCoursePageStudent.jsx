@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
   Button,
   CircularProgress,
   Stack,
@@ -20,9 +19,25 @@ import {
   Rating,
   Box,
   Avatar,
+  Chip,
+  Paper,
+  Tabs,
+  Tab,
+  LinearProgress,
+  IconButton,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import {
+  ExpandMore as ExpandMoreIcon,
+  CloudDownload as CloudDownloadIcon,
+  PlayCircle as PlayCircleIcon,
+  CheckCircle as CheckCircleIcon,
+  Description as DescriptionIcon,
+  Quiz as QuizIcon,
+  Assignment as AssignmentIcon,
+  School as SchoolIcon,
+  QuestionAnswer as QuestionAnswerIcon,
+  RateReview as RateReviewIcon,
+} from "@mui/icons-material";
 
 const StudentCoursePage = () => {
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -39,31 +54,28 @@ const StudentCoursePage = () => {
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [quizResults, setQuizResults] = useState(null);
-  const [message, setMessage]= useState("")
   const [completedVideos, setCompletedVideos] = useState([]);
   const [progressPercentage, setProgressPercentage] = useState(0);
-   const [rating, setRating] = useState(0);
-   const [comment, setComment] = useState("");
-   const [reviews, setReviews] = useState([]);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [reviews, setReviews] = useState([]);
 
-   useEffect(() => {
-     const fetchReviews = async () => {
-       try {
-         const response = await axios.get(
-           `http://localhost:3000/student/reviews/${courseId}`
-         );
-         setReviews(response.data.reviews);
-       } catch (error) {
-         console.error("Error fetching reviews:", error);
-       }
-     };
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/student/reviews/${courseId}`
+        );
+        setReviews(response.data.reviews);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
 
-     if (selectedSection === "review") {
-       fetchReviews();
-     }
-   }, [selectedSection, courseId]);
-
-
+    if (selectedSection === "review") {
+      fetchReviews();
+    }
+  }, [selectedSection, courseId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,38 +85,35 @@ const StudentCoursePage = () => {
           `http://localhost:3000/instructor/courseItems/${courseId}`
         );
         setCourse(courseResponse.data.course);
-  
+
         const quizResponse = await axios.get(
           `http://localhost:3000/instructor/quiz/${courseId}`
         );
         setQuizzes(quizResponse.data.quizzes || []);
-  
+
         const quizResult = await axios.get(
           `http://localhost:3000/student/quizResults/${userId}/${courseId}`
         );
         setQuizResults(quizResult.data.quizScores);
-  
-        // ✅ Fetch Progress (Percentage)
+
         const progressResponse = await axios.get(
           `http://localhost:3000/student/${userId}/progress/${courseId}`
         );
-  
+
         const progressData = progressResponse.data;
         setCompletedVideos(progressData.completedVideos || []);
         setProgressPercentage(progressData.progressPercentage || 0);
-  
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     if (courseId && userId) {
       fetchData();
     }
   }, [courseId, userId]);
-  
 
   const fetchQuizzes = async () => {
     try {
@@ -122,12 +131,11 @@ const StudentCoursePage = () => {
       ...prev,
       [quizId]: {
         ...prev[quizId],
-        [questionIndex]: parseInt(value, 10), // Convert back to number
+        [questionIndex]: parseInt(value, 10),
       },
     }));
   };
 
-  // Submit quiz
   const handleSubmitQuiz = async (quizId) => {
     if (!selectedAnswers[quizId]) {
       alert("Please select answers before submitting.");
@@ -136,16 +144,11 @@ const StudentCoursePage = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:3000/student/submitquiz",
-        {
-          userId,
-          quizId,
-          selectedAnswers: Object.values(selectedAnswers[quizId]),
-        }
-      );
-
-
+      await axios.post("http://localhost:3000/student/submitquiz", {
+        userId,
+        quizId,
+        selectedAnswers: Object.values(selectedAnswers[quizId]),
+      });
       alert("Quiz submitted successfully");
       window.location.reload();
     } catch (error) {
@@ -167,15 +170,15 @@ const StudentCoursePage = () => {
       alert("Please select a file and enter an assignment title.");
       return;
     }
-  
+
     const formData = new FormData();
-    formData.append("assignment", assignmentFile);  // ✅ File
-    formData.append("title", assignmentTitle);      // ✅ Title
-  
+    formData.append("assignment", assignmentFile);
+    formData.append("title", assignmentTitle);
+
     try {
       await axios.post(
         `http://localhost:3000/student/upload/${userId}/${courseId}`,
-        formData, // ✅ Send FormData directly
+        formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
@@ -186,51 +189,48 @@ const StudentCoursePage = () => {
     }
   };
 
+  const handleSubmitReview = async () => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      const userId = user._id;
 
-   const handleSubmitReview = async () => {
-     try {
-       const token = sessionStorage.getItem("logintoken");
-       const user = JSON.parse(sessionStorage.getItem("user"));
-       const userId = user._id;
+      const response = await axios.post(
+        "http://localhost:3000/student/submit-review",
+        {
+          studentId: userId,
+          courseId: courseId,
+          studentName,
+          profilePicture,
+          rating,
+          comment,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-       const response = await axios.post(
-         "http://localhost:3000/student/submit-review",
-         {
-           studentId: userId,
-           courseId: courseId,
-           studentName,
-           profilePicture,
-           rating,
-           comment,
-         },
-         {
-           headers: { Authorization: `Bearer ${token}` },
-         }
-       );
-
-       if (response.data.message) {
-         alert("Review submitted successfully!");
-         window.location.reload();
-         setRating(0);
-         setComment("");
-       }
-     } catch (error) {
-      const errorMessage = error.response?.data?.error
+      if (response.data.message) {
+        alert("Review submitted successfully!");
+        window.location.reload();
+        setRating(0);
+        setComment("");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error;
       alert(errorMessage);
-     }
-   };
-  
+    }
+  };
+
   const handleDownloadCertificate = async () => {
     try {
       const response = await axios.post(
         `http://localhost:3000/instructor/issueCertificate/${userId}/${courseId}`
       );
-  
+
       if (response.data.success) {
         const certificateUrl = response.data.certificateUrl;
-        
         if (certificateUrl) {
-          // ✅ Open the certificate URL in a new tab or download it
           window.open(certificateUrl, "_blank");
         } else {
           alert("Certificate not found. Please try again later.");
@@ -244,335 +244,409 @@ const StudentCoursePage = () => {
     }
   };
 
-
   if (loading)
-    return <CircularProgress style={{ display: "block", margin: "auto" }} />;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+        <CircularProgress />
+      </Box>
+    );
+
+  const sectionIcons = {
+    quizzes: <QuizIcon />,
+    resources: <DescriptionIcon />,
+    videos: <PlayCircleIcon />,
+    assignments: <AssignmentIcon />,
+    results: <SchoolIcon />,
+    "Q&A": <QuestionAnswerIcon />,
+    review: <RateReviewIcon />,
+  };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
-      <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
-        <CardContent>
-          <Typography variant="h4" fontWeight="bold">
-            {course.title}
+    <Box sx={{ maxWidth:"86%", margin: "0 auto", p: 3 ,backgroundColor:"rgb(156, 183, 186)"}}>
+      {/* Course Header and Thumbnail */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 4 }}>
+        {/* Text Content on the Left */}
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h4" fontWeight="bold" gutterBottom>
+            {course?.title}
           </Typography>
-          <Typography variant="body1" color="textSecondary">
-            {course.description}
+          <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+            {course?.description}
           </Typography>
-        </CardContent>
-      </Card>
 
-      <Stack
-  direction={{ xs: "column", sm: "row" }} // Column layout for small screens, row for larger
-  spacing={1}
-  justifyContent="center"
-  marginBottom={3}
-  alignItems="center"
-  sx={{ width: "100%" }} // Ensures buttons adjust correctly
->
-  {[
-    { label: "Quizz", key: "quizzes" },
-    { label: "Resources", key: "resources" },
-    { label: "Videos", key: "videos" },
-    { label: "Assignments", key: "assignments" },
-    { label: "Results", key: "results" },
-    { label: "Q&A", key: "Q&A" },
-    { label: "Post Review", key: "review" },
-  ].map((item) => (
-    <Button
-      key={item.key}
-      variant={selectedSection === item.key ? "contained" : "outlined"}
-      onClick={() => handleSectionChange(item.key)}
-      sx={{
-        fontSize: { xs: "0.75rem", sm: "0.875rem" }, // Reduce font size on small screens
-        padding: { xs: "6px 8px", sm: "8px 16px" }, // Adjust padding
-        width: { xs: "100%", sm: "auto" }, // Full width on small screens
-        whiteSpace: "nowrap", // Prevent text wrapping
-      }}
-    >
-      {item.label}
-    </Button>
-  ))}
-</Stack>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+            <Chip label={`${progressPercentage}% Complete`} color="primary" />
+            <LinearProgress
+              variant="determinate"
+              value={progressPercentage}
+              sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
+            />
+          </Box>
+        </Box>
 
+        {/* Course Thumbnail on the Right */}
+        {course?.thumbnail && (
+          <Box sx={{ flexShrink: 0, width: 400, borderRadius: 2, overflow: "hidden" }}>
+            <img
+              src={course.thumbnail}
+              alt={course.title}
+              style={{ width: "100%", objectFit: "cover" }}
+            />
+          </Box>
+        )}
+      </Box>
 
-      {selectedSection === "quizzes" &&
-        quizzes.map((quiz, index) => {
-          return (
-            <Accordion
-              key={quiz._id || index}
-              sx={{ boxShadow: 2, marginBottom: 2 }}
-            >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6">Quiz</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                {quiz.questions.map((question, qIndex) => (
-                  <Card key={qIndex} sx={{ marginBottom: 2, padding: 2 }}>
-                    <Typography variant="body1" fontWeight="bold">
-                      {qIndex + 1}. {question.questionText}
-                    </Typography>
-                    <RadioGroup
-                      value={selectedAnswers[quiz._id]?.[qIndex] ?? ""}
-                      onChange={(e) =>
-                        handleAnswerChange(quiz._id, qIndex, e.target.value)
+      {/* Navigation Tabs */}
+      <Paper elevation={2} sx={{ mb: 4, borderRadius: 2 ,backgroundColor:" #4F959D"}}>
+        <Tabs
+          value={selectedSection}
+          onChange={(e, newValue) => handleSectionChange(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': { minHeight: 64 },
+          }}
+        >
+          {[
+            { label: "Videos", value: "videos" },
+            { label: "Quizzes", value: "quizzes" },
+            { label: "Resources", value: "resources" },
+            { label: "Assignments", value: "assignments" },
+            { label: "Results", value: "results" },
+            { label: "Q&A", value: "Q&A" },
+            { label: "Reviews", value: "review" },
+          ].map((tab) => (
+            <Tab
+              key={tab.value}
+              label={tab.label}
+              value={tab.value}
+              icon={sectionIcons[tab.value]}
+              iconPosition="start"
+            />
+          ))}
+        </Tabs>
+      </Paper>
+
+      {/* Content Sections */}
+      <Box sx={{ mb: 4 }}>
+        {selectedSection === "videos" && (
+          <>
+            {progressPercentage === 100 && (
+              <Paper elevation={2} sx={{ p: 2, mb: 3, bgcolor: 'success.light' }}>
+                <Typography variant="h6" color="success.dark" textAlign="center">
+                  🎉 Congratulations! You've completed all videos. Go to the Results section to download your certificate.
+                </Typography>
+              </Paper>
+            )}
+
+            <Box sx={{ 
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: 3,
+              mb: 4
+            }}>
+              {course?.videos?.map((video) => {
+                const isCompleted = completedVideos.includes(video._id);
+
+                const markVideoAsCompleted = async () => {
+                  if (isCompleted) return;
+
+                  try {
+                    await axios.post(
+                      "http://localhost:3000/student/updateProgress",
+                      {
+                        userId,
+                        courseId,
+                        videoId: video._id,
                       }
-                    >
-                      {question.options.map((option, oIndex) => (
-                        <FormControlLabel
-                          key={oIndex}
-                          value={String(oIndex)}
-                          control={<Radio />}
-                          label={option.text}
-                        />
-                      ))}
-                    </RadioGroup>
+                    );
+                    setCompletedVideos((prev) => [...prev, video._id]);
+                    window.location.reload();
+                  } catch (error) {
+                    console.error("Error updating progress:", error);
+                  }
+                };
+
+                return (
+                  <Card key={video._id} elevation={3} sx={{ 
+                    borderRadius: 2,
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'scale(1.02)',
+                      boxShadow: 6
+                    }
+                  }}>
+                    <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
+                      <video
+                        src={video.videoUrl}
+                        controls
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          borderTopLeftRadius: '8px',
+                          borderTopRightRadius: '8px'
+                        }}
+                        onEnded={markVideoAsCompleted}
+                      />
+                    </Box>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <PlayCircleIcon color="primary" sx={{ mr: 1 }} />
+                        <Typography variant="h6" sx={{ flexGrow: 1, fontSize: '1rem' }}>
+                          {video.videoTitle}
+                        </Typography>
+                        {isCompleted && (
+                          <Chip
+                            icon={<CheckCircleIcon />}
+                            label="Completed"
+                            color="success"
+                            size="small"
+                          />
+                        )}
+                      </Box>
+                    </CardContent>
                   </Card>
-                ))}
+                );
+              })}
+            </Box>
+          </>
+        )}
+
+        {selectedSection === "quizzes" && (
+          <>
+            {quizzes.length === 0 ? (
+              <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+                <Typography variant="h6">No quizzes available yet</Typography>
+              </Paper>
+            ) : (
+              quizzes.map((quiz, index) => (
+                <Paper key={quiz._id || index} elevation={2} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+                  <Accordion sx={{ boxShadow: 'none' }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                        <QuizIcon color="primary" sx={{ mr: 1 }} />
+                        Quiz {index + 1}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {quiz.questions.map((question, qIndex) => (
+                        <Paper key={qIndex} sx={{ p: 2, mb: 2 }}>
+                          <Typography variant="body1" fontWeight="bold" gutterBottom>
+                            {qIndex + 1}. {question.questionText}
+                          </Typography>
+                          <RadioGroup
+                            value={selectedAnswers[quiz._id]?.[qIndex] ?? ""}
+                            onChange={(e) =>
+                              handleAnswerChange(quiz._id, qIndex, e.target.value)
+                            }
+                          >
+                            {question.options.map((option, oIndex) => (
+                              <FormControlLabel
+                                key={oIndex}
+                                value={String(oIndex)}
+                                control={<Radio />}
+                                label={option.text}
+                                sx={{ mb: 1 }}
+                              />
+                            ))}
+                          </RadioGroup>
+                        </Paper>
+                      ))}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleSubmitQuiz(quiz._id)}
+                        fullWidth
+                      >
+                        Submit Quiz
+                      </Button>
+                    </AccordionDetails>
+                  </Accordion>
+                </Paper>
+              ))
+            )}
+          </>
+        )}
+
+        {selectedSection === "resources" && (
+          <>
+            {course?.resources?.length === 0 ? (
+              <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+                <Typography variant="h6">No resources available yet</Typography>
+              </Paper>
+            ) : (
+              course.resources.map((resource) => (
+                <Paper key={resource._id} elevation={2} sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <DescriptionIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body1">{resource.resourceName}</Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    startIcon={<CloudDownloadIcon />}
+                    onClick={() => window.open(resource.resourceUrl, "_blank")}
+                  >
+                    Download
+                  </Button>
+                </Paper>
+              ))
+            )}
+          </>
+        )}
+
+        {selectedSection === "assignments" && (
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Submit Assignment
+            </Typography>
+            <TextField
+              label="Assignment Title"
+              variant="outlined"
+              fullWidth
+              value={assignmentTitle}
+              onChange={(e) => setAssignmentTitle(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <Box sx={{ mb: 2 }}>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setAssignmentFile(e.target.files[0])}
+                id="assignment-upload"
+                style={{ display: 'none' }}
+              />
+              <label htmlFor="assignment-upload">
+                <Button
+                  variant="outlined"
+                  component="span"
+                  startIcon={<CloudDownloadIcon />}
+                  sx={{ mr: 2 }}
+                >
+                  Choose File
+                </Button>
+              </label>
+              {assignmentFile && (
+                <Typography variant="body2" display="inline">
+                  {assignmentFile.name}
+                </Typography>
+              )}
+            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAssignmentUpload}
+              disabled={!assignmentFile || !assignmentTitle}
+              fullWidth
+              size="large"
+            >
+              Submit Assignment
+            </Button>
+          </Paper>
+        )}
+
+        {selectedSection === "results" && (
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              Quiz Results
+            </Typography>
+            {quizResults?.length > 0 ? (
+              quizResults.map((result, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Typography variant="h6">
+                    Quiz {index + 1}: <span style={{ color: '#4caf50' }}>{result?.score?.toFixed(2)}%</span>
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography>No quiz results available.</Typography>
+            )}
+
+            {progressPercentage === 100 && (
+              <Box sx={{ mt: 4, textAlign: 'center' }}>
+                <Typography variant="h5" gutterBottom>
+                  🎉 Certificate of Completion
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={{ mb: 3 }}>
+                  Congratulations on completing the course! Download your certificate below.
+                </Typography>
                 <Button
                   variant="contained"
-                  color="primary"
-                  onClick={() => handleSubmitQuiz(quiz._id)}
+                  color="success"
+                  onClick={handleDownloadCertificate}
+                  size="large"
+                  startIcon={<SchoolIcon />}
                 >
-                  Submit Quiz
+                  Download Certificate
                 </Button>
-              </AccordionDetails>
-            </Accordion>
-          );
-        })}
+              </Box>
+            )}
+          </Paper>
+        )}
 
-      {selectedSection === "resources" &&
-        course.resources.map((resource) => (
-          <Card key={resource._id} sx={{ boxShadow: 2, marginBottom: 2 }}>
-            <CardContent>
-              <Typography variant="body1">{resource.resourceName}</Typography>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<CloudDownloadIcon />}
-                onClick={() => window.open(resource.resourceUrl, "_blank")}
-              >
-                Download
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-
-      {selectedSection === "videos" && (
-        <>
-          {/* ✅ Message at the Top */}
-          {progressPercentage === 100 && (
-            <Typography
-              variant="h6"
-              color="primary"
-              fontWeight="bold"
-              textAlign="center"
-              marginBottom={2}
-            >
-              🎉 Congratulations! Go to the Results section to download your
-              certificate.
-            </Typography>
-          )}
-
-          {/* ✅ Video List */}
-          {course.videos.map((video) => {
-            const isCompleted = completedVideos.includes(video._id); // ✅ Check if video is completed
-
-            const markVideoAsCompleted = async () => {
-              if (isCompleted) return; // ✅ Avoid duplicate requests
-
-              try {
-                await axios.post(
-                  "http://localhost:3000/student/updateProgress",
-                  {
-                    userId,
-                    courseId,
-                    videoId: video._id,
-                  }
-                );
-
-                setCompletedVideos((prev) => [...prev, video._id]); // ✅ Update UI immediately
-                window.location.reload();
-              } catch (error) {
-                console.error("Error updating progress:", error);
-              }
-            };
-
-            return (
-              <Card key={video._id} sx={{ boxShadow: 3, marginBottom: 3 }}>
-                <CardContent>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="h6">{video.videoTitle}</Typography>
-                    {isCompleted && (
-                      <Typography
-                        color="green"
-                        fontWeight="bold"
-                        sx={{ display: "flex", alignItems: "center" }}
-                      >
-                        ✅ Completed
-                      </Typography>
-                    )}
-                  </Stack>
-
-                  <video
-                    src={video.videoUrl}
-                    controls
-                    style={{ width: "100%", borderRadius: "10px" }}
-                    onEnded={markVideoAsCompleted} // ✅ Mark video as completed when it ends
-                  />
-                </CardContent>
-              </Card>
-            );
-          })}
-        </>
-      )}
-
-      {selectedSection === "assignments" && (
-        <>
-          {/* Submit Assignment Section */}
-          <Typography variant="h5" fontWeight="bold" gutterBottom>
-            Submit Assignment
-          </Typography>
-
-          <TextField
-            label="Assignment Title"
-            variant="outlined"
-            fullWidth
-            value={assignmentTitle}
-            onChange={(e) => setAssignmentTitle(e.target.value)}
-            sx={{ marginBottom: 2 }}
-          />
-
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => setAssignmentFile(e.target.files[0])}
-            style={{ display: "block", marginBottom: "10px" }}
-          />
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleAssignmentUpload}
-            sx={{ marginTop: 2 }}
-            disabled={!assignmentFile || !assignmentTitle}
-          >
-            Submit Assignment
-          </Button>
-        </>
-      )}
-      {selectedSection === "results" && (
-        <>
-          {/* Quiz Results Section */}
-          <Typography variant="h5" fontWeight="bold" className="text-center">
-            Quiz Results
-          </Typography>
-
-          {quizResults?.length > 0 ? (
-            quizResults.map((result, index) => (
-              <Typography
-                key={index}
-                variant="h6"
-                color="green"
-                className="text-center"
-              >
-                Score: {result?.score?.toFixed(2)} %
-              </Typography>
-            ))
-          ) : (
-            <Typography>No quiz results available.</Typography>
-          )}
-
-          <Divider sx={{ marginY: 2 }} />
-
-          {/* ✅ Certificate Section (Only if progressPercentage === 100) */}
-          {progressPercentage === 100 && (
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom>
-                🎉 Certificate of Completion
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleDownloadCertificate}
-                // ✅ Function to download certificate
-              >
-                Download Certificate
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-
-      {selectedSection === "review" && (
-        <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
-          <CardContent>
-            <Typography variant="h5" fontWeight="bold">
+        {selectedSection === "review" && (
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
               Submit a Review
             </Typography>
-            <Stack spacing={2} marginTop={2}>
-              <Typography variant="body1">Rating:</Typography>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" gutterBottom>
+                Rating:
+              </Typography>
               <Rating
                 value={rating}
                 onChange={(event, newValue) => setRating(newValue)}
+                size="large"
               />
-              <TextField
-                label="Comment"
-                multiline
-                rows={4}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                fullWidth
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmitReview}
-              >
-                Submit Review
-              </Button>
-            </Stack>
+            </Box>
+            <TextField
+              label="Your Review"
+              multiline
+              rows={4}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              fullWidth
+              sx={{ mb: 3 }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmitReview}
+              fullWidth
+              size="large"
+            >
+              Submit Review
+            </Button>
 
-            {/* Display Existing Reviews */}
-<Typography variant="h5" fontWeight="bold" marginTop={4}>
-  Reviews
-</Typography>
-{reviews.length > 0 ? (
-  reviews.map((review) => (
-    <Card
-      key={review._id}
-      sx={{ boxShadow: 2, marginBottom: 2, padding: 2 }}
-    >
-      <CardContent>
-        <Box display="flex" alignItems="center" gap={2} marginBottom={1}>
-          <Avatar src={review.profilePicture} alt={review.studentName} />
-          <Typography 
-            variant="body1" 
-            fontWeight="bold" 
-            sx={{ textTransform: 'uppercase' }}
-          >
-            {review.studentName}
-          </Typography>
-        </Box>
-        <Typography variant="body1">
-          <strong>Rating:</strong> {review.rating}/5
-        </Typography>
-        <Typography variant="body1">
-          <strong>Comment:</strong> {review.comment}
-        </Typography>
-      </CardContent>
-    </Card>
-  ))
-) : (
-  <Typography>No reviews yet.</Typography>
-)}
-          </CardContent>
-        </Card>
-      )}
-    </div>
+            <Typography variant="h5" fontWeight="bold" sx={{ mt: 4, mb: 2 }}>
+              Course Reviews
+            </Typography>
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <Paper key={review._id} elevation={1} sx={{ p: 2, mb: 2 }}>
+                  <Box display="flex" alignItems="center" gap={2} mb={1}>
+                    <Avatar src={review.profilePicture} alt={review.studentName} />
+                    <Box>
+                      <Typography fontWeight="bold">
+                        {review.studentName}
+                      </Typography>
+                      <Rating value={review.rating} readOnly size="small" />
+                    </Box>
+                  </Box>
+                  <Typography variant="body2" sx={{ ml: 6 }}>
+                    {review.comment}
+                  </Typography>
+                </Paper>
+              ))
+            ) : (
+              <Typography>No reviews yet.</Typography>
+            )}
+          </Paper>
+        )}
+      </Box>
+    </Box>
   );
 };
 
