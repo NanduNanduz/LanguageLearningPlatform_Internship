@@ -30,6 +30,7 @@ import StudentDetailsPage from "./pages/instructor/StudentDetailsPage";
 import Footer from "./components/footer/Footer"
 import './app.scss'
 import Courses from "./pages/courses/Courses";
+import ContactUs from "./pages/Contactus";
 
 function App() {
 
@@ -41,6 +42,8 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/courses" element={<Courses />} />
+      <Route path="/contactus" element={<ContactUs/>} />
+
       <Route element={<PrivateRoutes />}>
         <Route path="/adminDashboard" element={<AdminDashboard />} />
         <Route path="/studentHome" element={<Studenthome />} />
