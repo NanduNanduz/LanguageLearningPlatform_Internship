@@ -60,6 +60,41 @@ const StudentCoursePage = () => {
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
 
+  // State for Q&A
+  const [questions, setQuestions] = useState([]);
+  const [newQuestion, setNewQuestion] = useState("");
+  const [newAnswer, setNewAnswer] = useState("");
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+
+  // Fetch questions
+  useEffect(() => {
+    // In your fetchQuestions function
+    const fetchQuestions = async () => {
+      try {
+        const token = sessionStorage.getItem("logintoken");
+        const response = await axios.get(
+          `http://localhost:3000/student/${courseId}/questions`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setQuestions(response.data);
+      } catch (error) {
+        console.error("Error details:", {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+        });
+      }
+    };
+
+    if (selectedSection === "Q&A") {
+      fetchQuestions();
+    }
+  }, [selectedSection, courseId]);
+
   useEffect(() => {
     const fetchReviews = async () => {
       try {
@@ -246,7 +281,12 @@ const StudentCoursePage = () => {
 
   if (loading)
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <CircularProgress />
       </Box>
     );
@@ -261,10 +301,86 @@ const StudentCoursePage = () => {
     review: <RateReviewIcon />,
   };
 
+  // Post new question
+  const handlePostQuestion = async () => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const response = await axios.post(
+        `http://localhost:3000/student/${courseId}/questions`,
+        { question: newQuestion },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setQuestions([response.data, ...questions]);
+      setNewQuestion("");
+    } catch (error) {
+      console.error("Error posting question:", error);
+    }
+  };
+
+  // Post answer
+  const handlePostAnswer = async (questionId) => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const response = await axios.post(
+        `http://localhost:3000/student/${courseId}/questions/${questionId}/answers`,
+        { answer: newAnswer },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setQuestions(
+        questions.map((q) => (q._id === questionId ? response.data : q))
+      );
+      setNewAnswer("");
+      setSelectedQuestion(null);
+    } catch (error) {
+      console.error("Error posting answer:", error);
+    }
+  };
+
+  // Upvote answer
+  const handleUpvote = async (questionId, answerId) => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const response = await axios.post(
+        `http://localhost:3000/student/answers/${answerId}/upvote`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setQuestions(
+        questions.map((q) => (q._id === questionId ? response.data : q))
+      );
+    } catch (error) {
+      console.error("Error upvoting answer:", error);
+    }
+  };
+
+  // Mark as resolved
+  const handleResolve = async (questionId) => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const response = await axios.put(
+        `http://localhost:3000/student/questions/${questionId}/resolve`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setQuestions(
+        questions.map((q) => (q._id === questionId ? response.data : q))
+      );
+    } catch (error) {
+      console.error("Error resolving question:", error);
+    }
+  };
+
   return (
-    <Box sx={{ maxWidth:"86%", margin: "0 auto", p: 3 ,backgroundColor:"rgb(156, 183, 186)"}}>
+    <Box
+      sx={{
+        maxWidth: "86%",
+        margin: "0 auto",
+        p: 3,
+        backgroundColor: "rgb(156, 183, 186)",
+      }}
+    >
       {/* Course Header and Thumbnail */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 4, mb: 4 }}>
         {/* Text Content on the Left */}
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -274,7 +390,7 @@ const StudentCoursePage = () => {
             {course?.description}
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}>
             <Chip label={`${progressPercentage}% Complete`} color="primary" />
             <LinearProgress
               variant="determinate"
@@ -286,7 +402,14 @@ const StudentCoursePage = () => {
 
         {/* Course Thumbnail on the Right */}
         {course?.thumbnail && (
-          <Box sx={{ flexShrink: 0, width: 400, borderRadius: 2, overflow: "hidden" }}>
+          <Box
+            sx={{
+              flexShrink: 0,
+              width: 400,
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
             <img
               src={course.thumbnail}
               alt={course.title}
@@ -297,14 +420,17 @@ const StudentCoursePage = () => {
       </Box>
 
       {/* Navigation Tabs */}
-      <Paper elevation={2} sx={{ mb: 4, borderRadius: 2 ,backgroundColor:" #4F959D"}}>
+      <Paper
+        elevation={2}
+        sx={{ mb: 4, borderRadius: 2, backgroundColor: " #4F959D" }}
+      >
         <Tabs
           value={selectedSection}
           onChange={(e, newValue) => handleSectionChange(newValue)}
           variant="scrollable"
           scrollButtons="auto"
           sx={{
-            '& .MuiTab-root': { minHeight: 64 },
+            "& .MuiTab-root": { minHeight: 64 },
           }}
         >
           {[
@@ -332,19 +458,33 @@ const StudentCoursePage = () => {
         {selectedSection === "videos" && (
           <>
             {progressPercentage === 100 && (
-              <Paper elevation={2} sx={{ p: 2, mb: 3, bgcolor: 'success.light' }}>
-                <Typography variant="h6" color="success.dark" textAlign="center">
-                  🎉 Congratulations! You've completed all videos. Go to the Results section to download your certificate.
+              <Paper
+                elevation={2}
+                sx={{ p: 2, mb: 3, bgcolor: "success.light" }}
+              >
+                <Typography
+                  variant="h6"
+                  color="success.dark"
+                  textAlign="center"
+                >
+                  🎉 Congratulations! You've completed all videos. Go to the
+                  Results section to download your certificate.
                 </Typography>
               </Paper>
             )}
 
-            <Box sx={{ 
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
-              gap: 3,
-              mb: 4
-            }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 3,
+                mb: 4,
+              }}
+            >
               {course?.videos?.map((video) => {
                 const isCompleted = completedVideos.includes(video._id);
 
@@ -368,34 +508,43 @@ const StudentCoursePage = () => {
                 };
 
                 return (
-                  <Card key={video._id} elevation={3} sx={{ 
-                    borderRadius: 2,
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'scale(1.02)',
-                      boxShadow: 6
-                    }
-                  }}>
-                    <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
+                  <Card
+                    key={video._id}
+                    elevation={3}
+                    sx={{
+                      borderRadius: 2,
+                      transition: "transform 0.2s",
+                      "&:hover": {
+                        transform: "scale(1.02)",
+                        boxShadow: 6,
+                      },
+                    }}
+                  >
+                    <Box sx={{ position: "relative", paddingTop: "56.25%" }}>
                       <video
                         src={video.videoUrl}
                         controls
                         style={{
-                          position: 'absolute',
+                          position: "absolute",
                           top: 0,
                           left: 0,
-                          width: '100%',
-                          height: '100%',
-                          borderTopLeftRadius: '8px',
-                          borderTopRightRadius: '8px'
+                          width: "100%",
+                          height: "100%",
+                          borderTopLeftRadius: "8px",
+                          borderTopRightRadius: "8px",
                         }}
                         onEnded={markVideoAsCompleted}
                       />
                     </Box>
                     <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                      >
                         <PlayCircleIcon color="primary" sx={{ mr: 1 }} />
-                        <Typography variant="h6" sx={{ flexGrow: 1, fontSize: '1rem' }}>
+                        <Typography
+                          variant="h6"
+                          sx={{ flexGrow: 1, fontSize: "1rem" }}
+                        >
                           {video.videoTitle}
                         </Typography>
                         {isCompleted && (
@@ -418,15 +567,22 @@ const StudentCoursePage = () => {
         {selectedSection === "quizzes" && (
           <>
             {quizzes.length === 0 ? (
-              <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+              <Paper elevation={2} sx={{ p: 3, textAlign: "center" }}>
                 <Typography variant="h6">No quizzes available yet</Typography>
               </Paper>
             ) : (
               quizzes.map((quiz, index) => (
-                <Paper key={quiz._id || index} elevation={2} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-                  <Accordion sx={{ boxShadow: 'none' }}>
+                <Paper
+                  key={quiz._id || index}
+                  elevation={2}
+                  sx={{ p: 2, mb: 3, borderRadius: 2 }}
+                >
+                  <Accordion sx={{ boxShadow: "none" }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography
+                        variant="h6"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
                         <QuizIcon color="primary" sx={{ mr: 1 }} />
                         Quiz {index + 1}
                       </Typography>
@@ -434,13 +590,21 @@ const StudentCoursePage = () => {
                     <AccordionDetails>
                       {quiz.questions.map((question, qIndex) => (
                         <Paper key={qIndex} sx={{ p: 2, mb: 2 }}>
-                          <Typography variant="body1" fontWeight="bold" gutterBottom>
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            gutterBottom
+                          >
                             {qIndex + 1}. {question.questionText}
                           </Typography>
                           <RadioGroup
                             value={selectedAnswers[quiz._id]?.[qIndex] ?? ""}
                             onChange={(e) =>
-                              handleAnswerChange(quiz._id, qIndex, e.target.value)
+                              handleAnswerChange(
+                                quiz._id,
+                                qIndex,
+                                e.target.value
+                              )
                             }
                           >
                             {question.options.map((option, oIndex) => (
@@ -474,15 +638,27 @@ const StudentCoursePage = () => {
         {selectedSection === "resources" && (
           <>
             {course?.resources?.length === 0 ? (
-              <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+              <Paper elevation={2} sx={{ p: 3, textAlign: "center" }}>
                 <Typography variant="h6">No resources available yet</Typography>
               </Paper>
             ) : (
               course.resources.map((resource) => (
-                <Paper key={resource._id} elevation={2} sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Paper
+                  key={resource._id}
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
                     <DescriptionIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="body1">{resource.resourceName}</Typography>
+                    <Typography variant="body1">
+                      {resource.resourceName}
+                    </Typography>
                   </Box>
                   <Button
                     variant="outlined"
@@ -516,7 +692,7 @@ const StudentCoursePage = () => {
                 accept="application/pdf"
                 onChange={(e) => setAssignmentFile(e.target.files[0])}
                 id="assignment-upload"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
               />
               <label htmlFor="assignment-upload">
                 <Button
@@ -556,7 +732,10 @@ const StudentCoursePage = () => {
               quizResults.map((result, index) => (
                 <Box key={index} sx={{ mb: 2 }}>
                   <Typography variant="h6">
-                    Quiz {index + 1}: <span style={{ color: '#4caf50' }}>{result?.score?.toFixed(2)}%</span>
+                    Quiz {index + 1}:{" "}
+                    <span style={{ color: "#4caf50" }}>
+                      {result?.score?.toFixed(2)}%
+                    </span>
                   </Typography>
                 </Box>
               ))
@@ -565,12 +744,13 @@ const StudentCoursePage = () => {
             )}
 
             {progressPercentage === 100 && (
-              <Box sx={{ mt: 4, textAlign: 'center' }}>
+              <Box sx={{ mt: 4, textAlign: "center" }}>
                 <Typography variant="h5" gutterBottom>
                   🎉 Certificate of Completion
                 </Typography>
                 <Typography variant="body1" gutterBottom sx={{ mb: 3 }}>
-                  Congratulations on completing the course! Download your certificate below.
+                  Congratulations on completing the course! Download your
+                  certificate below.
                 </Typography>
                 <Button
                   variant="contained"
@@ -584,6 +764,165 @@ const StudentCoursePage = () => {
               </Box>
             )}
           </Paper>
+        )}
+
+        {selectedSection === "Q&A" && (
+          <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
+            <CardContent>
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Course Q&A
+              </Typography>
+
+              {/* Post New Question */}
+              <Stack spacing={2} marginBottom={4}>
+                <TextField
+                  label="Ask a question"
+                  multiline
+                  rows={3}
+                  value={newQuestion}
+                  onChange={(e) => setNewQuestion(e.target.value)}
+                  fullWidth
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handlePostQuestion}
+                  disabled={!newQuestion.trim()}
+                >
+                  Post Question
+                </Button>
+              </Stack>
+
+              {/* Questions List */}
+              {questions.length > 0 ? (
+                questions.map((question) => (
+                  <Card
+                    key={question._id}
+                    sx={{ boxShadow: 2, marginBottom: 3, padding: 2 }}
+                  >
+                    <CardContent>
+                      <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="h6" fontWeight="bold">
+                          {question.question}
+                        </Typography>
+                        {question.resolved && (
+                          <Chip label="Resolved" color="success" size="small" />
+                        )}
+                      </Stack>
+
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        gutterBottom
+                      >
+                        Asked by: {question.studentId?.name || "Unknown"}
+                      </Typography>
+
+                      {/* Answers */}
+                      {question.answers.length > 0 && (
+                        <Box sx={{ marginTop: 2 }}>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            Answers:
+                          </Typography>
+                          {question.answers.map((answer) => (
+                            <Card
+                              key={answer._id}
+                              sx={{
+                                marginTop: 2,
+                                padding: 2,
+                                backgroundColor: answer.isInstructorAnswer
+                                  ? "#f5f5f5"
+                                  : "inherit",
+                              }}
+                            >
+                              <CardContent>
+                                <Stack
+                                  direction="row"
+                                  justifyContent="space-between"
+                                >
+                                  <Typography variant="body1">
+                                    {answer.answer}
+                                  </Typography>
+                                  <Button
+                                    size="small"
+                                    onClick={() =>
+                                      handleUpvote(question._id, answer._id)
+                                    }
+                                  >
+                                    👍 {answer.upvotes?.length || 0}
+                                  </Button>
+                                </Stack>
+                                <Typography
+                                  variant="caption"
+                                  color="textSecondary"
+                                >
+                                  {answer.isInstructorAnswer
+                                    ? "Instructor"
+                                    : "Student"}
+                                  : {answer.userId?.name || "Unknown"}
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </Box>
+                      )}
+
+                      {/* Post Answer */}
+                      {selectedQuestion === question._id ? (
+                        <Stack spacing={2} marginTop={2}>
+                          <TextField
+                            label="Your answer"
+                            multiline
+                            rows={3}
+                            value={newAnswer}
+                            onChange={(e) => setNewAnswer(e.target.value)}
+                            fullWidth
+                          />
+                          <Stack direction="row" spacing={2}>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handlePostAnswer(question._id)}
+                              disabled={!newAnswer.trim()}
+                            >
+                              Post Answer
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              onClick={() => setSelectedQuestion(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </Stack>
+                        </Stack>
+                      ) : (
+                        <Stack direction="row" spacing={2} marginTop={2}>
+                          <Button
+                            variant="outlined"
+                            onClick={() => setSelectedQuestion(question._id)}
+                          >
+                            Add Answer
+                          </Button>
+                          {user?.role === "instructor" &&
+                            !question.resolved && (
+                              <Button
+                                variant="contained"
+                                color="success"
+                                onClick={() => handleResolve(question._id)}
+                              >
+                                Mark as Resolved
+                              </Button>
+                            )}
+                        </Stack>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Typography>No questions yet. Be the first to ask!</Typography>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {selectedSection === "review" && (
@@ -627,7 +966,10 @@ const StudentCoursePage = () => {
               reviews.map((review) => (
                 <Paper key={review._id} elevation={1} sx={{ p: 2, mb: 2 }}>
                   <Box display="flex" alignItems="center" gap={2} mb={1}>
-                    <Avatar src={review.profilePicture} alt={review.studentName} />
+                    <Avatar
+                      src={review.profilePicture}
+                      alt={review.studentName}
+                    />
                     <Box>
                       <Typography fontWeight="bold">
                         {review.studentName}
