@@ -621,7 +621,7 @@ export const getCourseProgress = async (req, res) => {
 
 export const submitReview = async (req, res) => {
   try {
-    const { studentId, courseId, rating, comment } = req.body;
+    const { studentId, courseId, rating, comment, studentName, profilePicture } = req.body;
 
     // Check if the student has already submitted a review for this course
     const existingReview = await reviewModel.findOne({ studentId, courseId });
@@ -636,6 +636,8 @@ export const submitReview = async (req, res) => {
     // Create a new review
     const review = new reviewModel({
       studentId,
+      studentName,
+      profilePicture,
       courseId,
       rating,
       comment,

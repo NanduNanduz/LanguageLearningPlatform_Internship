@@ -7,6 +7,13 @@ const reviewSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    studentName:{
+      type:String,
+      required:true
+    },
+    profilePicture:{
+      type:String,
+    },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
