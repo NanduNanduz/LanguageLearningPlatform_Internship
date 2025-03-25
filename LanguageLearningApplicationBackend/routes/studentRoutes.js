@@ -3,6 +3,13 @@ import { enrollCourse, getAllNotifications, getCourseProgress, getEnrolledCourse
 import {getUserDetails} from "../controllers/studentController.js";
 import { getAllStudents , getQuizByCourse, getApprovedCourses} from "../controllers/studentController.js";
 import {upload, parseFormData } from "../utils/multer.js";
+import {
+  postQuestion,
+  postAnswer,
+  getCourseQuestions,
+  upvoteAnswer,
+  markAsResolved,
+} from "../controllers/studentController.js";
 import { verifyToken } from "../middlewares/jwt.js";
 // import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -10,7 +17,6 @@ const router = express.Router();
 
 router.get("/single-user/:userId", getUserDetails);
 router.post("/enroll/:courseId/:studentId", enrollCourse);
-
 
 router.get("/all-students", getAllStudents);
 router.get("/quiz/:courseId",getQuizByCourse );
@@ -28,6 +34,20 @@ router.post("/submit-review", verifyToken, submitReview);
 router.get("/reviews/:courseId", getReviewsForCourse);
 router.get("/search/category/:category", searchCoursesByCategory);
 router.get("/search/name/:name", searchCoursesByName);
+// Post a new question
+router.post("/:courseId/questions", verifyToken, postQuestion);
+
+// Post an answer to a question
+router.post("/:courseId/questions/:questionId/answers", verifyToken, postAnswer);
+
+// Get all questions for a course
+router.get("/:courseId/questions", verifyToken, getCourseQuestions);
+
+// Upvote an answer
+router.post("/answers/:answerId/upvote", verifyToken, upvoteAnswer);
+
+// Mark question as resolved
+router.put("/questions/:questionId/resolve", verifyToken, markAsResolved);
 
 
 

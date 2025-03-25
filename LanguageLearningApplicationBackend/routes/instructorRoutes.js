@@ -16,11 +16,16 @@ import {
   getInstuctors,
   deleteResource,
   getEnrolledStudents,
-  deleteQuizQuestion
+  deleteQuizQuestion,
+ 
+  getInstructorQuestions,
+  postInstructorAnswer,
 } from "../controllers/instructorController.js";
 
 import { upload , parseFormData} from "../utils/multer.js";
 import { getInstructorDetails } from "../controllers/instructorController.js";
+import { verifyToken } from "../middlewares/jwt.js";
+
 
 
 const router = express.Router();
@@ -88,5 +93,21 @@ router.delete(
   '/deleteQuestion/:quizId/:questionId',
   deleteQuizQuestion
 );
+
+
+
+
+
+// Get all questions for instructor's course
+router.get("/:courseId/questions", verifyToken, getInstructorQuestions);
+
+// Instructor posts an answer
+router.post("/:courseId/questions/:questionId/answers", verifyToken, postInstructorAnswer);
+
+// Mark question as resolved
+
+
+
+
 
 export default router;
