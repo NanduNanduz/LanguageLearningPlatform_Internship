@@ -122,6 +122,35 @@ export const deleteStudent = async (req, res) => {
 
 
 
+
+export const deleteInstructor = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const instructor = await userModel.findOne({ _id: id, role: "instructor" });
+    if (!instructor) {
+      return res.status(404).json({ message: "Instructor not found" });
+    }
+
+    // Delete all courses created by this instructor
+    if (instructor.courseCreated && instructor.courseCreated.length > 0) {
+      const courseIds = instructor.courseCreated.map((c) => c.courseId);
+      await courseModel.deleteMany({ _id: { $in: courseIds } });
+    }
+
+    // Then delete the instructor
+    await userModel.findByIdAndDelete(id);
+
+    res
+      .status(200)
+      .json({ message: "Instructor and their courses deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting instructor:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 // Block/Unblock instructor
 export const blockInstructor = async (req, res) => {
   const instructor = await userModel.findById(req.params.id);

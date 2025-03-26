@@ -16,6 +16,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 import Sidebar from "./Sidebar";
@@ -25,6 +30,9 @@ const Instructors = () => {
   const [instructors, setInstructors] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openBlockDialog, setOpenBlockDialog] = useState(false);
+  const [actionType, setActionType] = useState(""); // 'block' or 'unblock'
 
   useEffect(() => {
     fetchInstructors();
@@ -41,23 +49,46 @@ const Instructors = () => {
     }
   };
 
- const toggleBlockStatus = async (id, currentStatus) => {
-   try {
-     const newStatus = currentStatus === "yes" ? "no" : "yes"; // Toggle status
-     await axios.put(`http://localhost:3000/admin/block-instructor/${id}`, {
-       blocked: newStatus,
-     });
-     fetchInstructors();
-   } catch (error) {
-     console.error("Error updating status:", error);
-   }
- };
-
-
-  const deleteInstructor = async (id) => {
+  const toggleBlockStatus = async () => {
     try {
-      await axios.delete(`http://localhost:3000/admin/instructors/${id}`);
-      setInstructors(instructors.filter((inst) => inst._id !== id));
+      const response = await axios.put(
+        `http://localhost:3000/admin/block-instructor/${selectedInstructor._id}`
+      );
+
+      // Update the local state based on the response
+      setInstructors(
+        instructors.map((instructor) =>
+          instructor._id === selectedInstructor._id
+            ? {
+                ...instructor,
+                blocked:
+                  response.data.blocked || // First try response.data.blocked
+                  (response.data.instructor
+                    ? response.data.instructor.blocked // Then try response.data.instructor.blocked
+                    : response.data.user
+                    ? response.data.user.blocked // Then try response.data.user.blocked
+                    : instructor.blocked === "no"
+                    ? "yes"
+                    : "no"), // Fallback to toggle
+              }
+            : instructor
+        )
+      );
+      setOpenBlockDialog(false);
+    } catch (error) {
+      console.error("Error updating block status:", error);
+    }
+  };
+
+  const deleteInstructor = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:3000/admin/delete-instructor/${selectedInstructor._id}`
+      );
+      setInstructors(
+        instructors.filter((inst) => inst._id !== selectedInstructor._id)
+      );
+      setOpenDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting instructor:", error);
     }
@@ -70,7 +101,12 @@ const Instructors = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedInstructor(null);
+  };
+
+  const handleBlockAction = (type) => {
+    setActionType(type);
+    setOpenBlockDialog(true);
+    handleMenuClose();
   };
 
   return (
@@ -78,14 +114,12 @@ const Instructors = () => {
       <CssBaseline />
       <Sidebar />
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
         <Navbar title="Instructor Management" />
 
-        {/* Content Container */}
         <Container
           maxWidth="lg"
           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
@@ -141,20 +175,27 @@ const Instructors = () => {
                         : "No courses created"}
                     </TableCell>
 
+                    {/* Status Display */}
                     <TableCell align="center">
-                      <Button
-                        variant="contained"
-                        color={
-                          instructor.blocked === "yes" ? "error" : "success"
-                        }
-                        onClick={() =>
-                          toggleBlockStatus(instructor._id, instructor.blocked)
-                        }
-                        sx={{ textTransform: "capitalize" }}
+                      <Box
+                        sx={{
+                          display: "inline-block",
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 1,
+                          backgroundColor:
+                            instructor.blocked === "no" ? "#e8f5e9" : "#ffebee",
+                          color:
+                            instructor.blocked === "no" ? "#2e7d32" : "#c62828",
+                          fontWeight: "medium",
+                          textTransform: "capitalize",
+                        }}
                       >
-                        {instructor.blocked === "yes" ? "Blocked" : "Unblocked"}
-                      </Button>
+                        {instructor.blocked === "no" ? "Active" : "Blocked"}
+                      </Box>
                     </TableCell>
+
+                    {/* Action Menu */}
                     <TableCell align="center">
                       <IconButton
                         onClick={(e) => handleMenuClick(e, instructor)}
@@ -166,26 +207,23 @@ const Instructors = () => {
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                       >
+                        {selectedInstructor?.blocked === "no" ? (
+                          <MenuItem onClick={() => handleBlockAction("block")}>
+                            Block
+                          </MenuItem>
+                        ) : (
+                          <MenuItem
+                            onClick={() => handleBlockAction("unblock")}
+                          >
+                            Unblock
+                          </MenuItem>
+                        )}
                         <MenuItem
                           onClick={() => {
-                            if (selectedInstructor) {
-                              toggleBlockStatus(
-                                selectedInstructor._id,
-                                selectedInstructor.blocked
-                              );
-                              handleMenuClose();
-                            }
+                            setOpenDeleteDialog(true);
+                            handleMenuClose();
                           }}
-                        >
-                          {selectedInstructor?.blocked === "yes"
-                            ? "Unblock"
-                            : "Block"}
-                        </MenuItem>
-
-                        <MenuItem
-                          onClick={() =>
-                            deleteInstructor(selectedInstructor._id)
-                          }
+                          sx={{ color: "error.main" }}
                         >
                           Delete
                         </MenuItem>
@@ -198,6 +236,48 @@ const Instructors = () => {
           </TableContainer>
         </Container>
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete {selectedInstructor?.name}? This
+            action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={deleteInstructor} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Block/Unblock Confirmation Dialog */}
+      <Dialog open={openBlockDialog} onClose={() => setOpenBlockDialog(false)}>
+        <DialogTitle>
+          Confirm {actionType === "block" ? "Block" : "Unblock"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to {actionType} {selectedInstructor?.name}?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenBlockDialog(false)}>Cancel</Button>
+          <Button
+            onClick={toggleBlockStatus}
+            color="primary"
+            variant="contained"
+          >
+            {actionType === "block" ? "Block" : "Unblock"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

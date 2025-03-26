@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -17,6 +15,12 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
 } from "@mui/material";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Sidebar from "./Sidebar";
@@ -27,6 +31,9 @@ const Students = () => {
   const [students, setStudents] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openBlockDialog, setOpenBlockDialog] = useState(false);
+  const [actionType, setActionType] = useState(""); // 'block' or 'unblock'
 
   useEffect(() => {
     fetchStudents();
@@ -43,54 +50,53 @@ const Students = () => {
     }
   };
 
-  // Function to toggle block/unblock status
-  const toggleBlockStatus = async (studentId, currentStatus) => {
+  const toggleBlockStatus = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/admin/block-student/${studentId}`
+        `http://localhost:3000/admin/block-student/${selectedStudent._id}`
       );
 
-      // Update UI
-      setStudents((prevStudents) =>
-        prevStudents.map((student) =>
-          student._id === studentId
+      setStudents(
+        students.map((student) =>
+          student._id === selectedStudent._id
             ? { ...student, blocked: response.data.user.blocked }
             : student
         )
       );
+      setOpenBlockDialog(false);
     } catch (error) {
       console.error("Error updating block status:", error);
     }
   };
 
-  // Function to open menu
   const handleMenuOpen = (event, student) => {
     setAnchorEl(event.currentTarget);
     setSelectedStudent(student);
   };
 
-  // Function to close menu
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedStudent(null);
+    
   };
 
-  // Function to delete a student
-  const handleDeleteStudent = async (studentId) => {
+  const handleDeleteStudent = async () => {
     try {
       await axios.delete(
-        `http://localhost:3000/admin/delete-student/${studentId}`
+        `http://localhost:3000/admin/delete-student/${selectedStudent._id}`
       );
-
-      // Update UI after deletion
-      setStudents((prevStudents) =>
-        prevStudents.filter((student) => student._id !== studentId)
+      setStudents(
+        students.filter((student) => student._id !== selectedStudent._id)
       );
-
-      handleMenuClose();
+      setOpenDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting student:", error);
     }
+  };
+
+  const handleBlockAction = (type) => {
+    setActionType(type);
+    setOpenBlockDialog(true);
+    handleMenuClose();
   };
 
   return (
@@ -127,7 +133,7 @@ const Students = () => {
                     <strong>Student Email</strong>
                   </TableCell>
                   <TableCell align="center">
-                    <strong>Student Status</strong>
+                    <strong>Status</strong>
                   </TableCell>
                   <TableCell align="center">
                     <strong>Actions</strong>
@@ -151,74 +157,25 @@ const Students = () => {
                     </TableCell>
                     <TableCell>{student.email}</TableCell>
 
-                    {/* Status Toggle */}
-                    {/* <TableCell
-                      align="center"
-                      onClick={() =>
-                        toggleBlockStatus(student._id, student.blocked)
-                      }
-                      sx={{
-                        cursor: "pointer",
-                        width: "90px",
-                        borderRadius: "5px",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: student.blocked === "no" ? "green" : "red",
-                        backgroundColor:
-                          student.blocked === "no" ? "#d4edda" : "#f8d7da",
-
-                        // Flexbox Fix
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "24px", // Explicit height for better alignment
-                        minWidth: "70px",
-                        padding: "0 8px", // Reduce padding
-                        textTransform: "capitalize", // Ensure consistent text style
-
-                        transition: "0.3s",
-                        "&:hover": {
+                    {/* Status Display */}
+                    <TableCell align="center">
+                      <Box
+                        sx={{
+                          display: "inline-block",
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 1,
                           backgroundColor:
-                            student.blocked === "no" ? "#c3e6cb" : "#f5c6cb",
-                        },
-                      }}
-                    >
-                      {student.blocked === "no" ? "Unblocked" : "Blocked"}
-                    </TableCell> */}
-
-
-                    <TableCell
-  align="center"
-  onClick={() => toggleBlockStatus(student._id, student.blocked)}
-  sx={{
-    cursor: "pointer",
-    width: "90px",
-    borderRadius: "5px",
-    fontSize: "12px",
-    fontWeight: "bold",
-    color: student.blocked === "no" ? "green" : "red",
-    backgroundColor: student.blocked === "no" ? "#d4edda" : "#f8d7da",
-    
-    // Ensure full width & height
-    display: "flex",  
-    alignItems: "center",  
-    justifyContent: "center",  
-    height: "100%",  
-    minHeight: "30px", // Ensure proper vertical alignment
-    minWidth: "80px",  
-
-    padding: "0px", // Remove extra padding
-    textTransform: "capitalize", 
-
-    transition: "0.3s",
-    "&:hover": {
-      backgroundColor: student.blocked === "no" ? "#c3e6cb" : "#f5c6cb",
-    },
-  }}
->
-  {student.blocked === "no" ? "Unblocked" : "Blocked"}
-</TableCell>
-
+                            student.blocked === "no" ? "#e8f5e9" : "#ffebee",
+                          color:
+                            student.blocked === "no" ? "#2e7d32" : "#c62828",
+                          fontWeight: "medium",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {student.blocked === "no" ? "Active" : "Blocked"}
+                      </Box>
+                    </TableCell>
 
                     {/* Action Menu */}
                     <TableCell align="center">
@@ -232,11 +189,23 @@ const Students = () => {
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                       >
+                        {selectedStudent?.blocked === "no" ? (
+                          <MenuItem onClick={() => handleBlockAction("block")}>
+                            Block
+                          </MenuItem>
+                        ) : (
+                          <MenuItem
+                            onClick={() => handleBlockAction("unblock")}
+                          >
+                            Unblock
+                          </MenuItem>
+                        )}
                         <MenuItem
-                          onClick={() =>
-                            handleDeleteStudent(selectedStudent._id)
-                          }
-                          style={{ color: "red" }}
+                          onClick={() => {
+                            setOpenDeleteDialog(true);
+                            handleMenuClose();
+                          }}
+                          sx={{ color: "error.main" }}
                         >
                           Delete
                         </MenuItem>
@@ -249,6 +218,52 @@ const Students = () => {
           </TableContainer>
         </Container>
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete {selectedStudent?.name}? This action
+            cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button
+            onClick={handleDeleteStudent}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Block/Unblock Confirmation Dialog */}
+      <Dialog open={openBlockDialog} onClose={() => setOpenBlockDialog(false)}>
+        <DialogTitle>
+          Confirm {actionType === "block" ? "Block" : "Unblock"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to {actionType} {selectedStudent?.name}?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenBlockDialog(false)}>Cancel</Button>
+          <Button
+            onClick={toggleBlockStatus}
+            color="primary"
+            variant="contained"
+          >
+            {actionType === "block" ? "Block" : "Unblock"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
