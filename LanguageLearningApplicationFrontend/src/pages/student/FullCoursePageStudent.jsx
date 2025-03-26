@@ -39,6 +39,15 @@ import {
   RateReview as RateReviewIcon,
 } from "@mui/icons-material";
 
+// Add these to your existing Material-UI imports
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from "@mui/material";
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+
 const StudentCoursePage = () => {
   const user = JSON.parse(sessionStorage.getItem("user"));
   const userId = user._id;
@@ -65,6 +74,35 @@ const StudentCoursePage = () => {
   const [newQuestion, setNewQuestion] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
   const [selectedQuestion, setSelectedQuestion] = useState(null);
+
+  // Add to your component state
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [refundReason, setRefundReason] = useState("");
+  const [isEligibleForRefund, setIsEligibleForRefund] = useState(false);
+
+  // Add this useEffect to check refund eligibility
+  useEffect(() => {
+    const checkRefundEligibility = async () => {
+      try {
+        const token = sessionStorage.getItem("logintoken");
+        const response = await axios.get(
+          `http://localhost:3000/student/${userId}/${courseId}/refund-eligibility`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setIsEligibleForRefund(response.data.isEligible);
+      } catch (error) {
+        console.error("Error checking refund eligibility:", error);
+      }
+    };
+
+    if (courseId && userId) {
+      checkRefundEligibility();
+    }
+  }, [courseId, userId]);
 
   // Fetch questions
   useEffect(() => {
@@ -279,9 +317,36 @@ const StudentCoursePage = () => {
     }
   };
 
+  // Add the refund request handler
+  const handleSubmitRefundRequest = async () => {
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      const response = await axios.post(
+        `http://localhost:3000/student/${userId}/${courseId}/request-refund`,
+        { reason: refundReason },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        alert("Refund request submitted successfully!");
+        setRefundDialogOpen(false);
+        setRefundReason("");
+        setIsEligibleForRefund(false);
+      }
+    } catch (error) {
+      console.error("Error submitting refund request:", error);
+      alert(error.response?.data?.message || "Failed to submit refund request");
+    }
+  };
+
   if (loading)
     return (
       <Box
+        
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -376,7 +441,8 @@ const StudentCoursePage = () => {
         maxWidth: "86%",
         margin: "0 auto",
         p: 3,
-        backgroundColor: "rgb(156, 183, 186)",
+        backgroundColor: "rgb(233, 233, 233)",
+        // backgroundColor: "rgb(156, 183, 186)",
       }}
     >
       {/* Course Header and Thumbnail */}
@@ -397,6 +463,19 @@ const StudentCoursePage = () => {
               value={progressPercentage}
               sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
             />
+          </Box>
+
+          <Box sx={{ mt: 2 }}>
+            {isEligibleForRefund && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<MoneyOffIcon />}
+                onClick={() => setRefundDialogOpen(true)}
+              >
+                Request Refund
+              </Button>
+            )}
           </Box>
         </Box>
 
@@ -422,7 +501,7 @@ const StudentCoursePage = () => {
       {/* Navigation Tabs */}
       <Paper
         elevation={2}
-        sx={{ mb: 4, borderRadius: 2, backgroundColor: " #4F959D" }}
+        sx={{ mb: 4, borderRadius: 2, backgroundColor: "rgb(184, 193, 194)" }}
       >
         <Tabs
           value={selectedSection}
@@ -620,8 +699,11 @@ const StudentCoursePage = () => {
                         </Paper>
                       ))}
                       <Button
+                        style={{
+                          color: "black",
+                          backgroundColor: "rgb(184, 193, 194)",
+                        }}
                         variant="contained"
-                        color="primary"
                         onClick={() => handleSubmitQuiz(quiz._id)}
                         fullWidth
                       >
@@ -712,7 +794,7 @@ const StudentCoursePage = () => {
             </Box>
             <Button
               variant="contained"
-              color="primary"
+              style={{ color: "black", backgroundColor: "rgb(184, 193, 194)" }}
               onClick={handleAssignmentUpload}
               disabled={!assignmentFile || !assignmentTitle}
               fullWidth
@@ -785,7 +867,11 @@ const StudentCoursePage = () => {
                 />
                 <Button
                   variant="contained"
-                  color="primary"
+                  style={{
+                    color: "black",
+                    backgroundColor: "rgb(184, 193, 194)",
+                  }}
+                  // color="primary"
                   onClick={handlePostQuestion}
                   disabled={!newQuestion.trim()}
                 >
@@ -951,7 +1037,8 @@ const StudentCoursePage = () => {
             />
             <Button
               variant="contained"
-              color="primary"
+              style={{ color: "black", backgroundColor: "rgb(184, 193, 194)" }}
+              // color="primary"
               onClick={handleSubmitReview}
               fullWidth
               size="large"
@@ -987,6 +1074,42 @@ const StudentCoursePage = () => {
             )}
           </Paper>
         )}
+
+        {/* Add the Dialog component at the bottom of your return statement, before the closing </Box> */}
+        <Dialog
+          open={refundDialogOpen}
+          onClose={() => setRefundDialogOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle>Request Refund</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" gutterBottom>
+              You're eligible for a refund because you've watched less than 3
+              videos.
+            </Typography>
+            <TextField
+              label="Reason for refund"
+              multiline
+              rows={4}
+              fullWidth
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              sx={{ mt: 2 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRefundDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleSubmitRefundRequest}
+              color="primary"
+              variant="contained"
+              disabled={!refundReason.trim()}
+            >
+              Submit Request
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );
