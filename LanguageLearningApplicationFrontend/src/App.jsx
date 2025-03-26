@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect , useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -35,13 +35,17 @@ import RefundButton from "./pages/student/RefundButton";
 
 function App() {
 
+  const [currentUser, setCurrentUser] = useState(
+    JSON.parse(sessionStorage.getItem("currentUser"))
+  );
+
   return (
     <BrowserRouter>
-    <Navbar/>
+    <Navbar currentUser={currentUser} setCurrentUser={setCurrentUser}/>
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route path="/" element={<Home isLoggedIn={!!currentUser} />} />
+      <Route path="/login" element={<Login setCurrentUser={setCurrentUser} />} />
+      <Route path="/signup" element={<Signup setCurrentUser={setCurrentUser}  />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/contactus" element={<ContactUs/>} />
 

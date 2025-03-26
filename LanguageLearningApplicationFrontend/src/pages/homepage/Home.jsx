@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRef } from "react";
 import './Home.scss'
 
 
@@ -17,7 +18,15 @@ import TrustedBy from "../../components/trustedBy/TrustedBy";
 import CatCard from "../../components/catCard/CatCard";
 
 
-const Home = () => {
+const Home = ({ isLoggedIn }) => {
+
+    const learnMoreRef = useRef(null);
+
+    const handleScrollToLearnMore = () => {
+      if (learnMoreRef.current) {
+        learnMoreRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    };
     
     const location = useLocation();
 
@@ -28,7 +37,9 @@ const Home = () => {
     // }, [location]);
     return (
       <div className="home">
-        <Featured/>
+        <Featured onLearnMoreClick={handleScrollToLearnMore} 
+                  isLoggedIn={isLoggedIn}  
+        />
         <TrustedBy/>
         <div className="popular-courses">
           <h2>Popular Courses</h2>
@@ -76,7 +87,7 @@ const Home = () => {
 
 
 
-        <div className="features dark">
+        <div  ref={learnMoreRef}  className="features dark">
           <div className="container">
             <div className="item">
               <h1>Why Choose Us?</h1>

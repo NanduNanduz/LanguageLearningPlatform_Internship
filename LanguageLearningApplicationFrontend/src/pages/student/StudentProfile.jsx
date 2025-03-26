@@ -17,11 +17,15 @@ import {
   CircularProgress,
 } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { useLocation } from "react-router-dom";
+import { useLocation , useNavigate  } from "react-router-dom";
 
 const StudentProfile = () => {
   const location = useLocation();
-  const student = location.state?.student;
+  const navigate = useNavigate();
+  // const student = location.state?.student;
+
+  // Handle both direct user object and nested student object cases
+  const user = location.state?.user || location.state?.student?.currentUser;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,23 +41,38 @@ const StudentProfile = () => {
     qualification: "",
   });
 
+  // useEffect(() => {
+  //   fetchProfile();
+  // }, []);
+
   useEffect(() => {
+    if (!user?._id) {
+      // Redirect if no user data
+      navigate("/login");
+      return;
+    }
     fetchProfile();
-  }, []);
+  }, [user?._id]);
+
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/user/profile/${student._id}`);
-      setProfile(response.data.user);
+      const response = await axios.get(
+        `http://localhost:3000/user/profile/${user._id}`
+      );
+      const userData = response.data.user;
+      setProfile(userData);
       setFormData({
-        bio: response.data.user.bio || "",
-        github: response.data.user.socialLinks?.github || "",
-        linkedIn: response.data.user.socialLinks?.linkedIn || "",
-        twitter: response.data.user.socialLinks?.twitter || "",
-        mobile: response.data.user.mobile || "",
-        qualification: response.data.user.qualification || "",
+        bio: userData.bio || "",
+        github: userData.socialLinks?.github || "",
+        linkedIn: userData.socialLinks?.linkedIn || "",
+        twitter: userData.socialLinks?.twitter || "",
+        mobile: userData.mobile || "",
+        qualification: userData.qualification || "",
       });
-      setPreviewImage(response.data.user.profilePicture || "https://via.placeholder.com/150");
+      setPreviewImage(
+        userData.profilePicture || "https://via.placeholder.com/150"
+      );
       setLoading(false);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -84,7 +103,7 @@ const StudentProfile = () => {
         data.append("profilePicture", profileImage);
       }
 
-      await axios.put(`http://localhost:3000/user/updateUser/${student._id}`, data, {
+      await axios.put(`http://localhost:3000/user/updateUser/${user._id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

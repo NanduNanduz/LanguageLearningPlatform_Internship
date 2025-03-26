@@ -18,7 +18,7 @@ import Grid2 from "@mui/material/Grid2";
 import axios from "axios";
 
 
-const Login = ({onClose}) => {
+const Login = ({ setCurrentUser, onClose }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [forgotOpen, setForgotOpen] = useState(false);
   const [otpOpen, setOtpOpen] = useState(false);
@@ -50,25 +50,32 @@ const Login = ({onClose}) => {
         setMessage("You are blocked from this site.");
         return; // Exit the function if the user is blocked
       }
-      sessionStorage.setItem("logintoken", response.data.token);
-      sessionStorage.setItem("user", JSON.stringify(response.data.user));
 
-
-      if (role === "student") {
-        navigate("/studentHome", { state: { user: response.data.user } });
-      } else if (role === "admin") {
-        navigate("/adminDashboard", { state: { user: response.data.user } });
-      } else if (role === "instructor") {
-        navigate("/instructorHome", { state: { user: response.data.user } });
-      }
-      alert("login success");
-    } catch (error) {
-      const errorMessage = error.response?.data?.message
-          setMessage(errorMessage)
+    // Store token in sessionStorage (more secure)
+    sessionStorage.setItem("logintoken", response.data.token);
+    
+    // Store user data in sessionStorage
+    sessionStorage.setItem("user", JSON.stringify(response.data.user));
+    
+    // Update parent component state
+    if (setCurrentUser) {
+      setCurrentUser(response.data.user);
     }
-  
-  };
 
+    // Navigate based on role
+    if (role === "student") {
+      navigate("/", { state: { user: response.data.user } });
+    } else if (role === "admin") {
+      navigate("/adminDashboard", { state: { user: response.data.user } });
+    } else if (role === "instructor") {
+      navigate("/", { state: { user: response.data.user } });
+    }
+    alert("login success");
+    } catch (error) {
+    const errorMessage = error.response?.data?.message;
+    setMessage(errorMessage);
+    }
+    };
   const handleForgotPassword = () => {
     setForgotOpen(true);
   };

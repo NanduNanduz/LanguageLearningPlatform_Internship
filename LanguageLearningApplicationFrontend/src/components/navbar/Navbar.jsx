@@ -52,6 +52,241 @@
 
 // export default Navbar;
 
+// import React, { useEffect, useState } from "react";
+// import "./Navbar.scss";
+// import { Link, useLocation } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+// import axios from "axios";
+
+// const Navbar = ({ currentUser, setCurrentUser }) => {
+//   const [active, setActive] = useState(false);
+//   const [open, setOpen] = useState(false);
+//   const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
+//   const [courses, setCourses] = useState([]);
+//   const { pathname } = useLocation();
+//   const navigate = useNavigate();
+
+//   const isActive = () => {
+//     window.scrollY > 0 ? setActive(true) : setActive(false);
+//   };
+
+//   useEffect(() => {
+//     window.addEventListener("scroll", isActive);
+
+//     return () => {
+//       window.removeEventListener("scroll", isActive);
+//     };
+//   }, []);
+
+//   // Initialize currentUser from sessionStorage on component mount
+//   useEffect(() => {
+//     const userFromStorage = sessionStorage.getItem("user");
+//     if (userFromStorage) {
+//       setCurrentUser(JSON.parse(userFromStorage));
+//     }
+//   }, [setCurrentUser]);
+
+//   // Fetch profile picture when the component mounts
+//   useEffect(() => {
+//     const fetchProfilePicture = async () => {
+//       if (currentUser?._id) {
+//         try {
+//           const response = await axios.get(
+//             `http://localhost:3000/user/profile/${currentUser._id}`
+//           );
+//           setProfilePicture(response.data.user?.profilePicture || null);
+//         } catch (error) {
+//           console.error("Error fetching profile picture:", error);
+//         }
+//       }
+//     };
+
+//     fetchProfilePicture();
+//   }, [currentUser]);
+
+
+
+
+
+//   const handleLogout =  () => {
+//     try {
+//       //await axios.post("/auth/logout");
+//       sessionStorage.clear(); // Clears sessionStorage
+//       setCurrentUser(null); // Clear currentUser state
+//       window.history.pushState(null, null, "/");
+//       window.location.replace("/"); // Ensure no back navigation
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   };
+
+//   const goToProfile = () => {
+//     if (currentUser.role === "student") {
+//       navigate("/profileStudent", { state: { user: {currentUser} } });
+//     } else if (currentUser.role === "instructor") {
+//       navigate("/profileInstructor", { state: { user: currentUser } });
+//     }
+//     setOpen(false);
+//   };
+
+//   return (
+//     <div className={active || pathname !== "/" ? "navbar active" : "navbar"}>
+//       <div className="container">
+//         <div className="logo">
+//           <Link to={"/"} className="link">
+//             <span className="text">Fluencia</span>
+//           </Link>
+//           <span className="dot">.</span>
+//         </div>
+
+//           <div className="links">
+//           {/* Change "Courses" link based on user role */}
+//           {!currentUser ? (
+//             <Link className="link" to="/courses">
+//               Courses
+//             </Link>
+//           ) : currentUser.role === "student" ? (
+//             <Link className="link" to="/enrolledCourses" state={{ user: currentUser }}>
+//               Enrolled Courses
+//             </Link>
+//           ) : (
+//             <Link className="link" to="/mygigs" state={{ user: currentUser }}>
+//               My Courses
+//             </Link>
+//           )}
+
+//           <Link className="link" to="/contactus">
+//             Contact Us
+//           </Link>
+
+
+//           {currentUser ? (
+//             <div className="user" onClick={() => setOpen(!open)}>
+//               {/* Profile Picture */}
+//               <img
+//                 src={profilePicture || "/images/noavatar.jpg"}
+//                 alt="Profile"
+//               />
+//               <span>{currentUser?.username}</span>
+//               {/* Dropdown Menu */}
+//               {open && (
+//                 <div className="options">
+//                   {/* Profile (Visible to all users) */}
+//                   {/* <Link className="link" onClick={goToProfile}>
+//                     Profile
+//                   </Link> */}
+
+//                   <Link className="link" to={goToProfile}>
+//                     Profile
+//                   </Link>
+
+
+//                   {/* Enrolled Courses (Visible to students) */}
+//                   {/* {currentUser.role === "student" && (
+//                     <Link className="link" to="/enrolledCourses">
+//                       Enrolled Courses
+//                     </Link>
+//                   )} */}
+
+//                   {/* Add Course and My Courses (Visible to instructors) */}
+//                   {currentUser.role === "instructor" && (
+//                     <>
+//                       <Link className="link" to="/add">
+//                         Add Course
+//                       </Link>
+//                       {/* <Link className="link" to="/mygigs">
+//                         My Courses
+//                       </Link> */}
+//                     </>
+//                   )}
+
+//                   {/* Logout (Visible to all users) */}
+//                   <Link className="link" onClick={handleLogout}>
+//                     Logout
+//                   </Link>
+//                 </div>
+//               )}
+//             </div>
+//           ) : (
+//             <>
+//               <Link to="/login" className="link">
+//                 Sign in
+//               </Link>
+//               <Link className="link" to="/signup">
+//                 <button>Join</button>
+//               </Link>
+//             </>
+//           )}
+//         </div>
+//       </div>
+//       {(active || pathname !== "/") && (
+//         <>
+//           <hr />
+//           <div className="menu">
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("English")}`}
+//             >
+//               English
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("Spanish")}`}
+//             >
+//               Spanish
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("French")}`}
+//             >
+//               French
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("German")}`}
+//             >
+//               German
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("Mandarin")}`}
+//             >
+//               Mandarin
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("Japanese")}`}
+//             >
+//               Japanese
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("Hindi")}`}
+//             >
+//               Hindi
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("Russian")}`}
+//             >
+//               Russian
+//             </Link>
+//             <Link
+//               className="link menuLink"
+//               to={`/gigs?cat=${encodeURIComponent("Italian")}`}
+//             >
+//               Italian
+//             </Link>
+//           </div>
+//           <hr />
+//         </>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Navbar;
+
 import React, { useEffect, useState } from "react";
 import "./Navbar.scss";
 import { Link, useLocation } from "react-router-dom";
@@ -61,7 +296,7 @@ import axios from "axios";
 const Navbar = ({ currentUser, setCurrentUser }) => {
   const [active, setActive] = useState(false);
   const [open, setOpen] = useState(false);
-  const [profilePicture, setProfilePicture] = useState(null); // State for profile picture
+  const [profilePicture, setProfilePicture] = useState(null);
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -71,46 +306,65 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
 
   useEffect(() => {
     window.addEventListener("scroll", isActive);
-
     return () => {
       window.removeEventListener("scroll", isActive);
     };
   }, []);
 
-  // Fetch profile picture when the component mounts
+  // Initialize currentUser from sessionStorage on component mount
   useEffect(() => {
-    const fetchProfilePicture = async () => {
-      if (currentUser?._id) {
-        try {
-          const response = await axios.get(
-            `http://localhost:3000/user/profile/${currentUser._id}`
-          );
-          setProfilePicture(response.data.user?.profilePicture || null);
-        } catch (error) {
-          console.error("Error fetching profile picture:", error);
-        }
-      }
-    };
+    const userFromStorage = sessionStorage.getItem("user");
+    if (userFromStorage) {
+      const user = JSON.parse(userFromStorage);
+      setCurrentUser(user);
+      fetchProfilePicture(user._id);
+    }
+  }, [setCurrentUser]);
 
-    fetchProfilePicture();
-  }, [currentUser]);
-
-  const handleLogout = async () => {
+  const fetchProfilePicture = async (userId) => {
     try {
-      await axios.post("/auth/logout");
-      localStorage.clear(); // Clears all localStorage items
-      sessionStorage.clear(); // Clears sessionStorage
-      setCurrentUser(null); // Clear currentUser state
-      window.history.pushState(null, null, "/login");
-      window.location.replace("/login"); // Ensure no back navigation
+      const response = await axios.get(
+        `http://localhost:3000/user/profile/${userId}`
+      );
+      setProfilePicture(response.data.user?.profilePicture || null);
+    } catch (error) {
+      console.error("Error fetching profile picture:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    try {
+      sessionStorage.clear();
+      setCurrentUser(null);
+      navigate("/");
+      window.location.reload(); // Ensure complete reset
     } catch (err) {
       console.log(err);
     }
   };
 
   const goToProfile = () => {
-    navigate("/profileStudent", { state: { student: currentUser } });
-    setOpen(false); // Close the dropdown
+    if (!currentUser) return;
+    
+    if (currentUser.role === "student") {
+      navigate("/profileStudent", { state: { user: currentUser } });
+    } else if (currentUser.role === "instructor") {
+      navigate("/profileInstructor", { state: { user: currentUser } });
+    }
+    setOpen(false);
+  };
+
+  const goToCourses = () => {
+    if (!currentUser) {
+      navigate("/courses");
+      return;
+    }
+    
+    if (currentUser.role === "student") {
+      navigate("/enrolledCourses", { state: { user: currentUser } });
+    } else {
+      navigate("/instructorHome", { state: { user: currentUser } });
+    }
   };
 
   return (
@@ -122,61 +376,44 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
           </Link>
           <span className="dot">.</span>
         </div>
+
         <div className="links">
-          <Link className="link" to="/courses">
-            Courses
+          <Link 
+            className="link" 
+            to={currentUser ? (currentUser.role === "student" ? "/enrolledCourses" : "/mygigs") : "/courses"}
+            onClick={(e) => {
+              if (currentUser) {
+                e.preventDefault();
+                goToCourses();
+              }
+            }}
+          >
+            {!currentUser ? "Courses" : currentUser.role === "student" ? "Enrolled Courses" : "My Courses"}
           </Link>
+
           <Link className="link" to="/contactus">
             Contact Us
           </Link>
 
           {currentUser ? (
             <div className="user" onClick={() => setOpen(!open)}>
-              {/* Profile Picture */}
-              <img
-                src={profilePicture || "/images/noavatar.jpg"}
-                alt="Profile"
-              />
+              <img src={profilePicture || "/images/noavatar.jpg"} alt="Profile" />
               <span>{currentUser?.username}</span>
-              {/* Dropdown Menu */}
               {open && (
                 <div className="options">
-                  {/* Profile (Visible to all users) */}
-                  <Link className="link" onClick={goToProfile}>
+                  <span className="link" onClick={goToProfile}>
                     Profile
-                  </Link>
+                  </span>
 
-                  {/* Enrolled Courses (Visible to students) */}
-                  {currentUser.role === "student" && (
-                    <Link className="link" to="/enrolledCourses">
-                      Enrolled Courses
+                  {currentUser.role === "instructor" && (
+                    <Link className="link" to="/addCourse">
+                      Add Course
                     </Link>
                   )}
 
-                  {/* Add Course and My Courses (Visible to instructors) */}
-                  {currentUser.role === "instructor" && (
-                    <>
-                      <Link className="link" to="/add">
-                        Add Course
-                      </Link>
-                      <Link className="link" to="/mygigs">
-                        My Courses
-                      </Link>
-                    </>
-                  )}
-
-                  {/* Orders and Messages (Visible to all users) */}
-                  <Link className="link" to="/orders">
-                    Orders
-                  </Link>
-                  <Link className="link" to="/messages">
-                    Messages
-                  </Link>
-
-                  {/* Logout (Visible to all users) */}
-                  <Link className="link" onClick={handleLogout}>
+                  <span className="link" onClick={handleLogout}>
                     Logout
-                  </Link>
+                  </span>
                 </div>
               )}
             </div>
@@ -192,64 +429,20 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
           )}
         </div>
       </div>
+      
       {(active || pathname !== "/") && (
         <>
           <hr />
           <div className="menu">
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("English")}`}
-            >
-              English
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("Spanish")}`}
-            >
-              Spanish
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("French")}`}
-            >
-              French
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("German")}`}
-            >
-              German
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("Mandarin")}`}
-            >
-              Mandarin
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("Japanese")}`}
-            >
-              Japanese
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("Hindi")}`}
-            >
-              Hindi
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("Russian")}`}
-            >
-              Russian
-            </Link>
-            <Link
-              className="link menuLink"
-              to={`/gigs?cat=${encodeURIComponent("Italian")}`}
-            >
-              Italian
-            </Link>
+            {["English", "Spanish", "French", "German", "Mandarin", "Japanese", "Hindi", "Russian", "Italian"].map((language) => (
+              <Link
+                key={language}
+                className="link menuLink"
+                to={`/courses?cat=${encodeURIComponent(language)}`}
+              >
+                {language}
+              </Link>
+            ))}
           </div>
           <hr />
         </>

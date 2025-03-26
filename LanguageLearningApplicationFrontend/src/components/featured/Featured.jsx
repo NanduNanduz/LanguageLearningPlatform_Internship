@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import './Featured.scss'
 import { Link, useNavigate } from "react-router-dom";
 
-const Featured = () => {
+const Featured = ({  onLearnMoreClick ,isLoggedIn }) => {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
 
@@ -27,9 +27,12 @@ const Featured = () => {
                     <button onClick={handleSubmit}><img src="./images/search.png" alt="" /></button>
                 </div>
                 <div className="popular">
-                <Link to={`/gigs?cat=${encodeURIComponent("Web")}`}><button>Get Started</button></Link>
-                <Link to={`/gigs?cat=${encodeURIComponent("Gaming")}`}><button>Learn More</button></Link>
-
+                    {isLoggedIn ? (
+                        <Link to={`/courses`}><button>Explore Courses</button></Link>
+                        ) : (
+                        <Link to={`/signup`}><button>Get Started</button></Link>
+                        )}
+                        <button onClick={onLearnMoreClick}>Learn More</button>
                 </div>
             </div>
             <div className="right">
