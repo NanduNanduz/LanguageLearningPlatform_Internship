@@ -12,13 +12,15 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem
+  MenuItem,
+  CircularProgress
 } from "@mui/material";
 
 const UpdateCourse = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem("user"));
+  const [loading, setLoading] = useState(false);
 
   const [courseDetails, setCourseDetails] = useState({
     title: "",
@@ -76,6 +78,7 @@ const UpdateCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("title", courseDetails.title);
@@ -100,13 +103,15 @@ const UpdateCourse = () => {
       navigate("/instructorHome", { state: { user: user } });
     } catch (error) {
       console.error("Error updating course:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div
       style={{
-        backgroundColor:"#ADB2D4", // Red background
+        backgroundColor:"rgb(124, 169, 174)", 
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -196,10 +201,11 @@ const UpdateCourse = () => {
               <Button
                 type="submit"
                 variant="contained"
-                sx={{ backgroundColor: "rgb(85, 123, 159)", color: "white" }} // Darker red button
+                sx={{ backgroundColor: "rgb(85, 123, 159)", color: "white" }}
                 fullWidth
+                disabled={loading}
               >
-                Update Course
+                {loading ? <CircularProgress size={24} color="inherit" /> : "Update Course"}
               </Button>
             </Grid>
           </Grid>
