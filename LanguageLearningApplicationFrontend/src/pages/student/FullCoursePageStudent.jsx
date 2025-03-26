@@ -44,9 +44,9 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
 } from "@mui/material";
-import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 
 const StudentCoursePage = () => {
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -79,23 +79,34 @@ const StudentCoursePage = () => {
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [refundReason, setRefundReason] = useState("");
   const [isEligibleForRefund, setIsEligibleForRefund] = useState(false);
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(true);
 
   // Add this useEffect to check refund eligibility
   useEffect(() => {
     const checkRefundEligibility = async () => {
+      setIsCheckingEligibility(true);
       try {
         const token = sessionStorage.getItem("logintoken");
         const response = await axios.get(
-          `http://localhost:3000/student/${userId}/${courseId}/refund-eligibility`,
+          `http://localhost:3000/student/eligibility/${userId}/${courseId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        setIsEligibleForRefund(response.data.isEligible);
+
+        // Handle both possible response formats
+        setIsEligibleForRefund(
+          response.data.eligible !== undefined
+            ? response.data.eligible
+            : response.data.isEligible
+        );
       } catch (error) {
         console.error("Error checking refund eligibility:", error);
+        setIsEligibleForRefund(false);
+      } finally {
+        setIsCheckingEligibility(false);
       }
     };
 
@@ -346,7 +357,6 @@ const StudentCoursePage = () => {
   if (loading)
     return (
       <Box
-        
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -466,7 +476,8 @@ const StudentCoursePage = () => {
           </Box>
 
           <Box sx={{ mt: 2 }}>
-            {isEligibleForRefund && (
+            {isCheckingEligibility && <CircularProgress size={24} />}
+            {!isCheckingEligibility && isEligibleForRefund && (
               <Button
                 variant="outlined"
                 color="error"
