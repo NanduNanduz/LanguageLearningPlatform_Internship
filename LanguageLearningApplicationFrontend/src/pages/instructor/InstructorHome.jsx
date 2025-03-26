@@ -7,24 +7,12 @@ import {
   Typography,
   Grid,
   CardActions,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  AppBar,
-  Toolbar,
-  IconButton,
   Box,
   Container,
-  Menu,
-  MenuItem,
-  Avatar,
+  CssBaseline,
   useMediaQuery,
-  useTheme,
-  CssBaseline
+  useTheme
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const drawerWidth = 240; // Sidebar width
@@ -34,9 +22,6 @@ const InstructorHome = () => {
   const navigate = useNavigate();
   const instructor = location.state?.user;
   const [courseDetails, setCourseDetails] = useState([]);
-  const [profilePicture, setProfilePicture] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -52,25 +37,10 @@ const InstructorHome = () => {
       }
     };
 
-    const fetchProfileDetails = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/user/profile/${instructor?._id}`);
-        setProfilePicture(response.data.user?.profilePicture || null);
-      } catch (error) {
-        console.error("Error fetching profile details:", error);
-      }
-    };
-
     if (instructor?._id) {
       fetchCourseDetails();
-      fetchProfileDetails();
     }
   }, [instructor]);
-
-  const handleLogout = () => {
-    sessionStorage.clear();
-    navigate("/");
-  };
 
   const handleDelete = async (courseId) => {
     try {
@@ -82,39 +52,10 @@ const InstructorHome = () => {
   };
 
   const handleUpdate = (courseId) => navigate(`/updateCourse/${courseId}`);
-  const handleProfileClick = (event) => setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
-  const goToProfile = () => {
-    navigate("/profileInstructor", { state: { instructor } });
-    handleClose();
-  };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
       <CssBaseline />
-
-      {/* Sidebar */}
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        sx={{
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: "border-box",
-            backgroundColor: "#f5f5f5",
-          },
-        }}
-      >
-        <List>
-          <ListItem>
-            <ListItemText primary={`Welcome, ${instructor?.name}`} sx={{ textAlign: "center" }} />
-          </ListItem>
-          <ListItem button component={Link} to="/addCourse" state={{ instructor }}>
-            <ListItemText primary="Add Course" className="text-center" />
-          </ListItem>
-        </List>
-      </Drawer>
 
       {/* Main Content */}
       <Box
@@ -122,44 +63,39 @@ const InstructorHome = () => {
           flexGrow: 1,
           display: "flex",
           flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
           transition: "margin 0.3s",
-          marginLeft: isMobile ? 0 : `${drawerWidth}px`, // Push content if sidebar is visible
-          width: isMobile ? "100%" : `calc(100% - ${drawerWidth}px)`, // Adjust width
+          width: "100%", // Ensures full width
+          paddingLeft: isMobile ? 0 : `${drawerWidth / 2}px`, // Adjust for sidebar
+          paddingRight: isMobile ? 0 : `${drawerWidth / 2}px`, // Balance padding
         }}
       >
-        {/* Top Bar */}
-        <AppBar position="static">
-          <Toolbar>
-            {isMobile && (
-              <IconButton color="inherit" edge="start" onClick={() => setMobileOpen(!mobileOpen)}>
-                <MenuIcon />
-              </IconButton>
-            )}
-            <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "left" }}>
-              Instructor Dashboard
-            </Typography>
-            <IconButton color="inherit" onClick={handleProfileClick}>
-              <Avatar src={profilePicture || ""} alt="Profile">
-                {!profilePicture && <AccountCircleIcon />}
-              </Avatar>
-            </IconButton>
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-              <MenuItem onClick={goToProfile}>Profile</MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
-          </Toolbar>
-        </AppBar>
-
         {/* Course Section */}
         <Container
           sx={{
-            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
             padding: 3,
-            maxWidth: isMobile ? "100%" : "85%",
-            margin: "auto",
+            maxWidth: "70%", // Adjusted width for centering
+            backgroundColor: "#ffffff",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            margin: "auto", // Centers horizontally
           }}
         >
-          <Typography variant="h4" gutterBottom align="center">
+          {/* Welcome Message */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
+            <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+              Welcome, {instructor?.name}
+            </Typography>
+          </Box>
+
+          <Typography variant="h4" gutterBottom>
             Your Courses
           </Typography>
 
@@ -175,6 +111,7 @@ const InstructorHome = () => {
                       height: "100%",
                       padding: 1,
                       backgroundColor: "#fafafa",
+                      textAlign: "center",
                     }}
                   >
                     <CardContent>
