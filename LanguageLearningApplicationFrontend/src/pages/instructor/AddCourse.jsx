@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+AddCourse.jsx
+
+import React, { useEffect , useState } from "react";
 import axios from "axios";
 import {
   TextField,
@@ -11,6 +13,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Box,
   CircularProgress
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
@@ -20,26 +23,34 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const AddCourse = () => {
   const location = useLocation();
-  const instructor = location.state?.instructor;
-  const instructorId = location.state?.instructor?._id;
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  if (!instructorId) {
-    return <h2>Error: Instructor ID not found!</h2>;
-  }
+  // const instructor = location.state?.instructor;
+  // const instructorId = location.state?.instructor?._id;
+
+  // Get user data from location state (consistent with your Navbar implementation)
+  const user = location.state?.user || location.state?.instructor?.currentUser;
+
+  const userId = user?._id;
+  // if (!userId) {
+  //   return <h2>Error: Instructor ID not found!</h2>;
+  // }
+
+
 
   const [courseData, setCourseData] = useState({
     title: "",
     description: "",
     price: "",
     category: "",
-    instructorName: "",
+    instructorName: user?.username || "",
   });
   const [thumbnail, setThumbnail] = useState(null);
   const [videoFiles, setVideoFiles] = useState([]);
   const [videoTitles, setVideoTitles] = useState([""]);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  
   const categories = [
     "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati",
     "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili", "Santali",
@@ -50,6 +61,14 @@ const AddCourse = () => {
     "Malay", "Swedish", "Danish", "Finnish", "Norwegian", "Hungarian", "Czech",
     "Slovak", "Romanian", "Ukrainian", "Filipino (Tagalog)", "Swahili"
   ];
+
+  // useEffect(() => {
+  //   if (!userId) {
+  //     navigate("/login");
+  //     return;
+  //   }
+  //   setLoading(false);
+  // }, [userId, navigate]);
 
   const handleChange = (e) => {
     setCourseData({ ...courseData, [e.target.name]: e.target.value });
@@ -92,7 +111,6 @@ const AddCourse = () => {
       return;
     }
 
-    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("title", courseData.title);
@@ -101,6 +119,7 @@ const AddCourse = () => {
       formData.append("category", courseData.category);
       formData.append("instructorName", courseData.instructorName);
       formData.append("thumbnail", thumbnail);
+      formData.append("instructorId", userId);
 
       videoTitles.forEach((title, index) => {
         if (title) formData.append("videoTitle", title);
@@ -108,7 +127,7 @@ const AddCourse = () => {
       });
 
       const response = await axios.post(
-        `http://localhost:3000/instructor/createCourse/${instructorId}`,
+        `http://localhost:3000/instructor/createCourse/${userId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -120,15 +139,15 @@ const AddCourse = () => {
     } catch (error) {
       setError("Error creating course. Please try again.");
       console.error("Error:", error);
-    } finally {
-      setLoading(false);
     }
   };
+
+
 
   return (
     <Paper
       sx={{
-        backgroundColor: "rgb(124, 169, 174)",
+        backgroundColor: "#ADB2D4", // Light blue background
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -141,21 +160,22 @@ const AddCourse = () => {
         encType="multipart/form-data"
         style={{ width: "100%", maxWidth: 600 }}
       >
-        <Typography variant="h5" gutterBottom sx={{textAlign:"center",fontWeight: "bold", marginBottom: "15px"}}>
+        <Typography variant="h5" gutterBottom sx={{textAlign:"center",fontWeight: "bold", marginBottom: "15px",
+            }}>
           Create a New Course
         </Typography>
         {error && <Typography color="error">{error}</Typography>}
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
-              sx={{
-                backgroundColor: "white", 
-                borderRadius: "5px"
-              }}
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
               fullWidth
               variant="filled"
               label="Course Title"
               name="title"
+              
               onChange={handleChange}
               required
             />
@@ -163,10 +183,9 @@ const AddCourse = () => {
 
           <Grid item xs={12}>
             <TextField
-              sx={{
-                backgroundColor: "white", 
-                borderRadius: "5px"
-              }}
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
               fullWidth
               variant="filled"
               label="Description"
@@ -180,10 +199,9 @@ const AddCourse = () => {
 
           <Grid item xs={12}>
             <TextField
-              sx={{
-                backgroundColor: "white", 
-                borderRadius: "5px"
-              }}
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
               fullWidth
               variant="filled"
               label="Price (₹)"
@@ -195,29 +213,28 @@ const AddCourse = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
-              <InputLabel>Category</InputLabel>
-              <Select
-                name="category"
-                value={courseData.category}
-                onChange={handleChange}
-                required
-              >
-                {categories.map((category, index) => (
-                  <MenuItem key={index} value={category}>
-                    {category}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
+  <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
+    <InputLabel>Category</InputLabel>
+    <Select
+      name="category"
+      value={courseData.category}
+      onChange={handleChange}
+      required
+    >
+      {categories.map((category, index) => (
+        <MenuItem key={index} value={category}>
+          {category}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+</Grid>
 
           <Grid item xs={12}>
             <TextField
-              sx={{
-                backgroundColor: "white", 
-                borderRadius: "5px"
-              }}
+            sx={{
+              backgroundColor: "white", 
+              borderRadius: "5px"}}
               fullWidth
               variant="filled"
               label="Name That Will Be Displayed in the Certficates"
@@ -230,15 +247,16 @@ const AddCourse = () => {
           <Grid item xs={12}>
             <input type="file" accept="image/*" onChange={handleThumbnailChange} style={{ display: "none" }} id="thumbnail-upload" required />
             <label htmlFor="thumbnail-upload">
-              <Button
-                variant="outlined"
-                component="span"
-                startIcon={<AddPhotoAlternateIcon />}
-                sx={{ color: "black" }}
-              >
-                Upload Thumbnail{" "}
-                <span style={{ color: "rgb(211, 42, 42)" }}>(Required)</span>
-              </Button>
+             <Button
+                    variant="outlined"
+                    component="span"
+                    startIcon={<AddPhotoAlternateIcon />}
+                    sx={{ color: "black" }}
+                  >
+                    Upload Thumbnail{" "}
+                    <span style={{ color: "rgb(211, 42, 42)" }}>(Required)</span>
+            </Button>
+
             </label>
             {thumbnail && <Typography mt={1}>Selected: {thumbnail.name}</Typography>}
           </Grid>
@@ -249,10 +267,9 @@ const AddCourse = () => {
               <Grid container spacing={2} key={index} alignItems="center">
                 <Grid item xs={6}>
                   <TextField
-                    sx={{
-                      backgroundColor: "white", 
-                      borderRadius: "5px"
-                    }}
+                  sx={{
+                    backgroundColor: "white", 
+                    borderRadius: "5px"}}
                     fullWidth
                     variant="filled"
                     label="Video Title"
@@ -281,22 +298,22 @@ const AddCourse = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={loading}
-              sx={{
-                backgroundColor: "rgb(85, 123, 159)",
-                color: "#FFFFFF",
-                borderColor: "#1565C0",
-                "&:hover": {
-                  backgroundColor: "rgb(75, 144, 213)",
-                },
-              }}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : "Create Course"}
-            </Button>
+          <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      backgroundColor: "rgb(85, 123, 159)", // ✅ Matching blue color
+                      color: "#FFFFFF", // ✅ White text
+                      borderColor: "#1565C0", // ✅ Darker blue border
+                      "&:hover": {
+                        backgroundColor: "rgb(75, 144, 213)", // ✅ Slightly darker on hover
+                      },
+                    }}
+                  >
+                    Create Course
+          </Button>
+
           </Grid>
         </Grid>
       </form>

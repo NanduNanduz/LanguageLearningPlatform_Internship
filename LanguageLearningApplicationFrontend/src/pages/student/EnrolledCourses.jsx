@@ -15,7 +15,8 @@ import { Link, useLocation } from "react-router-dom";
 
 const EnrolledCourses = () => {
   const location = useLocation();
-  const student = location.state?.student; // Get student details from state
+  //const student = location.state?.student; // Get student details from state
+  const user = location.state?.user || location.state?.student?.currentUser;
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +24,7 @@ const EnrolledCourses = () => {
     const fetchEnrolledCourses = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/enrolledCourse/${student?._id}`
+          `http://localhost:3000/student/enrolledCourse/${user?._id}`
         );
     
         const enrolledData = response.data?.courses || [];
@@ -48,10 +49,10 @@ const EnrolledCourses = () => {
       }
     };
     
-    if (student?._id) {
+    if (user?._id) {
       fetchEnrolledCourses();
     }    
-  }, [student]);
+  }, [user]);
 
   return (
     <Container sx={{ paddingTop: 3 }}>

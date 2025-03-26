@@ -21,7 +21,8 @@ import { useLocation } from "react-router-dom";
 
 const InstructorProfile = () => {
   const location = useLocation();
-  const instructor = location.state?.instructor;
+  //const instructor = location.state?.instructor;
+  const user = location.state?.user || location.state?.instructor?.currentUser;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -44,7 +45,7 @@ const InstructorProfile = () => {
   const fetchProfile = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/user/profile/${instructor._id}`
+        `http://localhost:3000/user/profile/${user._id}`
       );
       setProfile(response.data.user);
       setPreviewImage(response.data.user.profilePicture || "https://via.placeholder.com/150");
@@ -89,7 +90,7 @@ const InstructorProfile = () => {
       }
 
       await axios.put(
-        `http://localhost:3000/user/updateUser/${instructor._id}`,
+        `http://localhost:3000/user/updateUser/${user._id}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
