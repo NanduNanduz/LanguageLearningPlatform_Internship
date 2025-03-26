@@ -819,8 +819,6 @@ export const deleteQuizQuestion = async (req, res) => {
 
 
 
-
-
 export const getInstructorQuestions = async (req, res) => {
   try {
     const { courseId } = req.params;

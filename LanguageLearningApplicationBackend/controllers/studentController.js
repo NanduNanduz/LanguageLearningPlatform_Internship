@@ -703,12 +703,6 @@ export const searchCoursesByName = async (req, res) => {
 };
 
 
-
-
-
-
-
-
 // Post a new question
 export const postQuestion = async (req, res) => {
   try {
@@ -763,9 +757,6 @@ export const postAnswer = async (req, res) => {
     res.status(500).json({ error: "Failed to post answer" });
   }
 };
-
-
-
 
 export const getCourseQuestions = async (req, res) => {
   try {
@@ -877,3 +868,50 @@ export const markAsResolved = async (req, res) => {
   }
 };
 
+export const checkRefundEligibility = async (req, res) => {
+  try {
+    const { userId, courseId } = req.params;
+
+    // 1. Find the user and their enrollment for the course
+    const user = await userModel.findOne(
+      { 
+        _id: userId,
+        'enrolledCourses.courseId': courseId 
+      },
+      { 
+        'enrolledCourses.$': 1 // Only return the matching enrolled course
+      }
+    );
+
+    if (!user || !user.enrolledCourses || user.enrolledCourses.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Course enrollment not found"
+      });
+    }
+
+    const enrollment = user.enrolledCourses[0];
+
+    // 2. Get progress percentage
+    const progressPercentage = enrollment.progressPercentage || 0;
+
+    // 3. Check eligibility (20% < progress < 50%)
+    const isEligible = progressPercentage > 20 && progressPercentage < 40;
+
+    return res.status(200).json({
+      success: true,
+      isEligible: isEligible,  // Changed from 'eligible' to 'isEligible'
+      progressPercentage,
+      message: isEligible 
+        ? "Eligible for refund" 
+        : `Not eligible for refund. Progress must be between 20% and 50% (current: ${progressPercentage}%)`
+    });
+
+  } catch (error) {
+    console.error("Error checking refund eligibility:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};

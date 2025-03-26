@@ -1,5 +1,5 @@
 import express from "express";
-import { enrollCourse, getAllNotifications, getCourseProgress, getEnrolledCourses, getReviewsForCourse, getStudentDetails, getUserQuizResults, searchCoursesByCategory, searchCoursesByName, submitQuiz, submitReview, updateVideoProgress, uploadAssignment, verifyPayment } from "../controllers/studentController.js";
+import { checkRefundEligibility, enrollCourse, getAllNotifications, getCourseProgress, getEnrolledCourses, getReviewsForCourse, getStudentDetails, getUserQuizResults, searchCoursesByCategory, searchCoursesByName, submitQuiz, submitReview, updateVideoProgress, uploadAssignment, verifyPayment } from "../controllers/studentController.js";
 import {getUserDetails} from "../controllers/studentController.js";
 import { getAllStudents , getQuizByCourse, getApprovedCourses} from "../controllers/studentController.js";
 import {upload, parseFormData } from "../utils/multer.js";
@@ -49,6 +49,7 @@ router.post("/answers/:answerId/upvote", verifyToken, upvoteAnswer);
 // Mark question as resolved
 router.put("/questions/:questionId/resolve", verifyToken, markAsResolved);
 
+router.get('/eligibility/:userId/:courseId', checkRefundEligibility);
 
 
 
