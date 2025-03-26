@@ -915,3 +915,99 @@ export const checkRefundEligibility = async (req, res) => {
     });
   }
 };
+
+export const requestRefund = async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+
+    const payment = await paymentModel.findById(paymentId);
+    
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found" });
+    }
+
+    // Check if already requested
+    if (payment.refundStatus === 'Requested') {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Refund already requested" 
+      });
+    }
+
+    // Update payment record
+    payment.refundStatus = 'Requested';
+    payment.refundRequestedAt = new Date();
+    
+    await payment.save();
+
+    res.status(200).json({
+      success: true,
+      refundStatus: payment.refundStatus,
+      message: "Refund requested successfully"
+    });
+
+  } catch (error) {
+    console.error("Error requesting refund:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
+export const getRefundStatus = async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    const payment = await paymentModel.findById(paymentId, 'refundStatus refundIssued');
+
+    if (!payment) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Payment not found" 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      refundStatus: payment.refundStatus,
+      refundIssued: payment.refundIssued
+    });
+
+  } catch (error) {
+    console.error("Error checking refund status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
+export const findUserPayment = async (req, res) => {
+  try {
+    const { userId, courseId } = req.params;
+
+    const payment = await paymentModel.findOne({
+      studentId: userId,
+      courseId: courseId
+    }).select('_id paymentStatus amount'); // Only return needed fields
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: "Payment record not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      payment
+    });
+
+  } catch (error) {
+    console.error("Error finding payment:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};

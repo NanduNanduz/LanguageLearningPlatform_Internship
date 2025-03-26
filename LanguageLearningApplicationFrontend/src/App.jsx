@@ -31,6 +31,7 @@ import Footer from "./components/footer/Footer"
 import './app.scss'
 import Courses from "./pages/courses/Courses";
 import ContactUs from "./pages/Contactus";
+import RefundButton from "./pages/student/RefundButton";
 
 function App() {
 
@@ -73,6 +74,7 @@ function App() {
         <Route path="/send-announcement" element={<SendAnnouncement />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/student-details/:studentId/course/:courseId" element={<StudentDetailsPage />} />
+        <Route  element={<RefundButton />} />
         </Route>
     </Routes>
     <Footer/>
