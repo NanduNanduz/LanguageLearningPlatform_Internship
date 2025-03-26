@@ -1,9 +1,9 @@
-
-import React from "react";
-import { Box, CssBaseline, Container, Paper, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { Box, CssBaseline, Container, Paper, Typography, Drawer, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Sidebar from "./Sidebar";
-import Navbar from "./Navbar"; // Import Navbar component
+import Navbar from "./Navbar";
+import MenuIcon from "@mui/icons-material/Menu"; // Import Menu Icon
 
 import {
   BarChart,
@@ -33,10 +33,34 @@ const pieData = [
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
 const AdminDashboard = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <CssBaseline />
-      <Sidebar />
+      
+      {/* Sidebar Drawer for Mobile */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": { width: 240 },
+        }}
+      >
+        <Sidebar />
+      </Drawer>
+
+      {/* Permanent Sidebar for Desktop */}
+      <Box sx={{ display: { xs: "none", md: "block" }, width: 240 }}>
+        <Sidebar />
+      </Box>
 
       {/* Main Content Area */}
       <Box
@@ -45,6 +69,14 @@ const AdminDashboard = () => {
       >
         {/* Navbar Component */}
         <Navbar title="Admin Dashboard" />
+        <IconButton
+          color="inherit"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ display: { md: "none" }, position: "absolute", left: 10, top: 10 }}
+        >
+          <MenuIcon />
+        </IconButton>
 
         {/* Dashboard Content */}
         <Container

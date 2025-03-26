@@ -22,28 +22,24 @@ const QuizzPage = () => {
 
   const isMobile = useMediaQuery("(max-width:600px)");
 
-  // Handle Question Text Change
   const handleQuestionChange = (index, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].questionText = value;
     setQuestions(updatedQuestions);
   };
 
-  // Handle Option Change
   const handleOptionChange = (qIndex, optIndex, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[qIndex].options[optIndex] = value;
     setQuestions(updatedQuestions);
   };
 
-  // Handle Correct Answer Selection
   const handleCorrectAnswerChange = (qIndex, value) => {
     const updatedQuestions = [...questions];
     updatedQuestions[qIndex].correctAnswer = value;
     setQuestions(updatedQuestions);
   };
 
-  // Add a new question field
   const addQuestion = () => {
     setQuestions([
       ...questions,
@@ -51,7 +47,6 @@ const QuizzPage = () => {
     ]);
   };
 
-  // Upload Quiz
   const handleUpload = async () => {
     if (questions.some((q) => !q.questionText || q.options.some((opt) => !opt))) {
       setMessage("Please complete all question fields.");
@@ -96,7 +91,7 @@ const QuizzPage = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "#ADB2D4",
+        background: "#4F959D",
         padding: isMobile ? "10px" : "20px",
       }}
     >
@@ -106,6 +101,9 @@ const QuizzPage = () => {
           maxWidth: "500px",
           padding: "20px",
           textAlign: "center",
+          background: "rgba(255, 255, 255, 0.1)",
+          borderRadius: "10px",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
         }}
       >
         <Typography
@@ -124,6 +122,9 @@ const QuizzPage = () => {
             key={qIndex}
             sx={{
               marginBottom: "15px",
+              background: "rgba(255, 255, 255, 0.1)",
+              padding: "15px",
+              borderRadius: "8px",
             }}
           >
             <TextField
@@ -205,7 +206,7 @@ const QuizzPage = () => {
           onClick={handleUpload}
           disabled={loading}
           sx={{
-            background: "linear-gradient(135deg,rgb(94, 78, 111) 0%, #2575FC 100%)",
+            background: "linear-gradient(135deg, rgb(94, 78, 111) 0%, #2575FC 100%)",
             borderRadius: "20px",
             padding: "10px",
             fontWeight: "bold",
@@ -217,8 +218,14 @@ const QuizzPage = () => {
 
         {message && (
           <Typography
-            color="error"
-            sx={{ marginTop: "10px", fontWeight: "bold", color: "#fff" }}
+            sx={{ 
+              marginTop: "10px", 
+              fontWeight: "bold", 
+              color: "#fff",
+              backgroundColor: "rgba(0,0,0,0.3)",
+              padding: "8px",
+              borderRadius: "4px"
+            }}
           >
             {message}
           </Typography>
