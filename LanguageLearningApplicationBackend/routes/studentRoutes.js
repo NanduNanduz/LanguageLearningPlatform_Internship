@@ -1,5 +1,5 @@
 import express from "express";
-import { checkRefundEligibility, enrollCourse, getAllNotifications, getCourseProgress, getEnrolledCourses, getReviewsForCourse, getStudentDetails, getUserQuizResults, searchCoursesByCategory, searchCoursesByName, submitQuiz, submitReview, updateVideoProgress, uploadAssignment, verifyPayment } from "../controllers/studentController.js";
+import { checkRefundEligibility, enrollCourse, findUserPayment, getAllNotifications, getCourseProgress, getEnrolledCourses, getRefundStatus, getReviewsForCourse, getStudentDetails, getUserQuizResults, requestRefund, searchCoursesByCategory, searchCoursesByName, submitQuiz, submitReview, updateVideoProgress, uploadAssignment, verifyPayment } from "../controllers/studentController.js";
 import {getUserDetails} from "../controllers/studentController.js";
 import { getAllStudents , getQuizByCourse, getApprovedCourses} from "../controllers/studentController.js";
 import {upload, parseFormData } from "../utils/multer.js";
@@ -50,6 +50,13 @@ router.post("/answers/:answerId/upvote", verifyToken, upvoteAnswer);
 router.put("/questions/:questionId/resolve", verifyToken, markAsResolved);
 
 router.get('/eligibility/:userId/:courseId', checkRefundEligibility);
+
+router.put('/:paymentId/request-refund', requestRefund);
+
+router.get('/:paymentId/refund-status', getRefundStatus);
+
+router.get('/find/:userId/:courseId', findUserPayment);
+
 
 
 

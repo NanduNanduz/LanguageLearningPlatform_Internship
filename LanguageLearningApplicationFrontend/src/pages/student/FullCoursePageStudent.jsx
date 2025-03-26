@@ -47,6 +47,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
+import RefundButton from "./RefundButton";
 
 const StudentCoursePage = () => {
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -478,14 +479,10 @@ const StudentCoursePage = () => {
           <Box sx={{ mt: 2 }}>
             {isCheckingEligibility && <CircularProgress size={24} />}
             {!isCheckingEligibility && isEligibleForRefund && (
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<MoneyOffIcon />}
-                onClick={() => setRefundDialogOpen(true)}
-              >
-                Request Refund
-              </Button>
+              <RefundButton 
+              userId={userId}
+              courseId={courseId}
+              ></RefundButton>
             )}
           </Box>
         </Box>
@@ -1086,41 +1083,7 @@ const StudentCoursePage = () => {
           </Paper>
         )}
 
-        {/* Add the Dialog component at the bottom of your return statement, before the closing </Box> */}
-        <Dialog
-          open={refundDialogOpen}
-          onClose={() => setRefundDialogOpen(false)}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle>Request Refund</DialogTitle>
-          <DialogContent>
-            <Typography variant="body1" gutterBottom>
-              You're eligible for a refund because you've watched less than 3
-              videos.
-            </Typography>
-            <TextField
-              label="Reason for refund"
-              multiline
-              rows={4}
-              fullWidth
-              value={refundReason}
-              onChange={(e) => setRefundReason(e.target.value)}
-              sx={{ mt: 2 }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setRefundDialogOpen(false)}>Cancel</Button>
-            <Button
-              onClick={handleSubmitRefundRequest}
-              color="primary"
-              variant="contained"
-              disabled={!refundReason.trim()}
-            >
-              Submit Request
-            </Button>
-          </DialogActions>
-        </Dialog>
+        
       </Box>
     </Box>
   );

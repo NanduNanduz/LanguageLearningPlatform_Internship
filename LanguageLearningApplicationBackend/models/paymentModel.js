@@ -26,6 +26,11 @@ const paymentSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    refundStatus: {
+      type: String,
+      enum: ["Not Requested", "Requested", "Approved", "Rejected"], // Added more states for future use
+      default: "Not Requested",
+    },
     refundIssued: {
       type: Boolean,
       default: false,
