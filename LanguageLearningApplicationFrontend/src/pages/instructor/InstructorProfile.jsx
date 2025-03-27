@@ -14,14 +14,15 @@ import {
   Grid,
   IconButton,
   Box,
-  CircularProgress
+  CircularProgress,
+  Divider,
+  Paper,
 } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { useLocation } from "react-router-dom";
 
 const InstructorProfile = () => {
   const location = useLocation();
-  //const instructor = location.state?.instructor;
   const user = location.state?.user || location.state?.instructor?.currentUser;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +49,9 @@ const InstructorProfile = () => {
         `http://localhost:3000/user/profile/${user._id}`
       );
       setProfile(response.data.user);
-      setPreviewImage(response.data.user.profilePicture || "https://via.placeholder.com/150");
+      setPreviewImage(
+        response.data.user.profilePicture || "https://via.placeholder.com/150"
+      );
 
       setFormData({
         bio: response.data.user.bio || "",
@@ -74,7 +77,7 @@ const InstructorProfile = () => {
     const file = e.target.files[0];
     if (file) {
       setProfileImage(file);
-      setPreviewImage(URL.createObjectURL(file)); // Instant preview
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -105,87 +108,117 @@ const InstructorProfile = () => {
   };
 
   if (loading) {
-    return <Typography align="center">Loading...</Typography>;
+    return (
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
-    <div style={{ textAlign: "center" }}>
+    <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
       {/* Profile Header */}
-      <Box
+      <Paper
+        elevation={3}
         sx={{
           position: "relative",
-          width: "100%",
-          height: "250px",
-          backgroundImage: "url('/images/bgpic.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          borderRadius: "0 0 15px 15px",
+          height: 200,
+          borderRadius: 2,
+          background: "linear-gradient(135deg, #4e9fa8 0%, #2d7e88 100%)",
+          mb: 8,
         }}
+        mt={4}
       >
         <Avatar
           src={previewImage}
-          alt="Profile"
           sx={{
-            width: 180,
-            height: 180,
+            width: 150,
+            height: 150,
             position: "absolute",
-            bottom: "-60px",
+            bottom: -75,
             left: "50%",
             transform: "translateX(-50%)",
             border: "4px solid white",
             boxShadow: 3,
           }}
         />
-      </Box>
+      </Paper>
 
-      <Typography variant="h5" sx={{ mt: 7, fontWeight: "bold", color: "#3f51b5" }}>
-        {profile?.name}
-      </Typography>
-      <Typography color="textSecondary">{profile?.email}</Typography>
+      {/* Profile Info */}
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h4" fontWeight="bold" color="#4e9fa8">
+          {profile?.name}
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          {profile?.email}
+        </Typography>
+      </Box>
 
       {/* Profile Details */}
-      <Box
-        sx={{
-          width: "100%",
-          backgroundColor: "#ADB2D4", // Light matching background
-          paddingTop: 5,
-          paddingBottom: 5,
-          mt: 3,
-        }}
-      >
-        <Grid container spacing={2} sx={{ maxWidth: 600, margin: "auto" }}>
-          {[
-            { label: "Bio", value: profile?.bio },
-            { label: "Qualification", value: profile?.qualification },
-            { label: "Mobile", value: profile?.mobile },
-            { label: "GitHub", value: profile?.socialLinks?.github },
-            { label: "LinkedIn", value: profile?.socialLinks?.linkedIn },
-            { label: "Twitter", value: profile?.socialLinks?.twitter },
-          ].map((item, index) => (
-            <Grid item xs={6} key={index}>
-              <Card variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {item.label}
-                </Typography>
-                <Typography>{item.value || "N/A"}</Typography>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+      <Card sx={{ mb: 3, borderRadius: 2 }}>
+        <CardContent>
+          <Grid container spacing={3}>
+            {[
+              { label: "Bio", value: profile?.bio },
+              { label: "Qualification", value: profile?.qualification },
+              { label: "Mobile", value: profile?.mobile },
+              { label: "GitHub", value: profile?.socialLinks?.github },
+              { label: "LinkedIn", value: profile?.socialLinks?.linkedIn },
+              { label: "Twitter", value: profile?.socialLinks?.twitter },
+            ].map((item, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <Box sx={{ p: 2 }}>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    color="#4e9fa8"
+                  >
+                    {item.label}
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 1 }}>
+                    {item.value || "Not specified"}
+                  </Typography>
+                </Box>
+                {index % 2 === 0 && index < 5 && (
+                  <Divider orientation="vertical" flexItem />
+                )}
+              </Grid>
+            ))}
+          </Grid>
+        </CardContent>
+      </Card>
+
+      <Box textAlign="center">
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#4e9fa8",
+            "&:hover": { backgroundColor: "#3d8b94" },
+            px: 4,
+            py: 1.5,
+          }}
+          onClick={() => setOpenEdit(true)}
+        >
+          Edit Profile
+        </Button>
       </Box>
 
-      <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={() => setOpenEdit(true)}>
-        Edit Profile
-      </Button>
-
       {/* Edit Profile Dialog */}
-      <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
-        <DialogTitle>Edit Profile</DialogTitle>
+      <Dialog
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ textAlign: "center", color: "#4e9fa8" }}>
+          Edit Profile
+        </DialogTitle>
         <DialogContent>
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <Avatar src={previewImage} sx={{ width: 120, height: 120, mb: 1 }} />
-
-            {/* Camera Icon Centered */}
+          <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
+            <Avatar
+              src={previewImage}
+              sx={{ width: 120, height: 120, mb: 2 }}
+            />
             <input
               type="file"
               accept="image/*"
@@ -194,34 +227,56 @@ const InstructorProfile = () => {
               id="upload-photo"
             />
             <label htmlFor="upload-photo">
-              <IconButton color="primary" component="span">
-                <PhotoCameraIcon fontSize="large" />
-              </IconButton>
+              <Button
+                variant="outlined"
+                component="span"
+                startIcon={<PhotoCameraIcon />}
+                sx={{ color: "#4e9fa8", borderColor: "#4e9fa8" }}
+              >
+                Change Photo
+              </Button>
             </label>
           </Box>
 
-          {Object.keys(formData).map((key) => (
-            <TextField
-              key={key}
-              fullWidth
-              margin="dense"
-              label={key.charAt(0).toUpperCase() + key.slice(1)}
-              name={key}
-              value={formData[key]}
-              onChange={handleChange}
-            />
-          ))}
+          <Grid container spacing={2}>
+            {Object.keys(formData).map((key) => (
+              <Grid item xs={12} sm={6} key={key}>
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label={key.charAt(0).toUpperCase() + key.slice(1)}
+                  name={key}
+                  value={formData[key]}
+                  onChange={handleChange}
+                  variant="outlined"
+                />
+              </Grid>
+            ))}
+          </Grid>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenEdit(false)} color="secondary">
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setOpenEdit(false)} sx={{ color: "#4e9fa8" }}>
             Cancel
           </Button>
-          <Button onClick={handleUpdate} color="primary" disabled={updateLoading}>
-            {updateLoading ? <CircularProgress size={24} /> : "Save Changes"}
+          <Button
+            onClick={handleUpdate}
+            variant="contained"
+            sx={{
+              backgroundColor: "#4e9fa8",
+              "&:hover": { backgroundColor: "#3d8b94" },
+              px: 3,
+            }}
+            disabled={updateLoading}
+          >
+            {updateLoading ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 
