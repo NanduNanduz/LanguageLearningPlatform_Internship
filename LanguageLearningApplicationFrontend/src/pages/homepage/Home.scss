@@ -27,8 +27,8 @@
         padding: 70px 0px;
     
         &.dark {
-          background-color: #0d084d;
-    
+          // background-color: #0d084d;
+        background-color: #4e9fa8;
           h1 {
             color: white !important;
             font-weight: bold !important;
@@ -47,8 +47,11 @@
           }
     
           button {
-            background-color: #1dbf73;
-            color: white;
+            // background-color: #1dbf73;
+            background-color:  #dadad6;
+
+           
+            color: black;
             padding: 10px 20px;
             border-radius: 5px;
             font-size: 16px;

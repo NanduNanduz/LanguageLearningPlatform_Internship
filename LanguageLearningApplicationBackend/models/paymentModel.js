@@ -28,12 +28,29 @@ const paymentSchema = new mongoose.Schema(
     },
     refundStatus: {
       type: String,
-      enum: ["Not Requested", "Requested", "Approved", "Rejected"], // Added more states for future use
+      enum: [
+        "Not Requested",
+        "Requested",
+        "Approved",
+        "Rejected",
+        "Processing",
+        "Completed",
+      ],
       default: "Not Requested",
     },
     refundIssued: {
       type: Boolean,
       default: false,
+    },
+
+    refundRequestDate: {
+      type: Date,
+    },
+    refundProcessedDate: {
+      type: Date,
+    },
+    refundReason: {
+      type: String,
     },
   },
   { timestamps: true }

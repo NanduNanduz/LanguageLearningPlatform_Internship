@@ -1,5 +1,5 @@
 import express from "express";
-import { allPayment, approveCourse, blockInstructor, courseDetails, deleteInstructor, refundPayment, rejectCourse, sendAnnouncement } from "../controllers/adminController.js"; 
+import { allPayment, approveCourse, blockInstructor, courseDetails, deleteInstructor, getRefundRequests, processRefund,  rejectCourse, sendAnnouncement } from "../controllers/adminController.js"; 
 import adminAuth from "../middlewares/adminAuth.js";
 import { getCourses } from "../controllers/adminController.js";
 import { toggleBlockUser } from "../controllers/adminController.js";
@@ -38,7 +38,10 @@ router.get("/courseDetails/:courseId", courseDetails);
 router.get("/payments", allPayment);
 
 // Refund a payment
-router.post("/payments/refund/:id", refundPayment);
+// router.post("/payments/refund/:id", refundPayment);
+
+router.get("/payments/refund-requests", getRefundRequests);
+router.post("/payments/process-refund/:id", processRefund);
 
 
 // Send announcement (Admin only)

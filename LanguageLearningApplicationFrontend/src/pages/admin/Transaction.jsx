@@ -1,3 +1,163 @@
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import {
+//   Box,
+//   CssBaseline,
+//   Container,
+//   Paper,
+//   Typography,
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   Button,
+//   Select,
+//   MenuItem,
+// } from "@mui/material";
+// import Sidebar from "./Sidebar";
+// import Navbar from "./Navbar";
+
+// const AdminTransactions = () => {
+//   const [transactions, setTransactions] = useState([]);
+//   const [statusFilter, setStatusFilter] = useState("All");
+
+//   useEffect(() => {
+//     fetchTransactions();
+//   }, []);
+
+//  const fetchTransactions = async () => {
+//    try {
+//      const token = sessionStorage.getItem("logintoken");
+//      console.log("Token:", token); // Debugging
+
+//      const { data } = await axios.get("http://localhost:3000/admin/payments", {
+//        headers: token ? { Authorization: `Bearer ${token}` } : {},
+//      });
+
+//      console.log("API Response:", data); // Debugging
+//      setTransactions(Array.isArray(data) ? data : []);
+//    } catch (error) {
+//      console.error("Error fetching transactions:", error.response || error);
+//    }
+//  };
+
+
+//   const handleRefund = async (id) => {
+//     try {
+//       await axios.post(
+//         `/admin/payments/refund/${id}`,
+//         {},
+//         {
+//           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//         }
+//       );
+//       fetchTransactions(); // Refresh the transactions list
+//     } catch (error) {
+//       console.error("Refund failed:", error);
+//     }
+//   };
+
+//   return (
+//     <Box sx={{ display: "flex", height: "100vh" }}>
+//       <CssBaseline />
+//       <Sidebar />
+
+//       {/* Main Content */}
+//       <Box
+//         component="main"
+//         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
+//       >
+//         <Navbar title="Transaction Management" />
+
+//         {/* Content Container */}
+//         <Container
+//           maxWidth="lg"
+//           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
+//         >
+//           <Typography variant="h5" fontWeight="bold" mb={2}>
+//             Transaction Management
+//           </Typography>
+
+//           {/* Status Filter Dropdown */}
+//           <Select
+//             value={statusFilter}
+//             onChange={(e) => setStatusFilter(e.target.value)}
+//             sx={{ mb: 2, backgroundColor: "white", borderRadius: 1 }}
+//           >
+//             <MenuItem value="All">All</MenuItem>
+//             <MenuItem value="Pending">Pending</MenuItem>
+//             <MenuItem value="Completed">Completed</MenuItem>
+//             <MenuItem value="Failed">Failed</MenuItem>
+//             <MenuItem value="Refunded">Refunded</MenuItem>
+//           </Select>
+
+//           {/* Transaction Table */}
+//           <TableContainer
+//             component={Paper}
+//             elevation={3}
+//             sx={{ borderRadius: 2 }}
+//           >
+//             <Table>
+//               <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+//                 <TableRow>
+//                   <TableCell>
+//                     <strong>Student</strong>
+//                   </TableCell>
+//                   <TableCell>
+//                     <strong>Course</strong>
+//                   </TableCell>
+//                   <TableCell>
+//                     <strong>Amount</strong>
+//                   </TableCell>
+//                   <TableCell>
+//                     <strong>Status</strong>
+//                   </TableCell>
+//                   <TableCell align="center">
+//                     <strong>Actions</strong>
+//                   </TableCell>
+//                 </TableRow>
+//               </TableHead>
+//               <TableBody>
+//                 {Array.isArray(transactions) &&
+//                   transactions
+//                     .filter(
+//                       (t) =>
+//                         statusFilter === "All" ||
+//                         t.paymentStatus === statusFilter
+//                     )
+//                     .map((t) => (
+//                       <TableRow key={t._id} hover>
+//                         <TableCell>{t.studentId?.name}</TableCell>
+//                         <TableCell>{t.courseId?.title}</TableCell>
+//                         <TableCell>₹{t.amount}</TableCell>
+//                         <TableCell>{t.paymentStatus}</TableCell>
+//                         <TableCell align="center">
+//                           {t.paymentStatus === "Completed" &&
+//                             !t.refundIssued && (
+//                               <Button
+//                                 color="error"
+//                                 onClick={() => handleRefund(t._id)}
+//                               >
+//                                 Refund
+//                               </Button>
+//                             )}
+//                         </TableCell>
+//                       </TableRow>
+//                     ))}
+//               </TableBody>
+//             </Table>
+//           </TableContainer>
+//         </Container>
+//       </Box>
+//     </Box>
+//   );
+// };
+
+// export default AdminTransactions;
+
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -15,6 +175,13 @@ import {
   Button,
   Select,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  TextField,
+  Chip,
 } from "@mui/material";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
@@ -22,40 +189,57 @@ import Navbar from "./Navbar";
 const AdminTransactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
+  const [refundRequests, setRefundRequests] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
     fetchTransactions();
+    fetchRefundRequests();
   }, []);
 
- const fetchTransactions = async () => {
-   try {
-     const token = sessionStorage.getItem("logintoken");
-     console.log("Token:", token); // Debugging
+  const fetchTransactions = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:3000/admin/payments");
+      setTransactions(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
 
-     const { data } = await axios.get("http://localhost:3000/admin/payments", {
-       headers: token ? { Authorization: `Bearer ${token}` } : {},
-     });
+  const fetchRefundRequests = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:3000/admin/payments/refund-requests"
+      );
+      setRefundRequests(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching refund requests:", error);
+    }
+  };
 
-     console.log("API Response:", data); // Debugging
-     setTransactions(Array.isArray(data) ? data : []);
-   } catch (error) {
-     console.error("Error fetching transactions:", error.response || error);
-   }
- };
+  const handleRefundAction = (transaction, action) => {
+    setSelectedTransaction(transaction);
+    if (action === "reject") {
+      setOpenDialog(true);
+    } else {
+      processRefund(transaction._id, "approve");
+    }
+  };
 
-
-  const handleRefund = async (id) => {
+  const processRefund = async (id, action) => {
     try {
       await axios.post(
-        `/admin/payments/refund/${id}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        `http://localhost:3000/admin/payments/process-refund/${id}`,
+        { action, reason: rejectionReason }
       );
-      fetchTransactions(); // Refresh the transactions list
+      fetchTransactions();
+      fetchRefundRequests();
+      setOpenDialog(false);
+      setRejectionReason("");
     } catch (error) {
-      console.error("Refund failed:", error);
+      console.error("Refund processing failed:", error);
     }
   };
 
@@ -64,14 +248,12 @@ const AdminTransactions = () => {
       <CssBaseline />
       <Sidebar />
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
         <Navbar title="Transaction Management" />
 
-        {/* Content Container */}
         <Container
           maxWidth="lg"
           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
@@ -80,7 +262,73 @@ const AdminTransactions = () => {
             Transaction Management
           </Typography>
 
-          {/* Status Filter Dropdown */}
+          {/* Refund Requests Section */}
+          {refundRequests.length > 0 && (
+            <>
+              <Typography variant="h6" mb={2}>
+                Pending Refund Requests
+              </Typography>
+              <TableContainer
+                component={Paper}
+                elevation={3}
+                sx={{ mb: 4, borderRadius: 2 }}
+              >
+                <Table>
+                  <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+                    <TableRow>
+                      <TableCell>
+                        <strong>Student</strong>
+                      </TableCell>
+                      <TableCell>
+                        <strong>Course</strong>
+                      </TableCell>
+                      <TableCell>
+                        <strong>Amount</strong>
+                      </TableCell>
+                      <TableCell>
+                        <strong>Request Date</strong>
+                      </TableCell>
+                      <TableCell align="center">
+                        <strong>Actions</strong>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {refundRequests.map((t) => (
+                      <TableRow key={t._id} hover>
+                        <TableCell>{t.studentId?.name}</TableCell>
+                        <TableCell>{t.courseId?.title}</TableCell>
+                        <TableCell>₹{t.amount}</TableCell>
+                        <TableCell>
+                          {new Date(t.refundRequestDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            color="success"
+                            onClick={() => handleRefundAction(t, "approve")}
+                            sx={{ mr: 1 }}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            color="error"
+                            onClick={() => handleRefundAction(t, "reject")}
+                          >
+                            Reject
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </>
+          )}
+
+          {/* All Transactions Section */}
+          <Typography variant="h6" mb={2}>
+            All Transactions
+          </Typography>
           <Select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -93,7 +341,6 @@ const AdminTransactions = () => {
             <MenuItem value="Refunded">Refunded</MenuItem>
           </Select>
 
-          {/* Transaction Table */}
           <TableContainer
             component={Paper}
             elevation={3}
@@ -114,43 +361,87 @@ const AdminTransactions = () => {
                   <TableCell>
                     <strong>Status</strong>
                   </TableCell>
-                  <TableCell align="center">
-                    <strong>Actions</strong>
+                  <TableCell>
+                    <strong>Refund Status</strong>
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Array.isArray(transactions) &&
-                  transactions
-                    .filter(
-                      (t) =>
-                        statusFilter === "All" ||
-                        t.paymentStatus === statusFilter
-                    )
-                    .map((t) => (
-                      <TableRow key={t._id} hover>
-                        <TableCell>{t.studentId?.name}</TableCell>
-                        <TableCell>{t.courseId?.title}</TableCell>
-                        <TableCell>₹{t.amount}</TableCell>
-                        <TableCell>{t.paymentStatus}</TableCell>
-                        <TableCell align="center">
-                          {t.paymentStatus === "Completed" &&
-                            !t.refundIssued && (
-                              <Button
-                                color="error"
-                                onClick={() => handleRefund(t._id)}
-                              >
-                                Refund
-                              </Button>
-                            )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                {transactions
+                  .filter(
+                    (t) =>
+                      statusFilter === "All" || t.paymentStatus === statusFilter
+                  )
+                  .map((t) => (
+                    <TableRow key={t._id} hover>
+                      <TableCell>{t.studentId?.name}</TableCell>
+                      <TableCell>{t.courseId?.title}</TableCell>
+                      <TableCell>₹{t.amount}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={t.paymentStatus}
+                          color={
+                            t.paymentStatus === "Completed"
+                              ? "success"
+                              : t.paymentStatus === "Refunded"
+                              ? "warning"
+                              : t.paymentStatus === "Failed"
+                              ? "error"
+                              : "default"
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {t.refundStatus !== "Not Requested" && (
+                          <Chip
+                            label={t.refundStatus}
+                            color={
+                              t.refundStatus === "Requested"
+                                ? "warning"
+                                : t.refundStatus === "Approved"
+                                ? "success"
+                                : t.refundStatus === "Rejected"
+                                ? "error"
+                                : "default"
+                            }
+                          />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
         </Container>
       </Box>
+
+      {/* Rejection Reason Dialog */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Reject Refund Request</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please provide a reason for rejecting this refund request:
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Reason"
+            fullWidth
+            variant="standard"
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button
+            onClick={() => processRefund(selectedTransaction._id, "reject")}
+            color="error"
+          >
+            Reject
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
