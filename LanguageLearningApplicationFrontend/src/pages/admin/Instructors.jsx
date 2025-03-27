@@ -124,9 +124,7 @@ const Instructors = () => {
           maxWidth="lg"
           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
         >
-          <Typography variant="h5" fontWeight="bold" mb={2}>
-            Instructor Management
-          </Typography>
+          
 
           <TableContainer
             component={Paper}

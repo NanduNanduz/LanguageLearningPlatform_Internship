@@ -42,8 +42,9 @@ const handleSubmit = async (e) => {
 };
 
   return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
+    <Box sx={{ display: "flex", height: "50vh" }}>
       {/* Sidebar */}
+      
       <Sidebar />
 
       {/* Main Content */}
@@ -57,12 +58,10 @@ const handleSubmit = async (e) => {
         {/* Send Announcement Form */}
         <Container
           maxWidth="md"
-          sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
+          sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8",marginTop:"10vh" }}
         >
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h4" gutterBottom>
-              Send Announcement
-            </Typography>
+           
             <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth

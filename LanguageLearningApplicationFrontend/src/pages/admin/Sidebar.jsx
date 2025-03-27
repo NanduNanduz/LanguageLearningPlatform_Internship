@@ -6,6 +6,8 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Typography,
+  Box,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
@@ -20,46 +22,52 @@ const Sidebar = () => {
       sx={{
         width: 240,
         flexShrink: 0,
-        "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box" },
+        "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box", backgroundColor: " #dadad6", color: "#fff" },
       }}
     >
-      <Toolbar />
+      {/* Logo & Branding */}
+      <Toolbar sx={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "16px", backgroundColor: "rgb(48, 50, 57)" }}>
+        <Typography variant="h6" sx={{ fontWeight: "bold", letterSpacing: "1px", color: "#4e9fa8" }}>
+          Fluencia
+        </Typography>
+      </Toolbar>
+
       <List>
         <ListItem button component={Link} to="/adminDashboard">
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary="Dashboard"sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/student-management">
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PeopleIcon />
           </ListItemIcon>
-          <ListItemText primary="Students" />
+          <ListItemText primary="Students"  sx={{ color: "black" }}/>
         </ListItem>
         <ListItem button component={Link} to="/instructor-management">
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PeopleIcon />
           </ListItemIcon>
-          <ListItemText primary="Instructors" />
+          <ListItemText primary="Instructors"  sx={{ color: "black" }}/>
         </ListItem>
         <ListItem button component={Link} to="/course-management">
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <SchoolIcon />
           </ListItemIcon>
-          <ListItemText primary="Courses" />
+          <ListItemText primary="Courses"sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/user-transactions">
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PaymentIcon />
           </ListItemIcon>
-          <ListItemText primary="Transactions" />
+          <ListItemText primary="Transactions"sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/send-announcement">
-          <ListItemIcon>
+          <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PaymentIcon />
           </ListItemIcon>
-          <ListItemText primary="Announcement" />
+          <ListItemText primary="Announcement" sx={{ color: "black" }}/>
         </ListItem>
       </List>
     </Drawer>
