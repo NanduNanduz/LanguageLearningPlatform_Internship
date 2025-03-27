@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Box,
@@ -9,26 +8,27 @@ import {
   MenuItem,
   Divider,
 } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SettingsIcon from "@mui/icons-material/Settings";
-import PersonIcon from "@mui/icons-material/Person";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ title }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
     sessionStorage.clear();
     navigate("/");
-    setAnchorEl(null);
+    handleClose();
   };
 
   return (
@@ -46,11 +46,6 @@ const Navbar = ({ title }) => {
         {title}
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center" }}>
-        {/* Notifications Icon */}
-        <IconButton>
-          <NotificationsIcon />
-        </IconButton>
-
         {/* Profile Section */}
         <IconButton onClick={handleClick}>
           <Avatar>
@@ -77,16 +72,8 @@ const Navbar = ({ title }) => {
           <Divider />
 
           {/* Menu Items */}
-          <MenuItem onClick={handleClose}>
-            <SettingsIcon fontSize="small" sx={{ marginRight: 1 }} />
-            Settings
-          </MenuItem>
-          <MenuItem onClick={handleClose}>
-            <PersonIcon fontSize="small" sx={{ marginRight: 1 }} />
-            Profile
-          </MenuItem>
           <Divider />
-          <MenuItem onClick={handleClose}>
+          <MenuItem onClick={handleLogout}>
             <ExitToAppIcon
               fontSize="small"
               sx={{ marginRight: 1, color: "red" }}
