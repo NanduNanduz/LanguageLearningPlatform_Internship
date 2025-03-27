@@ -374,7 +374,7 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
           <Link to={"/"} className="link">
             <span className="text">Fluencia</span>
           </Link>
-          <span className="dot">.</span>
+   
         </div>
 
         <div className="links">
