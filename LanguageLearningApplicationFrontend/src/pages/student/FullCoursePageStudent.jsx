@@ -465,7 +465,7 @@ const StudentCoursePage = () => {
             fontWeight="bold"
             gutterBottom
             style={{ color: "#4e9fa8" }}
-           >
+          >
             {course?.title}
           </Typography>
           <Typography variant="subtitle1" color="text.secondary" gutterBottom>
@@ -532,6 +532,7 @@ const StudentCoursePage = () => {
             { label: "Reviews", value: "review" },
           ].map((tab) => (
             <Tab
+              style={{ color: "rgb(51, 101, 107)" }}
               key={tab.value}
               label={tab.label}
               value={tab.value}
@@ -669,10 +670,11 @@ const StudentCoursePage = () => {
                   <Accordion sx={{ boxShadow: "none" }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Typography
+                        style={{ color: " rgb(51, 101, 107)" }}
                         variant="h6"
                         sx={{ display: "flex", alignItems: "center" }}
                       >
-                        <QuizIcon color="primary" sx={{ mr: 1 }} />
+                        <QuizIcon sx={{ mr: 1 }} />
                         Quiz {index + 1}
                       </Typography>
                     </AccordionSummary>
@@ -748,7 +750,10 @@ const StudentCoursePage = () => {
                 >
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <DescriptionIcon color="action" sx={{ mr: 1 }} />
-                    <Typography variant="body1">
+                    <Typography
+                      variant="body1"
+                      style={{ color: " rgb(51, 101, 107)" }}
+                    >
                       {resource.resourceName}
                     </Typography>
                   </Box>
@@ -767,8 +772,14 @@ const StudentCoursePage = () => {
 
         {selectedSection === "assignments" && (
           <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
-              Submit Assignment
+            <Typography
+              textAlign={"center"}
+              variant="h6"
+              fontWeight="bold"
+              gutterBottom
+              style={{ color: " rgb(51, 101, 107)" }}
+            >
+              SUBMIT ASSIGNMENT
             </Typography>
             <TextField
               label="Assignment Title"
@@ -817,15 +828,21 @@ const StudentCoursePage = () => {
 
         {selectedSection === "results" && (
           <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
-              Quiz Results
+            <Typography
+              textAlign={"center"}
+              variant="h6"
+              fontWeight="bold"
+              gutterBottom
+              style={{ color: " rgb(51, 101, 107)" }}
+            >
+              QUIZ RESULTS
             </Typography>
             {quizResults?.length > 0 ? (
               quizResults.map((result, index) => (
                 <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="h6">
-                    Quiz {index + 1}:{" "}
-                    <span style={{ color: "#4caf50" }}>
+                  <Typography variant="h6" textAlign={"center"}>
+                    QUIZ {index + 1}:{" "}
+                    <span style={{ color: " #4caf50" }}>
                       {result?.score?.toFixed(2)}%
                     </span>
                   </Typography>
@@ -861,8 +878,14 @@ const StudentCoursePage = () => {
         {selectedSection === "Q&A" && (
           <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
             <CardContent>
-              <Typography variant="h5" fontWeight="bold" gutterBottom>
-                Course Q&A
+              <Typography
+                textAlign={"center"}
+                variant="h6"
+                fontWeight="bold"
+                gutterBottom
+                style={{ color: " rgb(51, 101, 107)" }}
+              >
+                COURSE Q&A
               </Typography>
 
               {/* Post New Question */}
@@ -1023,8 +1046,14 @@ const StudentCoursePage = () => {
 
         {selectedSection === "review" && (
           <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
-              Submit a Review
+            <Typography
+              textAlign={"center"}
+              variant="h6"
+              fontWeight="bold"
+              gutterBottom
+              style={{ color: " rgb(51, 101, 107)" }}
+            >
+              SUBMIT A REVIEW
             </Typography>
             <Box sx={{ mb: 3 }}>
               <Typography variant="body1" gutterBottom>
@@ -1056,8 +1085,13 @@ const StudentCoursePage = () => {
               Submit Review
             </Button>
 
-            <Typography variant="h5" fontWeight="bold" sx={{ mt: 4, mb: 2 }}>
-              Course Reviews
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              sx={{ mt: 4, mb: 2 }}
+              style={{ color: " rgb(51, 101, 107)" }}
+            >
+              COURSE REVIEWS
             </Typography>
             {reviews.length > 0 ? (
               reviews.map((review) => (
