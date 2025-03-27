@@ -91,7 +91,7 @@ const QuizzPage = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "#4F959D",
+
         padding: isMobile ? "10px" : "20px",
       }}
     >
@@ -101,7 +101,7 @@ const QuizzPage = () => {
           maxWidth: "500px",
           padding: "20px",
           textAlign: "center",
-          background: "rgba(255, 255, 255, 0.1)",
+          background: " #dadad6",
           borderRadius: "10px",
           boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
         }}
@@ -111,10 +111,10 @@ const QuizzPage = () => {
           sx={{
             fontWeight: "bold",
             marginBottom: "15px",
-            color: "#fff",
+            color: " #4e9fa8",
           }}
         >
-          Create Quiz
+          CREATE QUIZ
         </Typography>
 
         {questions.map((q, qIndex) => (
@@ -122,7 +122,7 @@ const QuizzPage = () => {
             key={qIndex}
             sx={{
               marginBottom: "15px",
-              background: "rgba(255, 255, 255, 0.1)",
+              background: " #98D2C0",
               padding: "15px",
               borderRadius: "8px",
             }}
@@ -146,7 +146,9 @@ const QuizzPage = () => {
                 label={`Option ${optIndex + 1}`}
                 fullWidth
                 value={option}
-                onChange={(e) => handleOptionChange(qIndex, optIndex, e.target.value)}
+                onChange={(e) =>
+                  handleOptionChange(qIndex, optIndex, e.target.value)
+                }
                 margin="normal"
                 variant="outlined"
                 sx={{
@@ -156,15 +158,14 @@ const QuizzPage = () => {
               />
             ))}
 
-            <Typography
-              variant="subtitle2"
-              sx={{ marginTop: "10px", color: "#fff" }}
-            >
+            <Typography variant="subtitle2" sx={{ marginTop: "10px" }}>
               Correct Answer:
             </Typography>
             <Select
               value={q.correctAnswer}
-              onChange={(e) => handleCorrectAnswerChange(qIndex, e.target.value)}
+              onChange={(e) =>
+                handleCorrectAnswerChange(qIndex, e.target.value)
+              }
               fullWidth
               sx={{
                 backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -182,13 +183,16 @@ const QuizzPage = () => {
         ))}
 
         <Button
-          variant="outlined"
+          variant="contained"
+          fullWidth
           onClick={addQuestion}
+          style={{ color: "#fff" }}
           sx={{
-            width: "100%",
+            
             borderRadius: "20px",
-            border: "2px solid #fff",
-            color: "#fff",
+
+            background: "linear-gradient(135deg, #4e9fa8  0%, #98D2C0 100%)",
+
             fontWeight: "bold",
             marginBottom: "10px",
             "&:hover": {
@@ -201,16 +205,14 @@ const QuizzPage = () => {
 
         <Button
           variant="contained"
-          color="primary"
           fullWidth
           onClick={handleUpload}
           disabled={loading}
           sx={{
-            background: "linear-gradient(135deg, rgb(94, 78, 111) 0%, #2575FC 100%)",
+            background: "linear-gradient(135deg, #98D2C0 0%, #4e9fa8 100%)",
             borderRadius: "20px",
             padding: "10px",
             fontWeight: "bold",
-            color: "#fff",
           }}
         >
           {loading ? <CircularProgress size={24} /> : "Submit Quiz"}
@@ -218,13 +220,13 @@ const QuizzPage = () => {
 
         {message && (
           <Typography
-            sx={{ 
-              marginTop: "10px", 
-              fontWeight: "bold", 
+            sx={{
+              marginTop: "10px",
+              fontWeight: "bold",
               color: "#fff",
               backgroundColor: "rgba(0,0,0,0.3)",
               padding: "8px",
-              borderRadius: "4px"
+              borderRadius: "4px",
             }}
           >
             {message}
