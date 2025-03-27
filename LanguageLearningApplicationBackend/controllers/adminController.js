@@ -5,7 +5,10 @@ import userModel from "../models/userModel.js";
  import notificationModel from "../models/notificationModel.js"
 
 
-
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-08-16", // Use the latest API version
+});
 
 // Get all courses (for admin panel)
 export const getCourses = async (req, res) => {
@@ -170,27 +173,27 @@ export const allPayment = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch transactions" });
   }
 };
-export const refundPayment = async (req, res) => {
-  try {
-    const payment = await paymentModel.findById(req.params.id);
-    if (!payment || payment.paymentStatus !== "Completed") {
-      return res.status(400).json({ message: "Refund not possible" });
-    }
+// export const refundPayment = async (req, res) => {
+//   try {
+//     const payment = await paymentModel.findById(req.params.id);
+//     if (!payment || payment.paymentStatus !== "Completed") {
+//       return res.status(400).json({ message: "Refund not possible" });
+//     }
 
-    // Refund logic using Stripe API
-    await stripe.refunds.create({ payment_intent: payment.transactionId });
+//     // Refund logic using Stripe API
+//     await stripe.refunds.create({ payment_intent: payment.transactionId });
 
-    // Update payment status and refund status
-    payment.paymentStatus = "Refunded";
-    payment.refundIssued = true;
-    await payment.save();
+//     // Update payment status and refund status
+//     payment.paymentStatus = "Refunded";
+//     payment.refundIssued = true;
+//     await payment.save();
 
-    res.json({ message: "Refund issued successfully" });
-  } catch (error) {
-    console.error("Refund failed:", error);
-    res.status(500).json({ error: "Refund failed" });
-  }
-};
+//     res.json({ message: "Refund issued successfully" });
+//   } catch (error) {
+//     console.error("Refund failed:", error);
+//     res.status(500).json({ error: "Refund failed" });
+//   }
+// };
 
 
 export const sendAnnouncement = async (req, res) => {
@@ -227,3 +230,50 @@ export const sendAnnouncement = async (req, res) => {
   }
 };
 
+// Get refund requests
+export const getRefundRequests = async (req, res) => {
+  try {
+    const requests = await paymentModel.find({ refundStatus: "Requested" })
+      .populate("studentId", "name email")
+      .populate("courseId", "title");
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch refund requests" });
+  }
+};
+
+// Process refund request
+export const processRefund = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, reason } = req.body; // action: 'approve' or 'reject'
+
+    const payment = await paymentModel.findById(id);
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    if (payment.refundStatus !== "Requested") {
+      return res.status(400).json({ message: "Refund not in requested state" });
+    }
+
+    if (action === 'approve') {
+      // Process Stripe refund
+      await stripe.refunds.create({ payment_intent: payment.transactionId });
+      
+      payment.refundStatus = "Completed";
+      payment.paymentStatus = "Refunded";
+      payment.refundIssued = true;
+      payment.refundProcessedDate = new Date();
+    } else {
+      payment.refundStatus = "Rejected";
+      if (reason) payment.refundReason = reason;
+    }
+
+    await payment.save();
+    res.json({ message: `Refund ${action}ed successfully` });
+  } catch (error) {
+    console.error("Refund processing failed:", error);
+    res.status(500).json({ error: "Refund processing failed" });
+  }
+};
