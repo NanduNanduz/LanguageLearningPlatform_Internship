@@ -4,7 +4,7 @@ import "./CatCard.scss";
 
 function CatCard({ card }) {
   return (
-    <Link to={`/gigs?cat=${encodeURIComponent(card.title)}`}>
+    <Link to={`/courses?cat=${encodeURIComponent(card.title)}`}>
       <div className="catCard">
         <img src={card.img} alt={card.title} />
         <span className="desc">{card.desc}</span>
