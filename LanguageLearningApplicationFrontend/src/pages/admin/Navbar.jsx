@@ -38,7 +38,7 @@ const Navbar = ({ title }) => {
         justifyContent: "space-between",
         alignItems: "center",
         padding: "10px 20px",
-        backgroundColor: "#fff",
+        backgroundColor: "  #fff",
         boxShadow: "0px 2px 5px rgba(0,0,0,0.1)",
       }}
     >
@@ -63,10 +63,10 @@ const Navbar = ({ title }) => {
           {/* User Info */}
           <Box sx={{ padding: "10px 20px", minWidth: "200px" }}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Sofia Rivers
+              ADMIN
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              sofia.rivers@devias.io
+              admin12@gmail.com
             </Typography>
           </Box>
           <Divider />
@@ -78,7 +78,7 @@ const Navbar = ({ title }) => {
               fontSize="small"
               sx={{ marginRight: 1, color: "red" }}
             />
-            Sign Out
+            Logout
           </MenuItem>
         </Menu>
       </Box>
