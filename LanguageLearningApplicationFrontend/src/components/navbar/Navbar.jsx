@@ -406,7 +406,7 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
                   </span>
 
                   {currentUser.role === "instructor" && (
-                    <Link className="link" to="/addCourse">
+                    <Link className="link" to="/addCourse"  state={{ user: currentUser }}>
                       Add Course
                     </Link>
                   )}
