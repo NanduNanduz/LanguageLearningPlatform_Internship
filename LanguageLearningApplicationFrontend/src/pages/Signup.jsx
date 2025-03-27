@@ -11,14 +11,16 @@ import {
   Paper,
   TextField,
   Grid,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 
 const Signup = ({ onClose }) => {
   const navigate = useNavigate();
   const [openFormModal, setOpenFormModal] = useState(false);
   const [role, setRole] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); // Separate error message state
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -39,10 +41,8 @@ const Signup = ({ onClose }) => {
   };
 
   const handleSubmit = async () => {
-    // Reset previous error message
     setErrorMessage("");
 
-    // Basic validation
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setErrorMessage("All fields are required.");
       return;
@@ -66,7 +66,7 @@ const Signup = ({ onClose }) => {
   return (
     <>
       {/* Role Selection Dialog */}
-      <Dialog open={!openFormModal} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog open={!openFormModal} maxWidth="md" fullWidth>
         <Grid container>
           <Grid
             item
@@ -87,10 +87,19 @@ const Signup = ({ onClose }) => {
             <Typography variant="body1">Join us and start your journey today.</Typography>
           </Grid>
 
-          <Grid item xs={7} sx={{ padding: 4 }}>
+          <Grid item xs={7} sx={{ padding: 4, position: "relative" }}>
             <DialogTitle textAlign="center" fontSize={22} fontWeight="bold">
               Join as a Student or Instructor
             </DialogTitle>
+            {/* Close Button for Role Selection Dialog */}
+            <IconButton
+              aria-label="close"
+              onClick={() => navigate("/")}
+              sx={{ position: "absolute", right: 10, top: 10 }}
+            >
+              <CloseIcon />
+            </IconButton>
+
             <DialogContent>
               <Box display="flex" justifyContent="center" gap={2} mt={2}>
                 <Paper
@@ -148,7 +157,7 @@ const Signup = ({ onClose }) => {
       </Dialog>
 
       {/* Signup Form Dialog */}
-      <Dialog open={openFormModal} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog open={openFormModal} maxWidth="md" fullWidth>
         <Grid container>
           <Grid
             item
@@ -173,15 +182,16 @@ const Signup = ({ onClose }) => {
             <DialogTitle textAlign="center" fontSize={22} fontWeight="bold">
               {role === "student" ? "Student Signup" : "Instructor Signup"}
             </DialogTitle>
+
             <DialogContent>
               <TextField required label="Name" name="name" fullWidth margin="dense" onChange={handleChange} />
               <TextField required label="Email" name="email" type="email" fullWidth margin="dense" onChange={handleChange} />
               <TextField required label="Password" name="password" type="password" fullWidth margin="dense" onChange={handleChange} />
               <TextField required label="Confirm Password" name="confirmPassword" type="password" fullWidth margin="dense" onChange={handleChange} />
 
-              {/* Error Message as Separate Text */}
+              {/* Error Message */}
               {errorMessage && (
-                <Typography color="error" variant="body2" sx={{ mt: 1 , textAlign:"center"}}>
+                <Typography color="error" variant="body2" sx={{ mt: 1, textAlign: "center" }}>
                   {errorMessage}
                 </Typography>
               )}
