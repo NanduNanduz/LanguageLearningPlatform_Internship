@@ -72,7 +72,9 @@ const Signup = ({ onClose }) => {
             item
             xs={5}
             sx={{
-              backgroundColor: "#14213D",
+              background:
+                "linear-gradient(135deg,rgb(132, 192, 173) 0%,rgb(62, 121, 128) 100%)",
+              // backgroundColor: " #4e9fa8",
               color: "white",
               display: "flex",
               alignItems: "center",
@@ -82,13 +84,21 @@ const Signup = ({ onClose }) => {
             }}
           >
             <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Learning is a process, not an event. Let's Make it Happen Together!
+              Learning is a process, not an event. Let's Make it Happen
+              Together!
             </Typography>
-            <Typography variant="body1">Join us and start your journey today.</Typography>
+            <Typography variant="body1">
+              Join us and start your journey today.
+            </Typography>
           </Grid>
 
           <Grid item xs={7} sx={{ padding: 4, position: "relative" }}>
-            <DialogTitle textAlign="center" fontSize={22} fontWeight="bold">
+            <DialogTitle
+              textAlign="center"
+              fontSize={22}
+              fontWeight="bold"
+              color=" #4e9fa8"
+            >
               Join as a Student or Instructor
             </DialogTitle>
             {/* Close Button for Role Selection Dialog */}
@@ -108,12 +118,15 @@ const Signup = ({ onClose }) => {
                     width: 230,
                     padding: 3,
                     cursor: "pointer",
-                    border: role === "student" ? "2px solid #FCA311" : "1px solid #ccc",
+                    border:
+                      role === "student"
+                        ? "2px solid rgb(51, 101, 107)"
+                        : "1px solid #ccc",
                     borderRadius: 2,
-                    "&:hover": { border: "2px solid #FCA311" },
+                    "&:hover": { border: "2px  solid rgb(51, 101, 107)" },
                   }}
                 >
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6" fontWeight="bold" color="rgb(51, 101, 107)">
                     🎓 I'm a Student
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
@@ -127,12 +140,15 @@ const Signup = ({ onClose }) => {
                     width: 230,
                     padding: 3,
                     cursor: "pointer",
-                    border: role === "instructor" ? "2px solid #FCA311" : "1px solid #ccc",
+                    border:
+                      role === "instructor"
+                        ? "2px solid rgb(51, 101, 107)"
+                        : "1px solid #ccc",
                     borderRadius: 2,
-                    "&:hover": { border: "2px solid #FCA311" },
+                    "&:hover": { border: "2px solid rgb(51, 101, 107)" },
                   }}
                 >
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6" fontWeight="bold" color=" rgb(51, 101, 107) ">
                     📚 I'm an Instructor
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
@@ -142,10 +158,17 @@ const Signup = ({ onClose }) => {
               </Box>
             </DialogContent>
             <DialogActions sx={{ justifyContent: "center" }}>
-              <Typography variant="body2" sx={{ cursor: "pointer", color: "rgb(41, 39, 35)" }}>
+              <Typography
+                variant="body2"
+                sx={{ cursor: "pointer", color: "rgb(41, 39, 35)" }}
+              >
                 Already have an account?{" "}
                 <span
-                  style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+                  style={{
+                    color: "blue",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                  }}
                   onClick={() => navigate("/login")}
                 >
                   Login
@@ -175,7 +198,9 @@ const Signup = ({ onClose }) => {
             <Typography variant="h4" fontWeight="bold" gutterBottom>
               Welcome {role === "student" ? "Student" : "Instructor"}!
             </Typography>
-            <Typography variant="body1">Fill in your details to continue.</Typography>
+            <Typography variant="body1">
+              Fill in your details to continue.
+            </Typography>
           </Grid>
 
           <Grid item xs={7} sx={{ padding: 4 }}>
@@ -184,14 +209,49 @@ const Signup = ({ onClose }) => {
             </DialogTitle>
 
             <DialogContent>
-              <TextField required label="Name" name="name" fullWidth margin="dense" onChange={handleChange} />
-              <TextField required label="Email" name="email" type="email" fullWidth margin="dense" onChange={handleChange} />
-              <TextField required label="Password" name="password" type="password" fullWidth margin="dense" onChange={handleChange} />
-              <TextField required label="Confirm Password" name="confirmPassword" type="password" fullWidth margin="dense" onChange={handleChange} />
+              <TextField
+                required
+                label="Name"
+                name="name"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
+              <TextField
+                required
+                label="Email"
+                name="email"
+                type="email"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
+              <TextField
+                required
+                label="Password"
+                name="password"
+                type="password"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
+              <TextField
+                required
+                label="Confirm Password"
+                name="confirmPassword"
+                type="password"
+                fullWidth
+                margin="dense"
+                onChange={handleChange}
+              />
 
               {/* Error Message */}
               {errorMessage && (
-                <Typography color="error" variant="body2" sx={{ mt: 1, textAlign: "center" }}>
+                <Typography
+                  color="error"
+                  variant="body2"
+                  sx={{ mt: 1, textAlign: "center" }}
+                >
                   {errorMessage}
                 </Typography>
               )}

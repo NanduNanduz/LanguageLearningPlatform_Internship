@@ -146,8 +146,13 @@ const Login = ({ setCurrentUser, onClose }) => {
             }}
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Typography variant="h5" fontWeight="bold">
-                Login
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                textAlign={"center"}
+                color=" #4e9fa8"
+              >
+                LOGIN
               </Typography>
 
               <TextField
@@ -202,12 +207,12 @@ const Login = ({ setCurrentUser, onClose }) => {
                 onClick={handleLogin}
                 variant="contained"
                 fullWidth
-                sx={{ bgcolor: "purple", color: "white", fontWeight: "bold" }}
+                sx={{ bgcolor: " #4e9fa8", color: "white", fontWeight: "bold" }}
               >
                 Login
               </Button>
               <Typography variant="body2" sx={{ textAlign: "center", mt: 2 }}>
-                Don't have an account?{' '}
+                Don't have an account?{" "}
                 <Link
                   component="button"
                   variant="body2"
@@ -221,34 +226,39 @@ const Login = ({ setCurrentUser, onClose }) => {
           </Grid>
 
           {/* Right Side: Image with Close Button */}
-          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" }, position: 'relative' }}>
-            <Box 
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{ display: { xs: "none", md: "block" }, position: "relative" }}
+          >
+            <Box
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 top: 16,
                 right: 16,
                 zIndex: 1,
-                cursor: 'pointer',
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                borderRadius: '50%',
+                cursor: "pointer",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                borderRadius: "50%",
                 width: 32,
                 height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '20px',
-                fontWeight: 'bold',
-                '&:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.7)'
-                }
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontSize: "20px",
+                fontWeight: "bold",
+                "&:hover": {
+                  backgroundColor: "rgba(0,0,0,0.7)",
+                },
               }}
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               aria-label="Close"
             >
               ×
             </Box>
-            
+
             <Box
               sx={{
                 backgroundImage:
@@ -264,7 +274,12 @@ const Login = ({ setCurrentUser, onClose }) => {
       </Dialog>
 
       {/* Forgot Password Dialog */}
-      <Dialog open={forgotOpen} onClose={handleForgotClose} maxWidth="md" fullWidth>
+      <Dialog
+        open={forgotOpen}
+        onClose={handleForgotClose}
+        maxWidth="md"
+        fullWidth
+      >
         <Grid container sx={{ minHeight: "450px" }}>
           {/* Left Side: Forgot Password Form */}
           <Grid
@@ -299,7 +314,13 @@ const Login = ({ setCurrentUser, onClose }) => {
             {message2 && (
               <div className="message text-center text-danger">{message2}</div>
             )}
-            <DialogContent sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <DialogContent
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
               <TextField
                 label="Email Address"
                 name="email"
@@ -318,7 +339,14 @@ const Login = ({ setCurrentUser, onClose }) => {
                 }}
               />
             </DialogContent>
-            <DialogActions sx={{ justifyContent: "center", pb: 3, flexDirection: "column", width: "100%" }}>
+            <DialogActions
+              sx={{
+                justifyContent: "center",
+                pb: 3,
+                flexDirection: "column",
+                width: "100%",
+              }}
+            >
               <Button
                 variant="contained"
                 fullWidth
@@ -360,7 +388,12 @@ const Login = ({ setCurrentUser, onClose }) => {
           </Grid>
 
           {/* Right Side: Forgot Password Image */}
-          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{ display: { xs: "none", md: "block" } }}
+          >
             <Box
               sx={{
                 backgroundImage: "url(/images/forgot_password.jpg)",
@@ -375,7 +408,12 @@ const Login = ({ setCurrentUser, onClose }) => {
       </Dialog>
 
       {/* OTP Dialog */}
-      <Dialog open={otpOpen} onClose={() => setOtpOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={otpOpen}
+        onClose={() => setOtpOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogContent sx={{ textAlign: "center", padding: 4 }}>
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
             <img
@@ -391,13 +429,18 @@ const Login = ({ setCurrentUser, onClose }) => {
             Enter the six-digit code we sent to your email address.
           </Typography>
 
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 1, my: 2 }}>
+          <Box
+            sx={{ display: "flex", justifyContent: "center", gap: 1, my: 2 }}
+          >
             {otp.map((value, index) => (
               <TextField
                 key={index}
                 type="text"
                 variant="outlined"
-                inputProps={{ maxLength: 1, style: { textAlign: "center", fontSize: "20px" } }}
+                inputProps={{
+                  maxLength: 1,
+                  style: { textAlign: "center", fontSize: "20px" },
+                }}
                 sx={{
                   width: "3rem",
                   height: "3rem",
@@ -429,7 +472,12 @@ const Login = ({ setCurrentUser, onClose }) => {
       </Dialog>
 
       {/* Reset Password Dialog */}
-      <Dialog open={resetOpen} onClose={() => setResetOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogContent sx={{ textAlign: "center", padding: 4 }}>
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
             <img
