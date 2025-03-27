@@ -7,7 +7,7 @@ const Featured = ({  onLearnMoreClick ,isLoggedIn }) => {
   const navigate = useNavigate();
 
   const handleSubmit = () => {
-    navigate(`/gigs?search=${input}`);
+    navigate(`/courses?search=${input}`);
   };
 
   return (
