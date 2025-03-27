@@ -456,7 +456,7 @@ const CoursePage = () => {
           boxShadow: 3,
           marginBottom: 4,
           background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-          borderLeft: "5px solid #3f51b5",
+          borderLeft: "5px solid #2c3e50",
         }}
       >
         <CardContent>
@@ -465,6 +465,8 @@ const CoursePage = () => {
             fontWeight="bold"
             gutterBottom
             sx={{ color: "#2c3e50" }}
+            style={{ color: " #4e9fa8" }}
+            textAlign={"center"}
           >
             {course.title}
           </Typography>
@@ -475,6 +477,7 @@ const CoursePage = () => {
               marginBottom: 3,
               fontSize: "1.1rem",
               lineHeight: 1.6,
+              textAlign: "center",
             }}
           >
             {course.description}
@@ -498,6 +501,7 @@ const CoursePage = () => {
                   boxShadow: 4,
                 },
               }}
+              style={{ backgroundColor: " rgb(133, 181, 187)" }}
             >
               Add Videos & Resources
             </Button>
@@ -514,6 +518,7 @@ const CoursePage = () => {
                   boxShadow: 4,
                 },
               }}
+              style={{ backgroundColor: " rgb(179, 183, 184)" }}
             >
               Add Quiz
             </Button>
@@ -551,15 +556,17 @@ const CoursePage = () => {
                   fontWeight: "bold",
                   borderRadius: 0,
                   borderBottom:
-                    selectedSection === section ? "3px solid #3f51b5" : "none",
+                    selectedSection === section ? "3px solid #4e9fa8" : "none",
                   color: selectedSection === section ? "white" : "text.primary",
                   backgroundColor:
                     selectedSection === section
-                      ? "#3f51b5"
+                      ? "#2c3e50"
                       : "background.paper",
                   "&:hover": {
                     backgroundColor:
-                      selectedSection === section ? "#303f9f" : "#f5f5f5",
+                      selectedSection === section
+                        ? "rgb(87, 90, 116)"
+                        : " #f5f5f5",
                   },
                 }}
               >
@@ -582,12 +589,13 @@ const CoursePage = () => {
         {selectedSection === "quizzes" && (
           <>
             <Typography
-              variant="h5"
+              variant="h6"
               fontWeight="bold"
               marginBottom={3}
-              sx={{ color: "#2c3e50" }}
+              sx={{ color: " #2c3e50" }}
+              textAlign={"center"}
             >
-              Course Quizzes
+              COURSE QUIZZES
             </Typography>
             {quizLoading ? (
               <Box display="flex" justifyContent="center" py={4}>
@@ -613,7 +621,7 @@ const CoursePage = () => {
                     }}
                   >
                     <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                      Quiz {index + 1}
+                      QUIZ {index + 1}
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
@@ -792,12 +800,13 @@ const CoursePage = () => {
         {selectedSection === "resources" && (
           <>
             <Typography
-              variant="h5"
+              variant="h6"
               fontWeight="bold"
               marginBottom={3}
               sx={{ color: "#2c3e50" }}
+              textAlign={"center"}
             >
-              Course Resources
+              COURSE RESOURCES
             </Typography>
             {course.resources.length > 0 ? (
               <Grid container spacing={3}>
@@ -901,12 +910,13 @@ const CoursePage = () => {
         {selectedSection === "videos" && (
           <>
             <Typography
-              variant="h5"
+              variant="h6"
               fontWeight="bold"
               marginBottom={3}
-              sx={{ color: "#2c3e50" }}
+              sx={{ color: " #2c3e50" }}
+              textAlign={"center"}
             >
-              Course Videos
+              COURSE VIDEOS
             </Typography>
             <Grid container spacing={3}>
               {course.videos.length > 0 ? (
@@ -1070,12 +1080,13 @@ const CoursePage = () => {
         {selectedSection === "students" && (
           <>
             <Typography
-              variant="h5"
+              variant="h6"
               fontWeight="bold"
               marginBottom={3}
-              sx={{ color: "#2c3e50" }}
+              sx={{ color: " #2c3e50" }}
+              textAlign={"center"}
             >
-              Enrolled Students
+              ENROLLED STUDENTS
             </Typography>
             {students.length > 0 ? (
               <Grid container spacing={3}>
@@ -1140,8 +1151,14 @@ const CoursePage = () => {
         {selectedSection === "Q&A" && (
           <Card sx={{ boxShadow: 3, marginBottom: 3, padding: 2 }}>
             <CardContent>
-              <Typography variant="h5" fontWeight="bold" gutterBottom>
-                Course Q&A
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                gutterBottom
+                textAlign={"center"}
+                sx={{ color: "#2c3e50" }}
+              >
+                COURSE Q&A
               </Typography>
 
               {isLoadingQA ? (
@@ -1198,7 +1215,7 @@ const CoursePage = () => {
                           mt: 2,
                           mb: 3,
                           p: 2,
-                          backgroundColor: "#f9f9f9",
+                          backgroundColor: " #f9f9f9",
                           borderRadius: 1,
                         }}
                       >
@@ -1227,14 +1244,16 @@ const CoursePage = () => {
                                 mt: 2,
                                 p: 2,
                                 backgroundColor: answer.isInstructorAnswer
-                                  ? "#e3f2fd"
-                                  : "#f5f5f5",
+                                  ? " #e3f2fd"
+                                  : " #f5f5f5",
                                 borderRadius: 1,
                                 borderLeft: answer.isInstructorAnswer
                                   ? "3px solid #1976d2"
                                   : "3px solid #9e9e9e",
                               }}
                             >
+                              {" "}
+                              
                               <Stack
                                 direction="row"
                                 alignItems="center"
@@ -1310,6 +1329,7 @@ const CoursePage = () => {
                       ) : (
                         <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
                           <Button
+                            backgroundColor=" rgb(133, 181, 187)"
                             variant="contained"
                             onClick={() => {
                               setSelectedQuestion(question._id);
@@ -1319,7 +1339,7 @@ const CoursePage = () => {
                           >
                             Answer Question
                           </Button>
-                          {!question.resolved && (
+                          {/* {!question.resolved && (
                             <Button
                               variant="contained"
                               color="success"
@@ -1328,7 +1348,7 @@ const CoursePage = () => {
                             >
                               Mark Resolved
                             </Button>
-                          )}
+                          )} */}
                         </Stack>
                       )}
                     </CardContent>
@@ -1344,12 +1364,13 @@ const CoursePage = () => {
         {selectedSection === "reviews" && (
           <>
             <Typography
-              variant="h5"
+              variant="h6"
               fontWeight="bold"
               marginBottom={3}
               sx={{ color: "#2c3e50" }}
+              textAlign={"center"}
             >
-              Student Reviews
+              STUDENT REVIEWS
             </Typography>
             {reviews.length > 0 ? (
               <Grid container spacing={3}>

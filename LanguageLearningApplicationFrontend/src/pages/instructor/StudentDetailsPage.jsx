@@ -11,6 +11,7 @@ import {
   Divider,
   Paper,
   Button,
+  Box,
 } from "@mui/material";
 
 const StudentDetailsPage = () => {
@@ -44,9 +45,9 @@ const StudentDetailsPage = () => {
 
   if (loading)
     return (
-      <CircularProgress
-        style={{ display: "block", margin: "auto", marginTop: "20px" }}
-      />
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
     );
   if (error) return <Typography color="error">{error}</Typography>;
 
@@ -59,20 +60,39 @@ const StudentDetailsPage = () => {
   const assignmentSubmissions = enrolledCourse?.assignments || [];
 
   return (
-    <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
-      {/* Unified Card */}
-      <Card sx={{ boxShadow: 3, padding: 3 }}>
+    <Box sx={{ p: 4, maxWidth: 1200, mx: "auto" }}>
+      <Typography
+        variant="h5"
+        component="h1"
+        gutterBottom
+        sx={{
+          fontWeight: "bold",
+          color: "#4e9fa8",
+          mb: 4,
+          textAlign: "center",
+        }}
+      >
+        STUDENT PROGRESS
+      </Typography>
+
+      <Card
+        sx={{
+          boxShadow: 3,
+          p: 3,
+          borderRadius: 2,
+        }}
+      >
         <CardContent>
           {/* Student Profile Section */}
           <Grid container spacing={3} alignItems="center">
-            <Grid item>
+            <Grid item xs={12} sm="auto">
               <Avatar
                 src={student.profilePicture}
                 sx={{ width: 100, height: 100 }}
               />
             </Grid>
-            <Grid item>
-              <Typography variant="h4" fontWeight="bold">
+            <Grid item xs={12} sm>
+              <Typography variant="h5" fontWeight="bold" color="#4e9fa8">
                 {student.name}
               </Typography>
               <Typography variant="body1" color="textSecondary">
@@ -84,52 +104,94 @@ const StudentDetailsPage = () => {
             </Grid>
           </Grid>
 
-          <Divider sx={{ marginY: 3 }} />
+          <Divider sx={{ my: 4 }} />
 
-          {/* Course Progress */}
-          <Typography variant="h5">Course Progress</Typography>
-          <Typography variant="body1">
-            <strong>Progress:</strong> {courseProgress}%
-          </Typography>
-
-          <Divider sx={{ marginY: 3 }} />
-
-          {/* Quiz Result (Single Text) */}
-          <Typography variant="h5">Quiz Result</Typography>
-          {quizResult ? (
-            <Typography variant="body1">
-              <strong>Score:</strong> {quizResult.score.toFixed(2)}%
+          {/* Course Progress Section */}
+          <Box mb={4}>
+            <Typography variant="h6" color="#4e9fa8" gutterBottom>
+              Course Progress
             </Typography>
-          ) : (
-            <Typography>No quiz attempted yet.</Typography>
-          )}
+            <Box
+              sx={{
+                width: "100%",
+                height: 20,
+                backgroundColor: "#f0f0f0",
+                borderRadius: 10,
+                overflow: "hidden",
+                mb: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  height: "100%",
+                  width: `${courseProgress}%`,
+                  backgroundColor: "#4e9fa8",
+                }}
+              />
+            </Box>
+            <Typography variant="body1">
+              <strong>Progress:</strong> {courseProgress}%
+            </Typography>
+          </Box>
 
-          <Divider sx={{ marginY: 3 }} />
+          <Divider sx={{ my: 4 }} />
 
-          {/* Assignment Submissions */}
-          <Typography variant="h5">Assignment Submissions</Typography>
-          {assignmentSubmissions.length > 0 ? (
-            assignmentSubmissions.map((assignment, index) => (
-              <Paper key={index} sx={{ padding: 2, marginTop: 2 }}>
-                <Typography variant="body1">
-                  <strong>{assignment.title}: </strong>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => window.open(assignment.fileUrl, "_blank")}
-                  >
-                    Open
-                  </Button>
-                </Typography>
-              </Paper>
-            ))
-          ) : (
-            <Typography>No assignments submitted yet.</Typography>
-          )}
+          {/* Quiz Result Section */}
+          <Box mb={4}>
+            <Typography variant="h6" color="#4e9fa8" gutterBottom>
+              Quiz Result
+            </Typography>
+            {quizResult ? (
+              <Typography variant="body1">
+                <strong>Score:</strong> {quizResult.score.toFixed(2)}%
+              </Typography>
+            ) : (
+              <Typography>No quiz attempted yet.</Typography>
+            )}
+          </Box>
 
+          <Divider sx={{ my: 4 }} />
+
+          {/* Assignment Submissions Section */}
+          <Box>
+            <Typography variant="h6" color="#4e9fa8" gutterBottom>
+              Assignment Submissions
+            </Typography>
+            {assignmentSubmissions.length > 0 ? (
+              <Grid container spacing={2}>
+                {assignmentSubmissions.map((assignment, index) => (
+                  <Grid item xs={12} key={index}>
+                    <Paper sx={{ p: 2, borderRadius: 2 }}>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Typography variant="body1" fontWeight="medium">
+                          {assignment.title}
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          onClick={() =>
+                            window.open(assignment.fileUrl, "_blank")
+                          }
+                          size="small"
+                        >
+                          View Submission
+                        </Button>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Typography>No assignments submitted yet.</Typography>
+            )}
+          </Box>
         </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 };
 

@@ -11,7 +11,7 @@ import {
   Container,
   CssBaseline,
   useMediaQuery,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -44,8 +44,12 @@ const InstructorHome = () => {
 
   const handleDelete = async (courseId) => {
     try {
-      await axios.delete(`http://localhost:3000/instructor/delete-course/${courseId}`);
-      setCourseDetails(courseDetails.filter((course) => course._id !== courseId));
+      await axios.delete(
+        `http://localhost:3000/instructor/delete-course/${courseId}`
+      );
+      setCourseDetails(
+        courseDetails.filter((course) => course._id !== courseId)
+      );
     } catch (error) {
       console.error("Error deleting course:", error);
     }
@@ -54,79 +58,112 @@ const InstructorHome = () => {
   const handleUpdate = (courseId) => navigate(`/updateCourse/${courseId}`);
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        backgroundColor: "#f5f5f5",
+        pt: 4, // Add padding top to create space below navbar
+      }}
+    >
       <CssBaseline />
 
       {/* Main Content */}
       <Box
+        component="main"
         sx={{
           flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          transition: "margin 0.3s",
-          width: "100%", // Ensures full width
-          paddingLeft: isMobile ? 0 : `${drawerWidth / 2}px`, // Adjust for sidebar
-          paddingRight: isMobile ? 0 : `${drawerWidth / 2}px`, // Balance padding
+          width: "100%",
+          px: isMobile ? 2 : 4, // Responsive padding
+          pb: 4,
         }}
       >
-        {/* Course Section */}
         <Container
+          maxWidth="lg"
           sx={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            padding: 3,
-            maxWidth: "70%", // Adjusted width for centering
-            backgroundColor: "#ffffff",
-            borderRadius: "8px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            margin: "auto", // Centers horizontally
+            py: 4,
           }}
         >
-          {/* Welcome Message */}
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
-            <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-              Welcome, {instructor?.name}
+          {/* Welcome Section */}
+          <Box
+            sx={{
+              width: "100%",
+              textAlign: "center",
+              mb: 4,
+            }}
+          >
+            <Typography
+              variant="h4"
+              sx={{ fontWeight: "bold", mb: 1 }}
+              style={{ color: "#4e9fa8" }}
+            >
+              WELCOME, {instructor?.name}
+            </Typography>
+            <Typography variant="h5" color="textSecondary">
+              YOUR COURSES
             </Typography>
           </Box>
 
-          <Typography variant="h4" gutterBottom>
-            Your Courses
-          </Typography>
-
-          <Grid container spacing={4} justifyContent="center">
+          {/* Courses Grid */}
+          <Grid container spacing={3} justifyContent="center">
             {courseDetails.length > 0 ? (
               courseDetails.map((course) => (
                 <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
                   <Card
                     sx={{
+                      height: "100%",
                       display: "flex",
                       flexDirection: "column",
-                      justifyContent: "space-between",
-                      height: "100%",
-                      padding: 1,
-                      backgroundColor: "#fafafa",
-                      textAlign: "center",
+                      transition: "transform 0.2s",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: 3,
+                      },
                     }}
                   >
-                    <CardContent>
-                      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography
+                        textAlign={"center"}
+                        variant="h6"
+                        sx={{ fontWeight: "bold" }}
+                        style={{ color: " #4e9fa8" }}
+                      >
                         {course.title}
                       </Typography>
                     </CardContent>
-                    <CardActions sx={{ justifyContent: "center" }}>
-                      <Button size="small" variant="contained" color="primary" component={Link} to={`/coursePage/${course._id}`}>
+                    <CardActions sx={{ justifyContent: "center", p: 2 }}>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        // color="primary"
+                        component={Link}
+                        to={`/coursePage/${course._id}`}
+                        sx={{ mx: 0.5 }}
+                        style={{ backgroundColor: " rgb(133, 181, 187)" }}
+                      >
                         View
                       </Button>
-                      <Button size="small" variant="contained" color="secondary" onClick={() => handleUpdate(course._id)}>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        // color="secondary"
+                        onClick={() => handleUpdate(course._id)}
+                        sx={{ mx: 0.5 }}
+                        style={{ backgroundColor: " rgb(95, 115, 117)" }}
+                      >
                         Update
                       </Button>
-                      <Button size="small" variant="contained" color="error" onClick={() => handleDelete(course._id)}>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleDelete(course._id)}
+                        sx={{ mx: 0.5 }}
+                        style={{ backgroundColor: " rgb(179, 183, 184)" }}
+                      >
                         Delete
                       </Button>
                     </CardActions>
@@ -134,9 +171,20 @@ const InstructorHome = () => {
                 </Grid>
               ))
             ) : (
-              <Typography color="textSecondary" align="center">
-                No courses found.
-              </Typography>
+              <Box sx={{ textAlign: "center", py: 4 }}>
+                <Typography variant="h6" color="textSecondary">
+                  No courses found. Create your first course to get started!
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  component={Link}
+                  to="/addCourse"
+                  sx={{ mt: 2 }}
+                >
+                  Create New Course
+                </Button>
+              </Box>
             )}
           </Grid>
         </Container>
