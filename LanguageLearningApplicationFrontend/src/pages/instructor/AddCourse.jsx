@@ -1,5 +1,4 @@
-
-import React, { useEffect , useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   TextField,
@@ -12,7 +11,6 @@ import {
   Select,
   FormControl,
   InputLabel,
-  Box,
   CircularProgress
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
@@ -20,22 +18,16 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { useLocation, useNavigate } from "react-router-dom";
 
+
 const AddCourse = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // const instructor = location.state?.instructor;
-  // const instructorId = location.state?.instructor?._id;
-
-  // Get user data from location state (consistent with your Navbar implementation)
-  const user = location.state?.user || location.state?.instructor?.currentUser;
-
+  // Handle both old and new ways of passing instructor data
+  const user = location.state?.user || location.state?.instructor?.currentUser || location.state?.instructor;
   const userId = user?._id;
-  // if (!userId) {
-  //   return <h2>Error: Instructor ID not found!</h2>;
-  // }
 
-
+  console.log("User data in AddCourse:", user); // Debugging log
 
   const [courseData, setCourseData] = useState({
     title: "",
@@ -60,14 +52,6 @@ const AddCourse = () => {
     "Malay", "Swedish", "Danish", "Finnish", "Norwegian", "Hungarian", "Czech",
     "Slovak", "Romanian", "Ukrainian", "Filipino (Tagalog)", "Swahili"
   ];
-
-  // useEffect(() => {
-  //   if (!userId) {
-  //     navigate("/login");
-  //     return;
-  //   }
-  //   setLoading(false);
-  // }, [userId, navigate]);
 
   const handleChange = (e) => {
     setCourseData({ ...courseData, [e.target.name]: e.target.value });
@@ -103,10 +87,16 @@ const AddCourse = () => {
     setVideoFiles(updatedVideos);
   };
 
+  console.log("User object:", user);
+  console.log("Extracted userId:", userId);
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+
     if (!thumbnail) {
       setError("Course thumbnail is required.");
+      setSubmitting(false);
       return;
     }
 
@@ -121,32 +111,37 @@ const AddCourse = () => {
       formData.append("instructorId", userId);
 
       videoTitles.forEach((title, index) => {
-        if (title) formData.append("videoTitle", title);
+        if (title) formData.append("videoTitles", title);
         if (videoFiles[index]) formData.append("videos", videoFiles[index]);
       });
 
+      
+
+
       const response = await axios.post(
-        `http://localhost:3000/instructor/createCourse/${userId}`,
+        // `http://localhost:3000/courses/createCourse`
+        
+         `http://localhost:3000/instructor/createCourse/${userId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       if (response.data.success) {
         alert("Course created successfully!");
-        navigate("/instructorHome", { state: { user: instructor } });
+        navigate("/instructorHome", { state: { user } });
       }
     } catch (error) {
-      setError("Error creating course. Please try again.");
+      setError(error.response?.data?.message || "Error creating course. Please try again.");
       console.error("Error:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
-
-
 
   return (
     <Paper
       sx={{
-        backgroundColor: "#ADB2D4", // Light blue background
+        backgroundColor: "#ADB2D4",
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -159,22 +154,29 @@ const AddCourse = () => {
         encType="multipart/form-data"
         style={{ width: "100%", maxWidth: 600 }}
       >
-        <Typography variant="h5" gutterBottom sx={{textAlign:"center",fontWeight: "bold", marginBottom: "15px",
-            }}>
+        <Typography variant="h5" gutterBottom sx={{
+          textAlign: "center",
+          fontWeight: "bold", 
+          marginBottom: "15px",
+        }}>
           Create a New Course
         </Typography>
-        {error && <Typography color="error">{error}</Typography>}
+        
+        {error && (
+          <Typography color="error" sx={{ textAlign: "center", mb: 2 }}>
+            {error}
+          </Typography>
+        )}
+
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
-            sx={{
-              backgroundColor: "white", 
-              borderRadius: "5px"}}
+              sx={{ backgroundColor: "white", borderRadius: "5px" }}
               fullWidth
               variant="filled"
               label="Course Title"
               name="title"
-              
+              value={courseData.title}
               onChange={handleChange}
               required
             />
@@ -182,13 +184,12 @@ const AddCourse = () => {
 
           <Grid item xs={12}>
             <TextField
-            sx={{
-              backgroundColor: "white", 
-              borderRadius: "5px"}}
+              sx={{ backgroundColor: "white", borderRadius: "5px" }}
               fullWidth
               variant="filled"
               label="Description"
               name="description"
+              value={courseData.description}
               multiline
               rows={3}
               onChange={handleChange}
@@ -198,64 +199,68 @@ const AddCourse = () => {
 
           <Grid item xs={12}>
             <TextField
-            sx={{
-              backgroundColor: "white", 
-              borderRadius: "5px"}}
+              sx={{ backgroundColor: "white", borderRadius: "5px" }}
               fullWidth
               variant="filled"
               label="Price (₹)"
               name="price"
               type="number"
+              value={courseData.price}
               onChange={handleChange}
               required
             />
           </Grid>
 
           <Grid item xs={12}>
-  <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
-    <InputLabel>Category</InputLabel>
-    <Select
-      name="category"
-      value={courseData.category}
-      onChange={handleChange}
-      required
-    >
-      {categories.map((category, index) => (
-        <MenuItem key={index} value={category}>
-          {category}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
-</Grid>
+            <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
+              <InputLabel>Category</InputLabel>
+              <Select
+                name="category"
+                value={courseData.category}
+                onChange={handleChange}
+                required
+              >
+                {categories.map((category, index) => (
+                  <MenuItem key={index} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
 
           <Grid item xs={12}>
             <TextField
-            sx={{
-              backgroundColor: "white", 
-              borderRadius: "5px"}}
+              sx={{ backgroundColor: "white", borderRadius: "5px" }}
               fullWidth
               variant="filled"
-              label="Name That Will Be Displayed in the Certficates"
+              label="Name That Will Be Displayed in the Certificates"
               name="instructorName"
+              value={courseData.instructorName}
               onChange={handleChange}
               required
             />
           </Grid>
 
           <Grid item xs={12}>
-            <input type="file" accept="image/*" onChange={handleThumbnailChange} style={{ display: "none" }} id="thumbnail-upload" required />
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleThumbnailChange} 
+              style={{ display: "none" }} 
+              id="thumbnail-upload" 
+              required 
+            />
             <label htmlFor="thumbnail-upload">
-             <Button
-                    variant="outlined"
-                    component="span"
-                    startIcon={<AddPhotoAlternateIcon />}
-                    sx={{ color: "black" }}
-                  >
-                    Upload Thumbnail{" "}
-                    <span style={{ color: "rgb(211, 42, 42)" }}>(Required)</span>
-            </Button>
-
+              <Button
+                variant="outlined"
+                component="span"
+                startIcon={<AddPhotoAlternateIcon />}
+                sx={{ color: "black" }}
+              >
+                Upload Thumbnail{" "}
+                <span style={{ color: "rgb(211, 42, 42)" }}>(Required)</span>
+              </Button>
             </label>
             {thumbnail && <Typography mt={1}>Selected: {thumbnail.name}</Typography>}
           </Grid>
@@ -266,9 +271,7 @@ const AddCourse = () => {
               <Grid container spacing={2} key={index} alignItems="center">
                 <Grid item xs={6}>
                   <TextField
-                  sx={{
-                    backgroundColor: "white", 
-                    borderRadius: "5px"}}
+                    sx={{ backgroundColor: "white", borderRadius: "5px" }}
                     fullWidth
                     variant="filled"
                     label="Video Title"
@@ -277,9 +280,17 @@ const AddCourse = () => {
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <input type="file" accept="video/*" onChange={(e) => handleVideoChange(e, index)} style={{ display: "none" }} id={`video-upload-${index}`} />
+                  <input 
+                    type="file" 
+                    accept="video/*" 
+                    onChange={(e) => handleVideoChange(e, index)} 
+                    style={{ display: "none" }} 
+                    id={`video-upload-${index}`} 
+                  />
                   <label htmlFor={`video-upload-${index}`}>
-                    <Button variant="outlined" component="span" sx={{color:"black"}}>Upload Video</Button>
+                    <Button variant="outlined" component="span" sx={{color:"black"}}>
+                      Upload Video
+                    </Button>
                   </label>
                 </Grid>
                 <Grid item xs={2}>
@@ -291,28 +302,31 @@ const AddCourse = () => {
                 </Grid>
               </Grid>
             ))}
-            <Button startIcon={<AddIcon />} onClick={addVideoField} sx={{ mt: 1,color:"black" }}>
+            <Button 
+              startIcon={<AddIcon />} 
+              onClick={addVideoField} 
+              sx={{ mt: 1, color: "black" }}
+            >
               Add Another Video
             </Button>
           </Grid>
 
           <Grid item xs={12}>
-          <Button
-                    type="submit"
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      backgroundColor: "rgb(85, 123, 159)", // ✅ Matching blue color
-                      color: "#FFFFFF", // ✅ White text
-                      borderColor: "#1565C0", // ✅ Darker blue border
-                      "&:hover": {
-                        backgroundColor: "rgb(75, 144, 213)", // ✅ Slightly darker on hover
-                      },
-                    }}
-                  >
-                    Create Course
-          </Button>
-
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={submitting}
+              sx={{
+                backgroundColor: "rgb(85, 123, 159)",
+                color: "#FFFFFF",
+                "&:hover": {
+                  backgroundColor: "rgb(75, 144, 213)",
+                },
+              }}
+            >
+              {submitting ? <CircularProgress size={24} /> : "Create Course"}
+            </Button>
           </Grid>
         </Grid>
       </form>
