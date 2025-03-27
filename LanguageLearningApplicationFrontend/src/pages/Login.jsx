@@ -17,65 +17,59 @@ import { useNavigate } from "react-router-dom";
 import Grid2 from "@mui/material/Grid2";
 import axios from "axios";
 
-
 const Login = ({ setCurrentUser, onClose }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [forgotOpen, setForgotOpen] = useState(false);
   const [otpOpen, setOtpOpen] = useState(false);
-  const [newpassword,setNewPassword] = useState("");
+  const [newpassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetOpen, setResetOpen] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [message,setMessage] = useState("")
-  const [message2,setMessage2]= useState("")
+  const [message, setMessage] = useState("");
+  const [message2, setMessage2] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-
   const handleLogin = async (e) => {
-    setMessage("")
+    setMessage("");
     if (!formData.email || !formData.password) {
       setMessage("Please fill in all fields.");
-      return; // Exit the function if fields are empty
+      return;
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/auth/login',formData);
-      const { role , blocked } = response.data.user;
+      const response = await axios.post('http://localhost:3000/auth/login', formData);
+      const { role, blocked } = response.data.user;
 
       if (blocked === "yes") {
         setMessage("You are blocked from this site.");
-        return; // Exit the function if the user is blocked
+        return;
       }
 
-    // Store token in sessionStorage (more secure)
-    sessionStorage.setItem("logintoken", response.data.token);
-    
-    // Store user data in sessionStorage
-    sessionStorage.setItem("user", JSON.stringify(response.data.user));
-    
-    // Update parent component state
-    if (setCurrentUser) {
-      setCurrentUser(response.data.user);
-    }
+      sessionStorage.setItem("logintoken", response.data.token);
+      sessionStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      if (setCurrentUser) {
+        setCurrentUser(response.data.user);
+      }
 
-    // Navigate based on role
-    if (role === "student") {
-      navigate("/", { state: { user: response.data.user } });
-    } else if (role === "admin") {
-      navigate("/adminDashboard", { state: { user: response.data.user } });
-    } else if (role === "instructor") {
-      navigate("/", { state: { user: response.data.user } });
-    }
-    alert("login success");
+      if (role === "student") {
+        navigate("/", { state: { user: response.data.user } });
+      } else if (role === "admin") {
+        navigate("/adminDashboard", { state: { user: response.data.user } });
+      } else if (role === "instructor") {
+        navigate("/", { state: { user: response.data.user } });
+      }
+      alert("login success");
     } catch (error) {
-    const errorMessage = error.response?.data?.message;
-    setMessage(errorMessage);
+      const errorMessage = error.response?.data?.message;
+      setMessage(errorMessage);
     }
-    };
+  };
+
   const handleForgotPassword = () => {
     setForgotOpen(true);
   };
@@ -108,24 +102,23 @@ const Login = ({ setCurrentUser, onClose }) => {
   };
 
   const handleSendMail = async () => {
-   
     try {
-      const response = await axios.post('http://localhost:3000/auth/reset-password',{email:formData.email} )
-      alert("OTP send to your E-mail")
+      const response = await axios.post('http://localhost:3000/auth/reset-password', {email: formData.email});
+      alert("OTP sent to your E-mail");
       setForgotOpen(false);
       setOtpOpen(true);
-      } catch (error) {
-        const errorMessage = error.response?.data?.message
-        setMessage2(errorMessage)
-        }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message;
+      setMessage2(errorMessage);
+    }
   };
 
   const handleResetPassword = async () => {
     try {
       await axios.post("http://localhost:3000/auth/newPass", {
         email: formData.email,
-        newPassword:newpassword,
-        newConfirmPassword : confirmPassword
+        newPassword: newpassword,
+        newConfirmPassword: confirmPassword
       });
       alert("Password reset successful");
       setResetOpen(false);
@@ -152,9 +145,7 @@ const Login = ({ setCurrentUser, onClose }) => {
               backgroundColor: "white",
             }}
           >
-            <Box
-              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-            >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Typography variant="h5" fontWeight="bold">
                 Login
               </Typography>
@@ -204,11 +195,11 @@ const Login = ({ setCurrentUser, onClose }) => {
                 Forgot password?
               </Link>
               {message && (
-            <div className="message text-center text-danger">{message}</div>
-          )}
+                <div className="message text-center text-danger">{message}</div>
+              )}
 
               <Button
-          onClick={handleLogin}
+                onClick={handleLogin}
                 variant="contained"
                 fullWidth
                 sx={{ bgcolor: "purple", color: "white", fontWeight: "bold" }}
@@ -229,8 +220,35 @@ const Login = ({ setCurrentUser, onClose }) => {
             </Box>
           </Grid>
 
-          {/* Right Side: Image */}
-          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" } }}>
+          {/* Right Side: Image with Close Button */}
+          <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "block" }, position: 'relative' }}>
+            <Box 
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                zIndex: 1,
+                cursor: 'pointer',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                borderRadius: '50%',
+                width: 32,
+                height: 32,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.7)'
+                }
+              }}
+              onClick={() => navigate('/')}
+              aria-label="Close"
+            >
+              ×
+            </Box>
+            
             <Box
               sx={{
                 backgroundImage:
@@ -279,8 +297,8 @@ const Login = ({ setCurrentUser, onClose }) => {
               Enter your registered email to reset your password.
             </Typography>
             {message2 && (
-            <div className="message text-center text-danger">{message2}</div>
-          )}
+              <div className="message text-center text-danger">{message2}</div>
+            )}
             <DialogContent sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               <TextField
                 label="Email Address"
