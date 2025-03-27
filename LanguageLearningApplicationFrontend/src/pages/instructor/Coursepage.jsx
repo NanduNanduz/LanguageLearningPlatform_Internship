@@ -953,7 +953,7 @@ const CoursePage = () => {
                               backgroundColor: "#000",
                             }}
                           />
-                          <Box
+                          {/* <Box
                             sx={{
                               position: "absolute",
                               top: 0,
@@ -977,7 +977,7 @@ const CoursePage = () => {
                                 color: "white",
                               }}
                             />
-                          </Box>
+                          </Box> */}
                         </Box>
                         <Stack
                           direction="row"

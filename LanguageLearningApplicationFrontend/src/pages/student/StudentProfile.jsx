@@ -134,7 +134,8 @@ const StudentProfile = () => {
           position: "relative",
           width: "100%",
           height: "250px",
-          backgroundImage: "url('/images/profilebg.jpg')",
+          backgroundColor: "#4e9fa8",
+          // backgroundImage: "url('/images/profilebg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           borderRadius: "0 0 15px 15px",
@@ -157,13 +158,24 @@ const StudentProfile = () => {
       </Box>
 
       {/* Name and Email */}
-      <Typography variant="h5" sx={{ mt: 7, fontWeight: "bold", color: "#3f51b5" }}>
+      <Typography
+        variant="h5"
+        sx={{ mt: 7, fontWeight: "bold", color: " #4e9fa8" }}
+      >
         {profile?.name}
       </Typography>
       <Typography color="textSecondary">{profile?.email}</Typography>
 
       {/* Profile Details in Cards */}
-      <Box sx={{ width: "100%", backgroundColor: " #4F959D", paddingTop: 5, paddingBottom: 5, mt: 3 }}>
+      <Box
+        sx={{
+          width: "100%",
+          backgroundColor: "rgb(208, 211, 211)",
+          paddingTop: 5,
+          paddingBottom: 5,
+          mt: 3,
+        }}
+      >
         <Grid container spacing={2} sx={{ maxWidth: 600, margin: "auto" }}>
           {[
             { label: "Bio", value: profile?.bio },
@@ -175,7 +187,9 @@ const StudentProfile = () => {
           ].map((item, index) => (
             <Grid item xs={6} key={index}>
               <Card variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                <Typography variant="subtitle1" fontWeight="bold">{item.label}</Typography>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  {item.label}
+                </Typography>
                 <Typography>{item.value || "N/A"}</Typography>
               </Card>
             </Grid>
@@ -183,19 +197,46 @@ const StudentProfile = () => {
         </Grid>
       </Box>
 
-      <Button variant="contained" sx={{ mt: 3, backgroundColor: "#4F959D", "&:hover": { backgroundColor: "#3B7D84" } }} onClick={handleEditOpen}>
-      Edit Profile
+      <Button
+        variant="contained"
+        sx={{
+          mt: 3,
+          backgroundColor: "#4F959D",
+          "&:hover": { backgroundColor: "#3B7D84" },
+        }}
+        onClick={handleEditOpen}
+      >
+        Edit Profile
       </Button>
 
       {/* Edit Profile Dialog */}
       <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
-        <DialogTitle sx={{ backgroundColor: "#4F959D", color: "white" }}>Edit Profile</DialogTitle>
+        <DialogTitle sx={{ backgroundColor: "#4F959D", color: "white" }}>
+          Edit Profile
+        </DialogTitle>
         <DialogContent sx={{ textAlign: "center" }}>
-          <Avatar src={previewImage} alt="Profile Preview" sx={{ width: 100, height: 100, margin: "auto", mt: 2 }} />
-          
+          <Avatar
+            src={previewImage}
+            alt="Profile Preview"
+            sx={{ width: 100, height: 100, margin: "auto", mt: 2 }}
+          />
+
           {/* Camera Upload Button */}
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: 2}}>
-            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} id="upload-photo" />
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              mt: 2,
+            }}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+              id="upload-photo"
+            />
             <label htmlFor="upload-photo">
               <IconButton color="primary" component="span">
                 <PhotoCameraIcon sx={{ fontSize: 40 }} />
@@ -224,7 +265,9 @@ const StudentProfile = () => {
           ))}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEdit(false)} color="secondary">Cancel</Button>
+          <Button onClick={() => setOpenEdit(false)} color="secondary">
+            Cancel
+          </Button>
           <Button onClick={handleUpdate} color="primary" disabled={saving}>
             {saving ? <CircularProgress size={24} /> : "Save Changes"}
           </Button>

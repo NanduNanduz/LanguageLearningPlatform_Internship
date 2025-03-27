@@ -460,7 +460,12 @@ const StudentCoursePage = () => {
       <Box sx={{ display: "flex", alignItems: "center", gap: 4, mb: 4 }}>
         {/* Text Content on the Left */}
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            gutterBottom
+            style={{ color: "#4e9fa8" }}
+           >
             {course?.title}
           </Typography>
           <Typography variant="subtitle1" color="text.secondary" gutterBottom>
@@ -479,10 +484,7 @@ const StudentCoursePage = () => {
           <Box sx={{ mt: 2 }}>
             {isCheckingEligibility && <CircularProgress size={24} />}
             {!isCheckingEligibility && isEligibleForRefund && (
-              <RefundButton 
-              userId={userId}
-              courseId={courseId}
-              ></RefundButton>
+              <RefundButton userId={userId} courseId={courseId}></RefundButton>
             )}
           </Box>
         </Box>
@@ -1082,8 +1084,6 @@ const StudentCoursePage = () => {
             )}
           </Paper>
         )}
-
-        
       </Box>
     </Box>
   );

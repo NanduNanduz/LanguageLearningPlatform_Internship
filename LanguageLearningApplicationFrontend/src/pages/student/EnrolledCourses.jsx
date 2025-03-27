@@ -56,7 +56,12 @@ const EnrolledCourses = () => {
 
   return (
     <Container sx={{ paddingTop: 3 }}>
-      <Typography variant="h4" gutterBottom align="center">
+      <Typography
+        variant="h4"
+        gutterBottom
+        align="center"
+        style={{ color: "#4e9fa8" }}
+      >
         Enrolled Courses
       </Typography>
 
@@ -69,6 +74,7 @@ const EnrolledCourses = () => {
           {enrolledCourses.map((course) => (
             <Grid item key={course._id} xs={12} sm={6} md={4}>
               <Card
+                style={{ backgroundColor: " #dadad6" }}
                 sx={{
                   minWidth: 250,
                   borderRadius: 3,
@@ -93,7 +99,9 @@ const EnrolledCourses = () => {
 
                 <CardContent>
                   {/* Course Title */}
-                  <Typography variant="h6">{course.title}</Typography>
+                  <Typography variant="h6" style={{ color: "#4e9fa8" }}>
+                    {course.title}
+                  </Typography>
 
                   {/* Course Description (Shortened) */}
                   <Typography variant="body2" color="textSecondary">
@@ -103,14 +111,21 @@ const EnrolledCourses = () => {
                   </Typography>
                 </CardContent>
 
-                <CardActions sx={{ justifyContent: "center", paddingBottom: 2 }}>
+                <CardActions
+                  sx={{ justifyContent: "center", paddingBottom: 2 }}
+                >
                   {/* Go to Course Button */}
                   <Button
+                    style={{ backgroundColor: "#4e9fa8" }}
                     variant="contained"
-                    color="primary"
+                    // color="primary"
                     component={Link}
                     to={`/fullCourse/${course._id}`}
-                    sx={{ borderRadius: 2, fontSize: "0.8rem", padding: "6px 12px" }}
+                    sx={{
+                      borderRadius: 2,
+                      fontSize: "0.8rem",
+                      padding: "6px 12px",
+                    }}
                   >
                     Go to Course
                   </Button>
