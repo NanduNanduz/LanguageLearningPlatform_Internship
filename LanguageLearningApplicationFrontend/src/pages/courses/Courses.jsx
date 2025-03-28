@@ -1,10 +1,8 @@
-
-
-// import React, { useEffect, useRef, useState } from "react";
+// import React, { useRef, useState } from "react";
 // import "./Courses.scss";
-// import GigCard from "../../components/gigCard/GigCard";
+// import CourseCard from "../../components/courseCard/CourseCard";
 // import { useQuery } from "@tanstack/react-query";
-// import newRequest from "../../utils/newRequest";
+// import axios from "axios";
 // import { useLocation } from "react-router-dom";
 
 // const Courses = () => {
@@ -15,57 +13,71 @@
 
 //   const { search } = useLocation();
 //   const queryParams = new URLSearchParams(search);
-//   const category = queryParams.get("cat") || ""; // Extract category from URL
-//   const searchQuery = queryParams.get("search")?.toLowerCase().replace(/\s+/g, ""); // Normalize search
+//   const category = queryParams.get("cat") || "";
+//   const searchQuery = queryParams.get("search")?.toLowerCase().replace(/\s+/g, "");
 
-//   // Fetch gigs based on category, budget, and sorting
-
+//   // Fetch approved courses using React Query
 //   const { isLoading, error, data, refetch } = useQuery({
-//     queryKey: ["gigs", category, sort],
-//     queryFn: () =>
-//       newRequest
-//         .get(
-//           `/gigs?cat=${category}&min=${minRef.current.value}&max=${maxRef.current.value}&sort=${sort}`
-//         )
-//         .then((res) => res.data),
+//     queryKey: ["courses", category, sort],
+//     queryFn: async () => {
+//       const res = await axios.get("http://localhost:3000/student/approved-courses");
+//       return res.data; // This should return { courses: [...] } based on your previous code
+//     },
 //   });
-
-//   console.log(data);
 
 //   const reSort = (type) => {
 //     setSort(type);
 //     setOpen(false);
 //   };
 
-//   useEffect(() => {
-//     // refetch();
-//   }, [sort, category]); // Refetch data when category changes
-
 //   const apply = () => {
 //     refetch();
 //   };
 
-//   // Filter gigs based on search query
-//   const filteredGigs = data
-//     ? data.filter((gig) =>
-//         gig.title.toLowerCase().replace(/\s+/g, "").includes(searchQuery || "")
-//       )
-//     : [];
+//   // Enhanced filtering and sorting logic from your previous working version
+//   const coursesArray = data?.courses || []; // Access the courses array from response data
+//   const filteredCourses = coursesArray
+//     .filter((course) => {
+//       // Filter by category
+//       if (category && course.category !== category) return false;
 
+//       // Filter by search query
+//       if (searchQuery && !course.title.toLowerCase().replace(/\s+/g, "").includes(searchQuery)) {
+//         return false;
+//       }
+
+//       // Filter by budget
+//       const minPrice = minRef.current?.value ? parseFloat(minRef.current.value) : 0;
+//       const maxPrice = maxRef.current?.value ? parseFloat(maxRef.current.value) : Infinity;
+//       if (course.price < minPrice || course.price > maxPrice) return false;
+
+//       return true;
+//     })
+//     .sort((a, b) => {
+//       // Sort by sales, createdAt, or other criteria
+//       if (sort === "sales") {
+//         return b.totalSales - a.totalSales; // Sort by total sales (descending)
+//       } else if (sort === "createdAt") {
+//         return new Date(b.createdAt) - new Date(a.createdAt); // Sort by newest
+//       }
+//       return 0;
+//     });
 
 //   return (
-//     <div className="gigs">
+//     <div className="courses"> 
 //       <div className="container">
-//         <span className="breadcrumbs">gigSync {'>'} {category} {'>'}</span>
-//         <h1>{category || "All Gigs"}</h1>
-//         <p>Explore top-quality services in {category || "various categories"}</p>
+//         <span className="breadcrumbs">Courses {'>'} {category} {'>'}</span>
+//         <h1>{category || "All Courses"}</h1>
+//         <p>Explore top-quality courses in {category || "various categories"}</p>
+        
 //         <div className="menu">
 //           <div className="left">
-//             <span>Budget</span>
+//             <span>Budget</span> {/* Changed from Price Range to Budget */}
 //             <input ref={minRef} type="number" placeholder="min" />
 //             <input ref={maxRef} type="number" placeholder="max" />
 //             <button onClick={apply}>Apply</button>
 //           </div>
+          
 //           <div className="right">
 //             <span className="sortBy">Sort By</span>
 //             <span className="sortType">
@@ -84,15 +96,18 @@
 //             )}
 //           </div>
 //         </div>
+
 //         <div className="cards">
 //           {isLoading ? (
-//             "Loading"
+//             "Loading..."
 //           ) : error ? (
-//             "Something went wrong!"
-//           ) : filteredGigs.length > 0 ? (
-//             filteredGigs.map((gig) => <GigCard key={gig._id} item={gig} />)
+//             <p style={{ color: "red" }}>{error.message || "Something went wrong!"}</p>
+//           ) : filteredCourses.length > 0 ? (
+//             filteredCourses.map((course) => (
+//               <CourseCard key={course._id} item={course} />
+//             ))
 //           ) : (
-//             <p>No gigs found for this category</p>
+//             <p>No courses found for this category</p>
 //           )}
 //         </div>
 //       </div>
@@ -102,43 +117,33 @@
 
 // export default Courses;
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import "./Courses.scss";
 import CourseCard from "../../components/courseCard/CourseCard";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 
 const Courses = () => {
   const [open, setOpen] = useState(false);
   const [sort, setSort] = useState("sales");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [courses, setCourses] = useState([]); // Renamed to courses for clarity
   const minRef = useRef();
   const maxRef = useRef();
+  const [priceFilter, setPriceFilter] = useState({ min: 0, max: Infinity });
 
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
-  const category = queryParams.get("cat") || ""; // Extract category from URL
-  const searchQuery = queryParams.get("search")?.toLowerCase().replace(/\s+/g, ""); // Normalize search
+  const category = queryParams.get("cat") || "";
+  const searchQuery = queryParams.get("search")?.toLowerCase().replace(/\s+/g, "");
 
-  // Fetch approved courses using axios
-  const fetchCourses = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get("http://localhost:3000/student/approved-courses");
-      setCourses(response.data?.courses || []); // Set courses from the response
-    } catch (err) {
-      setError(err.message || "Failed to fetch courses");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCourses();
-  }, []); // Fetch courses on component mount
+  // Fetch approved courses using React Query
+  const { isLoading, error, data } = useQuery({
+    queryKey: ["courses", category, sort, priceFilter],
+    queryFn: async () => {
+      const res = await axios.get("http://localhost:3000/student/approved-courses");
+      return res.data;
+    },
+  });
 
   const reSort = (type) => {
     setSort(type);
@@ -146,11 +151,15 @@ const Courses = () => {
   };
 
   const apply = () => {
-    fetchCourses(); // Refetch courses when filters are applied
+    setPriceFilter({
+      min: minRef.current?.value ? parseFloat(minRef.current.value) : 0,
+      max: maxRef.current?.value ? parseFloat(maxRef.current.value) : Infinity
+    });
   };
 
-  // Filter courses based on search query, category, and budget
-  const filteredCourses = courses
+  // Enhanced filtering and sorting logic
+  const coursesArray = data?.courses || [];
+  const filteredCourses = coursesArray
     .filter((course) => {
       // Filter by category
       if (category && course.category !== category) return false;
@@ -161,18 +170,15 @@ const Courses = () => {
       }
 
       // Filter by budget
-      const minPrice = minRef.current?.value ? parseFloat(minRef.current.value) : 0;
-      const maxPrice = maxRef.current?.value ? parseFloat(maxRef.current.value) : Infinity;
-      if (course.price < minPrice || course.price > maxPrice) return false;
+      if (course.price < priceFilter.min || course.price > priceFilter.max) return false;
 
       return true;
     })
     .sort((a, b) => {
-      // Sort by sales, createdAt, or other criteria
       if (sort === "sales") {
-        return b.totalSales - a.totalSales; // Sort by total sales (descending)
+        return b.totalSales - a.totalSales;
       } else if (sort === "createdAt") {
-        return new Date(b.createdAt) - new Date(a.createdAt); // Sort by newest
+        return new Date(b.createdAt) - new Date(a.createdAt);
       }
       return 0;
     });
@@ -183,13 +189,27 @@ const Courses = () => {
         <span className="breadcrumbs">Courses {'>'} {category} {'>'}</span>
         <h1>{category || "All Courses"}</h1>
         <p>Explore top-quality courses in {category || "various categories"}</p>
+        
         <div className="menu">
           <div className="left">
             <span>Budget</span>
-            <input ref={minRef} type="number" placeholder="min" />
-            <input ref={maxRef} type="number" placeholder="max" />
+            <input 
+              ref={minRef} 
+              type="number" 
+              placeholder="min" 
+              min="0"
+              onKeyDown={(e) => e.key === 'Enter' && apply()}
+            />
+            <input 
+              ref={maxRef} 
+              type="number" 
+              placeholder="max" 
+              min="0"
+              onKeyDown={(e) => e.key === 'Enter' && apply()}
+            />
             <button onClick={apply}>Apply</button>
           </div>
+          
           <div className="right">
             <span className="sortBy">Sort By</span>
             <span className="sortType">
@@ -203,16 +223,17 @@ const Courses = () => {
                 ) : (
                   <span onClick={() => reSort("sales")}>Best Selling</span>
                 )}
-                <span onClick={() => reSort("sales")}>Popular</span>
+                
               </div>
             )}
           </div>
         </div>
+
         <div className="cards">
           {isLoading ? (
             "Loading..."
           ) : error ? (
-            <p style={{ color: "red" }}>{error}</p>
+            <p style={{ color: "red" }}>{error.message || "Something went wrong!"}</p>
           ) : filteredCourses.length > 0 ? (
             filteredCourses.map((course) => (
               <CourseCard key={course._id} item={course} />
