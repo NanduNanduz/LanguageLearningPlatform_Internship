@@ -109,7 +109,8 @@ const Home = ({ isLoggedIn }) => {
                 <img src="/images/check.png" alt="" />
                 24/7 Access to Courses
               </div>
-              <button>Explore Courses</button>
+              {/* <button>Explore Courses</button> */}
+              <Link to={`/courses`}><button>Explore Courses</button></Link>
             </div>
             <div className="item">
               <img src="https://sg.fiverrcdn.com/press_release/1068/Press-Page%20-%201_press_image_1600171796.jpg" alt="" />
