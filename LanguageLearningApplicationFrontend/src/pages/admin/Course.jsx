@@ -35,24 +35,23 @@ const Course = () => {
     }
   };
 
- const handleApprove = async (id) => {
-   try {
-     await axios.put(`http://localhost:3000/admin/approve-course/${id}`);
-     fetchCourses(); // Refresh course list
-   } catch (error) {
-     console.error("Error approving course:", error);
-   }
- };
+  const handleApprove = async (id) => {
+    try {
+      await axios.put(`http://localhost:3000/admin/approve-course/${id}`);
+      fetchCourses();
+    } catch (error) {
+      console.error("Error approving course:", error);
+    }
+  };
 
- const handleReject = async (id) => {
-   try {
-     await axios.put(`http://localhost:3000/admin/reject-course/${id}`);
-     fetchCourses(); // Refresh course list
-   } catch (error) {
-     console.error("Error rejecting course:", error);
-   }
- };
-
+  const handleReject = async (id) => {
+    try {
+      await axios.put(`http://localhost:3000/admin/reject-course/${id}`);
+      fetchCourses(); 
+    } catch (error) {
+      console.error("Error rejecting course:", error);
+    }
+  };
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
@@ -71,8 +70,6 @@ const Course = () => {
           maxWidth="lg"
           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
         >
-         
-
           <TableContainer
             component={Paper}
             elevation={3}

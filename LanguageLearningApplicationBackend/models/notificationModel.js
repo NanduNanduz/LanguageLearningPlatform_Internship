@@ -13,7 +13,7 @@ const notificationSchema = new mongoose.Schema(
     recipients: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     sentBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Admin who sent the notification
+      ref: "User",
       required: true,
     },
     isRead: [

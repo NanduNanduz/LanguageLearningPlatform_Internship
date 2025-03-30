@@ -8,21 +8,20 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-//Additional details of students and instructors
+//--------------------------------------------Profile Details of Students and Instructors-----------------------------------------------
 export const additionalDetails = async (req, res) => {
   try {
     const { id } = req.params;
     const { bio, github, linkedIn, twitter, mobile, qualification } = req.body;
-
     console.log("Received Request:", req.body);
     console.log("Received File:", req.file);
-
     // Find the user
     const user = await userModel.findById(id);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
-
     // Update user details
     if (bio) user.bio = bio;
     if (github) user.socialLinks.github = github;
@@ -36,37 +35,36 @@ export const additionalDetails = async (req, res) => {
       const result = await cloudinary.v2.uploader.upload(req.file.path, {
         folder: "profile_pictures", // Cloudinary folder
       });
-
       user.profilePicture = result.secure_url;
       console.log("Profile Picture Uploaded:", result.secure_url);
-
-      
     }
-
     // Save updated user details
     await user.save();
-
-    res.status(200).json({ success: true, message: "User details updated successfully", user });
+    res.status(200).json({
+      success: true,
+      message: "User details updated successfully",
+      user,
+    });
   } catch (error) {
     console.error("Error updating user details:", error);
     res.status(500).json({ success: false, message: error.message });
   }
-  };
+};
 
+//------------------------------------------------GetProfile of Student/Instructor--------------------------------------------------
 export const getProfile = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      // Find the user
-      const user = await userModel.findById(id).select("-password"); // Exclude password field
-  
-      if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
-      }
-  
-      res.status(200).json({ success: true, user });
-    } catch (error) {
-      console.error("Error fetching user details:", error);
-      res.status(500).json({ success: false, message: error.message });
+  try {
+    const { id } = req.params;
+    // Find the user
+    const user = await userModel.findById(id).select("-password"); // Exclude password field
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
-  };
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

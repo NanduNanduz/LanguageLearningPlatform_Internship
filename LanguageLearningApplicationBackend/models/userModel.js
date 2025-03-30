@@ -5,22 +5,22 @@ const userSchema = mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { 
+    role: {
       type: String,
-      enum: ['student', 'instructor', 'admin'],  
-      default: 'student' 
+      enum: ["student", "instructor", "admin"],
+      default: "student",
     },
     createdAt: { type: Date, default: Date.now },
-    blocked: { type: String, enum: ['yes', 'no'], default: 'no' },
+    blocked: { type: String, enum: ["yes", "no"], default: "no" },
     bio: {
       type: String,
-      default: '',
-      maxlength: 500
+      default: "",
+      maxlength: 500,
     },
     socialLinks: {
       github: { type: String, default: "" },
       linkedIn: { type: String, default: "" },
-      twitter: { type: String, default: "" }
+      twitter: { type: String, default: "" },
     },
     enrolledCourses: [
       {
@@ -35,12 +35,16 @@ const userSchema = mongoose.Schema(
         ],
         assignments: [
           {
-            courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
-            title:{type:String, required:true},
-            assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Ref to assignment
-            fileUrl: { type: String, required: true }, // URL of submitted assignment file
-            submittedAt: { type: Date, default: Date.now }, // Submission timestamp
-            feedback: { type: String }, // Optional feedback from instructor
+            courseId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "Course",
+              required: true,
+            },
+            title: { type: String, required: true },
+            assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+            fileUrl: { type: String, required: true },
+            submittedAt: { type: Date, default: Date.now },
+            feedback: { type: String },
           },
         ],
         progressPercentage: { type: Number, default: 0 },
@@ -49,9 +53,9 @@ const userSchema = mongoose.Schema(
     ],
     courseCreated: [
       {
-        courseId:mongoose.Schema.Types.ObjectId,
-        courseTitle:String
-      }
+        courseId: mongoose.Schema.Types.ObjectId,
+        courseTitle: String,
+      },
     ],
     certificates: [
       {
@@ -63,8 +67,8 @@ const userSchema = mongoose.Schema(
     favourites: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Course"
-      }
+        ref: "Course",
+      },
     ],
     mobile: { type: Number },
     profilePicture: { type: String, default: "" },

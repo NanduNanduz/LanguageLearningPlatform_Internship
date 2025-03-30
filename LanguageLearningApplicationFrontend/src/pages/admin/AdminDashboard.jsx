@@ -1,10 +1,17 @@
 import React, { useState } from "react";
-import { Box, CssBaseline, Container, Paper, Typography, Drawer, IconButton } from "@mui/material";
+import {
+  Box,
+  CssBaseline,
+  Container,
+  Paper,
+  Typography,
+  Drawer,
+  IconButton,
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import MenuIcon from "@mui/icons-material/Menu"; // Import Menu Icon
-
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   BarChart,
   Bar,
@@ -42,7 +49,7 @@ const AdminDashboard = () => {
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <CssBaseline />
-      
+
       {/* Sidebar Drawer for Mobile */}
       <Drawer
         variant="temporary"
@@ -73,7 +80,12 @@ const AdminDashboard = () => {
           color="inherit"
           edge="start"
           onClick={handleDrawerToggle}
-          sx={{ display: { md: "none" }, position: "absolute", left: 10, top: 10 }}
+          sx={{
+            display: { md: "none" },
+            position: "absolute",
+            left: 10,
+            top: 10,
+          }}
         >
           <MenuIcon />
         </IconButton>

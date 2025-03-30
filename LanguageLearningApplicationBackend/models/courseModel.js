@@ -82,7 +82,7 @@ const CourseSchema = new mongoose.Schema(
     },
     instructorId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to User model (Instructor)
+      ref: "User", //Reference to User model (Instructor)
       required: true,
     },
     instructorName: {
@@ -111,7 +111,7 @@ const CourseSchema = new mongoose.Schema(
       {
         studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         studentName: { type: String },
-        completedVideos: [{ type: mongoose.Schema.Types.ObjectId }], // Tracks completed video IDs
+        completedVideos: [{ type: mongoose.Schema.Types.ObjectId }], //Tracks completed video IDs
         quizScores: [
           {
             quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" },
@@ -121,15 +121,14 @@ const CourseSchema = new mongoose.Schema(
         ],
         assignments: [
           {
-            studentId : { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-            title:{type:String, required:true},
+            studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+            title: { type: String, required: true },
             assignmentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Ref to assignment
-            fileUrl: { type: String, required: true }, // URL of submitted assignment file
-            submittedAt: { type: Date, default: Date.now }, // Submission timestamp
+            fileUrl: { type: String, required: true },
+            submittedAt: { type: Date, default: Date.now },
             feedback: { type: String }, // Optional feedback from instructor
           },
         ],
-
         progressPercentage: { type: Number, default: 0 },
         isCompleted: { type: Boolean, default: false }, // Stores course completion date
       },
@@ -153,7 +152,7 @@ const CourseSchema = new mongoose.Schema(
       default: "Pending",
     },
   },
-  { timestamps: true } // Auto-adds createdAt and updatedAt fields
+  { timestamps: true }
 );
 
 export default mongoose.model("Course", CourseSchema);

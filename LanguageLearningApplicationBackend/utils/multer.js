@@ -1,22 +1,25 @@
 import multer from "multer";
 
-
-
 const storage = multer.diskStorage({
-  filename:function(req,file,callback){
-    callback(null,file.originalname);
-  }
+  filename: function (req, file, callback) {
+    callback(null, file.originalname);
+  },
 });
 
 const fileFilter = (req, file, cb) => {
   if (
-    file.mimetype.startsWith("image/") || 
-    file.mimetype.startsWith("video/") || 
+    file.mimetype.startsWith("image/") ||
+    file.mimetype.startsWith("video/") ||
     file.mimetype === "application/pdf"
   ) {
     cb(null, true);
   } else {
-    cb(new Error("Invalid file type. Only images, videos, and PDFs are allowed."), false);
+    cb(
+      new Error(
+        "Invalid file type. Only images, videos, and PDFs are allowed."
+      ),
+      false
+    );
   }
 };
 
@@ -24,6 +27,3 @@ const fileFilter = (req, file, cb) => {
 export const upload = multer({ storage, fileFilter });
 
 export const parseFormData = upload.none();
-
-
-

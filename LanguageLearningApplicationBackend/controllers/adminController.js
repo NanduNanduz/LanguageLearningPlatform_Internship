@@ -1,31 +1,29 @@
 import courseModel from "../models/courseModel.js";
-
 import userModel from "../models/userModel.js";
- import paymentModel from "../models/paymentModel.js";
- import notificationModel from "../models/notificationModel.js"
-
+import paymentModel from "../models/paymentModel.js";
+import notificationModel from "../models/notificationModel.js";
 
 import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-08-16", // Use the latest API version
+  apiVersion: "2023-08-16",
 });
 
-// Get all courses (for admin panel)
+//---------------- Get all courses (for admin panel)-----------------------------------
 export const getCourses = async (req, res) => {
   try {
-    const courses = await courseModel
-      .find()
+    const courses = await courseModel.find();
     res.status(200).json(courses);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });
   }
 };
 
-export const courseDetails =  async (req, res) => {
+//------------------------------------ Get Specific Courses ------------------------------------------
+export const courseDetails = async (req, res) => {
   try {
-    const course = await courseModel.findById(req.params.courseId).populate(
-      "videos"
-    );
+    const course = await courseModel
+      .findById(req.params.courseId)
+      .populate("videos");
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
@@ -36,9 +34,7 @@ export const courseDetails =  async (req, res) => {
   }
 };
 
-
-
-// Approve Course
+//--------------------------------Approve Course By Admin----------------------------------------
 export const approveCourse = async (req, res) => {
   try {
     const course = await courseModel.findByIdAndUpdate(
@@ -57,8 +53,8 @@ export const approveCourse = async (req, res) => {
   }
 };
 
-// Reject Course
-export const rejectCourse =  async (req, res) => {
+//-----------------------------------------Reject Course By Admin----------------------------------
+export const rejectCourse = async (req, res) => {
   try {
     const course = await courseModel.findByIdAndUpdate(
       req.params.id,
@@ -76,40 +72,27 @@ export const rejectCourse =  async (req, res) => {
   }
 };
 
-
-
-//  block/unblock user
+//-----------------------------------Block/Unblock Student By Admin-----------------------------------
 export const toggleBlockUser = async (req, res) => {
   try {
     const { userId } = req.params;
-
-    // Find the user by ID
     const user = await userModel.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
-
-    // Toggle the blocked status
     user.blocked = user.blocked === "no" ? "yes" : "no";
     await user.save();
-
-    res
-      .status(200)
-      .json({
-        message: `User ${user.blocked === "yes" ? "Blocked" : "Unblocked"}`,
-        user,
-      });
+    res.status(200).json({
+      message: `User ${user.blocked === "yes" ? "Blocked" : "Unblocked"}`,
+      user,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error });
   }
 };
 
-
-
-
+//-------------------------------Find and Delete Student By Admin---------------------------------------
 export const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Find and delete student
     const deletedStudent = await userModel.findByIdAndDelete(id);
 
     if (!deletedStudent) {
@@ -123,9 +106,7 @@ export const deleteStudent = async (req, res) => {
   }
 };
 
-
-
-
+//----------------------------------Find and Delete Instructor By Admin-------------------------------
 export const deleteInstructor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -140,10 +121,8 @@ export const deleteInstructor = async (req, res) => {
       const courseIds = instructor.courseCreated.map((c) => c.courseId);
       await courseModel.deleteMany({ _id: { $in: courseIds } });
     }
-
     // Then delete the instructor
     await userModel.findByIdAndDelete(id);
-
     res
       .status(200)
       .json({ message: "Instructor and their courses deleted successfully" });
@@ -153,8 +132,7 @@ export const deleteInstructor = async (req, res) => {
   }
 };
 
-
-// Block/Unblock instructor
+//--------------------------------Block/Unblock Instructor By Admin-----------------------------------
 export const blockInstructor = async (req, res) => {
   const instructor = await userModel.findById(req.params.id);
   instructor.blocked = req.body.blocked;
@@ -162,10 +140,11 @@ export const blockInstructor = async (req, res) => {
   res.json({ message: "Instructor status updated" });
 };
 
-
+// All Transactions of Students
 export const allPayment = async (req, res) => {
   try {
-    const payments = await paymentModel.find()
+    const payments = await paymentModel
+      .find()
       .populate("studentId", "name email") // Populate student details
       .populate("courseId", "title"); // Populate course details
     res.json(payments);
@@ -173,43 +152,19 @@ export const allPayment = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch transactions" });
   }
 };
-// export const refundPayment = async (req, res) => {
-//   try {
-//     const payment = await paymentModel.findById(req.params.id);
-//     if (!payment || payment.paymentStatus !== "Completed") {
-//       return res.status(400).json({ message: "Refund not possible" });
-//     }
 
-//     // Refund logic using Stripe API
-//     await stripe.refunds.create({ payment_intent: payment.transactionId });
-
-//     // Update payment status and refund status
-//     payment.paymentStatus = "Refunded";
-//     payment.refundIssued = true;
-//     await payment.save();
-
-//     res.json({ message: "Refund issued successfully" });
-//   } catch (error) {
-//     console.error("Refund failed:", error);
-//     res.status(500).json({ error: "Refund failed" });
-//   }
-// };
-
-
+//---------------------------------Send Announcement to All Students By Admin---------------------------
 export const sendAnnouncement = async (req, res) => {
   try {
-    console.log("req.io:", req.io); // Debugging log
+    console.log("req.io:", req.io);
     const { title, message } = req.body;
-
     // Check if req.user is defined
     if (!req.user || !req.user._id) {
       return res.status(401).json({ error: "User not authenticated." });
     }
-
     // Fetch all users from the database
     const users = await userModel.find({}, { _id: 1 }); // Only fetch _id field
     const recipientIds = users.map((user) => user._id); // Extract ObjectId of each user
-
     // Create a new notification
     const notification = new notificationModel({
       title,
@@ -230,10 +185,11 @@ export const sendAnnouncement = async (req, res) => {
   }
 };
 
-// Get refund requests
+//----------------------------------------------Get Refund Requests------------------------------
 export const getRefundRequests = async (req, res) => {
   try {
-    const requests = await paymentModel.find({ refundStatus: "Requested" })
+    const requests = await paymentModel
+      .find({ refundStatus: "Requested" })
       .populate("studentId", "name email")
       .populate("courseId", "title");
     res.json(requests);
@@ -242,7 +198,7 @@ export const getRefundRequests = async (req, res) => {
   }
 };
 
-// Process refund request
+// ------------------------------------------Process Refund Request----------------------------------
 export const processRefund = async (req, res) => {
   try {
     const { id } = req.params;
@@ -257,10 +213,10 @@ export const processRefund = async (req, res) => {
       return res.status(400).json({ message: "Refund not in requested state" });
     }
 
-    if (action === 'approve') {
+    if (action === "approve") {
       // Process Stripe refund
       await stripe.refunds.create({ payment_intent: payment.transactionId });
-      
+
       payment.refundStatus = "Completed";
       payment.paymentStatus = "Refunded";
       payment.refundIssued = true;

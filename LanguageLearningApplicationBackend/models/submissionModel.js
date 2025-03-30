@@ -12,9 +12,7 @@ const SubmissionSchema = new mongoose.Schema(
       ref: "Quiz",
       required: true,
     },
-    selectedAnswers: [
-      { type: Number, required: true }, // Stores the index of the chosen answer
-    ],
+    selectedAnswers: [{ type: Number, required: true }],
     score: {
       type: Number, // Percentage score
       required: true,

@@ -32,7 +32,7 @@ const Instructors = () => {
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openBlockDialog, setOpenBlockDialog] = useState(false);
-  const [actionType, setActionType] = useState(""); // 'block' or 'unblock'
+  const [actionType, setActionType] = useState("");
 
   useEffect(() => {
     fetchInstructors();
@@ -55,7 +55,6 @@ const Instructors = () => {
         `http://localhost:3000/admin/block-instructor/${selectedInstructor._id}`
       );
 
-      // Update the local state based on the response
       setInstructors(
         instructors.map((instructor) =>
           instructor._id === selectedInstructor._id
@@ -69,7 +68,7 @@ const Instructors = () => {
                     ? response.data.user.blocked // Then try response.data.user.blocked
                     : instructor.blocked === "no"
                     ? "yes"
-                    : "no"), // Fallback to toggle
+                    : "no"),
               }
             : instructor
         )
@@ -124,8 +123,6 @@ const Instructors = () => {
           maxWidth="lg"
           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
         >
-          
-
           <TableContainer
             component={Paper}
             elevation={3}

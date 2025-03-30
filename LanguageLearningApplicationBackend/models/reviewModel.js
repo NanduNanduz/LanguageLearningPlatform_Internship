@@ -7,12 +7,12 @@ const reviewSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    studentName:{
-      type:String,
-      required:true
+    studentName: {
+      type: String,
+      required: true,
     },
-    profilePicture:{
-      type:String,
+    profilePicture: {
+      type: String,
     },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -33,6 +33,5 @@ const reviewSchema = new mongoose.Schema(
   },
   { timestamps: true } // Auto adds createdAt & updatedAt
 );
-
 
 export default mongoose.model("Review", reviewSchema);
