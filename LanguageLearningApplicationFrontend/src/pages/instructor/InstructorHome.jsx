@@ -15,8 +15,7 @@ import {
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-const drawerWidth = 240; // Sidebar width
-
+const drawerWidth = 240;
 const InstructorHome = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -63,7 +62,7 @@ const InstructorHome = () => {
         display: "flex",
         minHeight: "100vh",
         backgroundColor: "#f5f5f5",
-        pt: 4, // Add padding top to create space below navbar
+        pt: 4,
       }}
     >
       <CssBaseline />
@@ -149,7 +148,6 @@ const InstructorHome = () => {
                       <Button
                         size="small"
                         variant="contained"
-                        // color="secondary"
                         onClick={() => handleUpdate(course._id)}
                         sx={{ mx: 0.5 }}
                         style={{ backgroundColor: " rgb(95, 115, 117)" }}

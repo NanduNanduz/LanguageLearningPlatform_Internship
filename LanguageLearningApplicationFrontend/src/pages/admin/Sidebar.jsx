@@ -22,12 +22,28 @@ const Sidebar = () => {
       sx={{
         width: 240,
         flexShrink: 0,
-        "& .MuiDrawer-paper": { width: 240, boxSizing: "border-box", backgroundColor: " #dadad6", color: "#fff" },
+        "& .MuiDrawer-paper": {
+          width: 240,
+          boxSizing: "border-box",
+          backgroundColor: " #dadad6",
+          color: "#fff",
+        },
       }}
     >
       {/* Logo & Branding */}
-      <Toolbar sx={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "16px", backgroundColor: "rgb(48, 50, 57)" }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold", letterSpacing: "1px", color: "#4e9fa8" }}>
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "16px",
+          backgroundColor: "rgb(48, 50, 57)",
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", letterSpacing: "1px", color: "#4e9fa8" }}
+        >
           Fluencia
         </Typography>
       </Toolbar>
@@ -37,37 +53,37 @@ const Sidebar = () => {
           <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <DashboardIcon />
           </ListItemIcon>
-          <ListItemText primary="Dashboard"sx={{ color: "black" }} />
+          <ListItemText primary="Dashboard" sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/student-management">
           <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PeopleIcon />
           </ListItemIcon>
-          <ListItemText primary="Students"  sx={{ color: "black" }}/>
+          <ListItemText primary="Students" sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/instructor-management">
           <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PeopleIcon />
           </ListItemIcon>
-          <ListItemText primary="Instructors"  sx={{ color: "black" }}/>
+          <ListItemText primary="Instructors" sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/course-management">
           <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <SchoolIcon />
           </ListItemIcon>
-          <ListItemText primary="Courses"sx={{ color: "black" }} />
+          <ListItemText primary="Courses" sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/user-transactions">
           <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PaymentIcon />
           </ListItemIcon>
-          <ListItemText primary="Transactions"sx={{ color: "black" }} />
+          <ListItemText primary="Transactions" sx={{ color: "black" }} />
         </ListItem>
         <ListItem button component={Link} to="/send-announcement">
           <ListItemIcon sx={{ color: "#4e9fa8" }}>
             <PaymentIcon />
           </ListItemIcon>
-          <ListItemText primary="Announcement" sx={{ color: "black" }}/>
+          <ListItemText primary="Announcement" sx={{ color: "black" }} />
         </ListItem>
       </List>
     </Drawer>

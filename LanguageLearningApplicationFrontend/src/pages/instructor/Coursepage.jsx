@@ -33,13 +33,7 @@ import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import StarIcon from "@mui/icons-material/Star";
-
-
-
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-
-
-
 
 const CoursePage = () => {
   const { courseId } = useParams();
@@ -71,14 +65,11 @@ const CoursePage = () => {
   const [videoToDelete, setVideoToDelete] = useState(null);
   const [deleteVideoDialogOpen, setDeleteVideoDialogOpen] = useState(false);
   const [videoDeleting, setVideoDeleting] = useState(false);
-
-  // Q&A State
   const [questions, setQuestions] = useState([]);
   const [newAnswer, setNewAnswer] = useState("");
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [isLoadingQA, setIsLoadingQA] = useState(false);
   const [qaError, setQAError] = useState(null);
-
   const navigate = useNavigate();
 
   // Fetch questions for instructor's course
@@ -197,7 +188,7 @@ const CoursePage = () => {
           error.message ||
           "Error deleting video."
       );
-      throw error; // Re-throw to handle in the confirmation dialog
+      throw error;
     }
   };
 
@@ -412,25 +403,6 @@ const CoursePage = () => {
     } catch (error) {
       console.error("Error posting answer:", error);
       alert(error.response?.data?.message || "Failed to post answer");
-    }
-  };
-
-  // Mark question as resolved
-  const handleResolve = async (questionId) => {
-    try {
-      const token = sessionStorage.getItem("logintoken");
-      const response = await axios.put(
-        `http://localhost:3000/qa/instructor/questions/${questionId}/resolve`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setQuestions(
-        questions.map((q) => (q._id === questionId ? response.data : q))
-      );
-    } catch (error) {
-      console.error("Error resolving question:", error);
-      alert(error.response?.data?.message || "Failed to resolve question");
     }
   };
 
@@ -963,31 +935,6 @@ const CoursePage = () => {
                               backgroundColor: "#000",
                             }}
                           />
-                          {/* <Box
-                            sx={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "rgba(0,0,0,0.3)",
-                              opacity: 0,
-                              transition: "opacity 0.3s",
-                              "&:hover": {
-                                opacity: 1,
-                              },
-                            }}
-                          >
-                            <PlayCircleOutlineIcon
-                              sx={{
-                                fontSize: 60,
-                                color: "white",
-                              }}
-                            />
-                          </Box> */}
                         </Box>
                         <Stack
                           direction="row"
@@ -1253,7 +1200,6 @@ const CoursePage = () => {
                               }}
                             >
                               {" "}
-                              
                               <Stack
                                 direction="row"
                                 alignItems="center"
@@ -1339,16 +1285,6 @@ const CoursePage = () => {
                           >
                             Answer Question
                           </Button>
-                          {/* {!question.resolved && (
-                            <Button
-                              variant="contained"
-                              color="success"
-                              onClick={() => handleResolve(question._id)}
-                              startIcon={<CheckCircleOutlineIcon />}
-                            >
-                              Mark Resolved
-                            </Button>
-                          )} */}
                         </Stack>
                       )}
                     </CardContent>

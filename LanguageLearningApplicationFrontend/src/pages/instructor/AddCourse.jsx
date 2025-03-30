@@ -11,20 +11,20 @@ import {
   Select,
   FormControl,
   InputLabel,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { useLocation, useNavigate } from "react-router-dom";
 
-
 const AddCourse = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Handle both old and new ways of passing instructor data
-  const user = location.state?.user || location.state?.instructor?.currentUser || location.state?.instructor;
+  const user =
+    location.state?.user ||
+    location.state?.instructor?.currentUser ||
+    location.state?.instructor;
   const userId = user?._id;
 
   console.log("User data in AddCourse:", user); // Debugging log
@@ -41,16 +41,62 @@ const AddCourse = () => {
   const [videoTitles, setVideoTitles] = useState([""]);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  
+
   const categories = [
-    "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati",
-    "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili", "Santali",
-    "Kashmiri", "Konkani", "Sindhi", "Dogri", "Manipuri", "Bodo", "Sanskrit",
-    "Nepali", "English", "Spanish", "French", "German", "Portuguese", "Chinese",
-    "Cantonese", "Japanese", "Korean", "Russian", "Italian", "Turkish", "Dutch",
-    "Polish", "Greek", "Hebrew", "Arabic", "Persian (Farsi)", "Thai", "Vietnamese",
-    "Malay", "Swedish", "Danish", "Finnish", "Norwegian", "Hungarian", "Czech",
-    "Slovak", "Romanian", "Ukrainian", "Filipino (Tagalog)", "Swahili"
+    "Hindi",
+    "Bengali",
+    "Telugu",
+    "Marathi",
+    "Tamil",
+    "Urdu",
+    "Gujarati",
+    "Kannada",
+    "Odia",
+    "Punjabi",
+    "Malayalam",
+    "Assamese",
+    "Maithili",
+    "Santali",
+    "Kashmiri",
+    "Konkani",
+    "Sindhi",
+    "Dogri",
+    "Manipuri",
+    "Bodo",
+    "Sanskrit",
+    "Nepali",
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Portuguese",
+    "Chinese",
+    "Cantonese",
+    "Japanese",
+    "Korean",
+    "Russian",
+    "Italian",
+    "Turkish",
+    "Dutch",
+    "Polish",
+    "Greek",
+    "Hebrew",
+    "Arabic",
+    "Persian (Farsi)",
+    "Thai",
+    "Vietnamese",
+    "Malay",
+    "Swedish",
+    "Danish",
+    "Finnish",
+    "Norwegian",
+    "Hungarian",
+    "Czech",
+    "Slovak",
+    "Romanian",
+    "Ukrainian",
+    "Filipino (Tagalog)",
+    "Swahili",
   ];
 
   const handleChange = (e) => {
@@ -115,13 +161,8 @@ const AddCourse = () => {
         if (videoFiles[index]) formData.append("videos", videoFiles[index]);
       });
 
-      
-
-
       const response = await axios.post(
-        // `http://localhost:3000/courses/createCourse`
-        
-         `http://localhost:3000/instructor/createCourse/${userId}`,
+        `http://localhost:3000/instructor/createCourse/${userId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -131,7 +172,10 @@ const AddCourse = () => {
         navigate("/instructorHome", { state: { user } });
       }
     } catch (error) {
-      setError(error.response?.data?.message || "Error creating course. Please try again.");
+      setError(
+        error.response?.data?.message ||
+          "Error creating course. Please try again."
+      );
       console.error("Error:", error);
     } finally {
       setSubmitting(false);
@@ -154,14 +198,18 @@ const AddCourse = () => {
         encType="multipart/form-data"
         style={{ width: "100%", maxWidth: 600 }}
       >
-        <Typography variant="h5" gutterBottom sx={{
-          textAlign: "center",
-          fontWeight: "bold", 
-          marginBottom: "15px",
-        }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{
+            textAlign: "center",
+            fontWeight: "bold",
+            marginBottom: "15px",
+          }}
+        >
           Create a New Course
         </Typography>
-        
+
         {error && (
           <Typography color="error" sx={{ textAlign: "center", mb: 2 }}>
             {error}
@@ -212,7 +260,11 @@ const AddCourse = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
+            <FormControl
+              fullWidth
+              variant="filled"
+              sx={{ backgroundColor: "white", borderRadius: "5px" }}
+            >
               <InputLabel>Category</InputLabel>
               <Select
                 name="category"
@@ -243,13 +295,13 @@ const AddCourse = () => {
           </Grid>
 
           <Grid item xs={12}>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleThumbnailChange} 
-              style={{ display: "none" }} 
-              id="thumbnail-upload" 
-              required 
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleThumbnailChange}
+              style={{ display: "none" }}
+              id="thumbnail-upload"
+              required
             />
             <label htmlFor="thumbnail-upload">
               <Button
@@ -262,7 +314,9 @@ const AddCourse = () => {
                 <span style={{ color: "rgb(211, 42, 42)" }}>(Required)</span>
               </Button>
             </label>
-            {thumbnail && <Typography mt={1}>Selected: {thumbnail.name}</Typography>}
+            {thumbnail && (
+              <Typography mt={1}>Selected: {thumbnail.name}</Typography>
+            )}
           </Grid>
 
           <Grid item xs={12}>
@@ -280,31 +334,38 @@ const AddCourse = () => {
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <input 
-                    type="file" 
-                    accept="video/*" 
-                    onChange={(e) => handleVideoChange(e, index)} 
-                    style={{ display: "none" }} 
-                    id={`video-upload-${index}`} 
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => handleVideoChange(e, index)}
+                    style={{ display: "none" }}
+                    id={`video-upload-${index}`}
                   />
                   <label htmlFor={`video-upload-${index}`}>
-                    <Button variant="outlined" component="span" sx={{color:"black"}}>
+                    <Button
+                      variant="outlined"
+                      component="span"
+                      sx={{ color: "black" }}
+                    >
                       Upload Video
                     </Button>
                   </label>
                 </Grid>
                 <Grid item xs={2}>
                   {index > 0 && (
-                    <IconButton color="error" onClick={() => removeVideoField(index)}>
+                    <IconButton
+                      color="error"
+                      onClick={() => removeVideoField(index)}
+                    >
                       <RemoveIcon />
                     </IconButton>
                   )}
                 </Grid>
               </Grid>
             ))}
-            <Button 
-              startIcon={<AddIcon />} 
-              onClick={addVideoField} 
+            <Button
+              startIcon={<AddIcon />}
+              onClick={addVideoField}
               sx={{ mt: 1, color: "black" }}
             >
               Add Another Video

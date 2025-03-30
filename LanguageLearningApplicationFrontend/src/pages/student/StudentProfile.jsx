@@ -17,14 +17,11 @@ import {
   CircularProgress,
 } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import { useLocation , useNavigate  } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const StudentProfile = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // const student = location.state?.student;
-
-  // Handle both direct user object and nested student object cases
   const user = location.state?.user || location.state?.student?.currentUser;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,20 +37,13 @@ const StudentProfile = () => {
     mobile: "",
     qualification: "",
   });
-
-  // useEffect(() => {
-  //   fetchProfile();
-  // }, []);
-
   useEffect(() => {
     if (!user?._id) {
-      // Redirect if no user data
       navigate("/login");
       return;
     }
     fetchProfile();
   }, [user?._id]);
-
 
   const fetchProfile = async () => {
     try {
@@ -103,12 +93,16 @@ const StudentProfile = () => {
         data.append("profilePicture", profileImage);
       }
 
-      await axios.put(`http://localhost:3000/user/updateUser/${user._id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.put(
+        `http://localhost:3000/user/updateUser/${user._id}`,
+        data,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       setOpenEdit(false);
-      fetchProfile(); // Refresh profile details after update
+      fetchProfile();
     } catch (error) {
       console.error("Error updating profile:", error);
     } finally {
@@ -117,8 +111,10 @@ const StudentProfile = () => {
   };
 
   const handleEditOpen = () => {
-    setPreviewImage(profile?.profilePicture || "https://via.placeholder.com/150");
-    setProfileImage(null); // Reset selected image to avoid unintended changes
+    setPreviewImage(
+      profile?.profilePicture || "https://via.placeholder.com/150"
+    );
+    setProfileImage(null);
     setOpenEdit(true);
   };
 
@@ -135,7 +131,6 @@ const StudentProfile = () => {
           width: "100%",
           height: "250px",
           backgroundColor: "#4e9fa8",
-          // backgroundImage: "url('/images/profilebg.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           borderRadius: "0 0 15px 15px",

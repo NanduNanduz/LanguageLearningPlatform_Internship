@@ -76,8 +76,8 @@ function App({ currentUser, setCurrentUser }) {
         <Route path="/courses" element={<Courses />} />
         <Route path="/contactus" element={<ContactUs />} />
         <Route
-            path="/coursePageStudent/:courseId"
-            element={<CoursePageStudent />}
+          path="/coursePageStudent/:courseId"
+          element={<CoursePageStudent />}
         />
 
         <Route element={<PrivateRoutes />}>
@@ -96,10 +96,6 @@ function App({ currentUser, setCurrentUser }) {
           <Route path="/courseDetails/:courseId" element={<CourseDetails />} />
           <Route path="/profileStudent" element={<StudentProfile />} />
           <Route path="/enrolledCourses" element={<EnrolledCourses />} />
-          {/* <Route
-            path="/coursePageStudent/:courseId"
-            element={<CoursePageStudent />}
-          /> */}
           <Route path="/user-transactions" element={<AdminTransactions />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route

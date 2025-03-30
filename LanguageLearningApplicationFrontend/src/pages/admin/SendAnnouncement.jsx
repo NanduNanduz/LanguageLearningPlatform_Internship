@@ -10,41 +10,41 @@ const SendAnnouncement = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const token = sessionStorage.getItem("logintoken"); // Retrieve the token
-    if (!token) {
-      setError("You are not logged in. Please log in and try again.");
-      return;
-    }
-
-    const response = await axios.post(
-      "http://localhost:3000/admin/sendAnnouncement",
-      { title, message }, // Only send title and message
-      {
-        headers: { Authorization: `Bearer ${token}` }, // Send the token
+    try {
+      const token = sessionStorage.getItem("logintoken");
+      if (!token) {
+        setError("You are not logged in. Please log in and try again.");
+        return;
       }
-    );
 
-    if (response.data.message) {
-      setSuccess("Announcement sent successfully!");
-      setError("");
-      setTitle("");
-      setMessage("");
+      const response = await axios.post(
+        "http://localhost:3000/admin/sendAnnouncement",
+        { title, message },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.message) {
+        setSuccess("Announcement sent successfully!");
+        setError("");
+        setTitle("");
+        setMessage("");
+      }
+    } catch (error) {
+      console.error("Error sending announcement:", error);
+      setError("Failed to send announcement. Please try again.");
+      setSuccess("");
     }
-  } catch (error) {
-    console.error("Error sending announcement:", error);
-    setError("Failed to send announcement. Please try again.");
-    setSuccess("");
-  }
-};
+  };
 
   return (
     <Box sx={{ display: "flex", height: "50vh" }}>
       {/* Sidebar */}
-      
+
       <Sidebar />
 
       {/* Main Content */}
@@ -58,10 +58,14 @@ const handleSubmit = async (e) => {
         {/* Send Announcement Form */}
         <Container
           maxWidth="md"
-          sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8",marginTop:"10vh" }}
+          sx={{
+            flexGrow: 1,
+            padding: 3,
+            backgroundColor: "#f4f6f8",
+            marginTop: "10vh",
+          }}
         >
           <Box sx={{ mt: 4 }}>
-           
             <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth

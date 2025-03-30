@@ -38,8 +38,6 @@ import {
   QuestionAnswer as QuestionAnswerIcon,
   RateReview as RateReviewIcon,
 } from "@mui/icons-material";
-
-// Add these to your existing Material-UI imports
 import {
   Dialog,
   DialogTitle,
@@ -69,20 +67,15 @@ const StudentCoursePage = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [reviews, setReviews] = useState([]);
-
-  // State for Q&A
   const [questions, setQuestions] = useState([]);
   const [newQuestion, setNewQuestion] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
   const [selectedQuestion, setSelectedQuestion] = useState(null);
-
-  // Add to your component state
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [refundReason, setRefundReason] = useState("");
   const [isEligibleForRefund, setIsEligibleForRefund] = useState(false);
   const [isCheckingEligibility, setIsCheckingEligibility] = useState(true);
 
-  // Add this useEffect to check refund eligibility
   useEffect(() => {
     const checkRefundEligibility = async () => {
       setIsCheckingEligibility(true);
@@ -96,8 +89,6 @@ const StudentCoursePage = () => {
             },
           }
         );
-
-        // Handle both possible response formats
         setIsEligibleForRefund(
           response.data.eligible !== undefined
             ? response.data.eligible
@@ -118,7 +109,6 @@ const StudentCoursePage = () => {
 
   // Fetch questions
   useEffect(() => {
-    // In your fetchQuestions function
     const fetchQuestions = async () => {
       try {
         const token = sessionStorage.getItem("logintoken");
@@ -453,7 +443,6 @@ const StudentCoursePage = () => {
         margin: "0 auto",
         p: 3,
         backgroundColor: "rgb(233, 233, 233)",
-        // backgroundColor: "rgb(156, 183, 186)",
       }}
     >
       {/* Course Header and Thumbnail */}

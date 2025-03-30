@@ -47,7 +47,7 @@ const Course = () => {
   const handleReject = async (id) => {
     try {
       await axios.put(`http://localhost:3000/admin/reject-course/${id}`);
-      fetchCourses(); 
+      fetchCourses();
     } catch (error) {
       console.error("Error rejecting course:", error);
     }

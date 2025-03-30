@@ -48,7 +48,9 @@ const QuizzPage = () => {
   };
 
   const handleUpload = async () => {
-    if (questions.some((q) => !q.questionText || q.options.some((opt) => !opt))) {
+    if (
+      questions.some((q) => !q.questionText || q.options.some((opt) => !opt))
+    ) {
       setMessage("Please complete all question fields.");
       return;
     }
@@ -73,12 +75,16 @@ const QuizzPage = () => {
 
       if (response.data.success) {
         setMessage("Quiz created successfully!");
-        setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswer: 0 }]);
+        setQuestions([
+          { questionText: "", options: ["", "", "", ""], correctAnswer: 0 },
+        ]);
       } else {
         setMessage("Failed: " + response.data.message);
       }
     } catch (error) {
-      setMessage("Error: " + (error.response?.data?.message || "Upload failed"));
+      setMessage(
+        "Error: " + (error.response?.data?.message || "Upload failed")
+      );
     } finally {
       setLoading(false);
     }
@@ -188,7 +194,6 @@ const QuizzPage = () => {
           onClick={addQuestion}
           style={{ color: "#fff" }}
           sx={{
-            
             borderRadius: "20px",
 
             background: "linear-gradient(135deg, #4e9fa8  0%, #98D2C0 100%)",

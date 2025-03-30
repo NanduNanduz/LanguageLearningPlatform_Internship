@@ -13,7 +13,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 
 const UpdateCourse = () => {
@@ -31,14 +31,60 @@ const UpdateCourse = () => {
   });
 
   const categories = [
-    "Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati",
-    "Kannada", "Odia", "Punjabi", "Malayalam", "Assamese", "Maithili", "Santali",
-    "Kashmiri", "Konkani", "Sindhi", "Dogri", "Manipuri", "Bodo", "Sanskrit",
-    "Nepali", "English", "Spanish", "French", "German", "Portuguese", "Chinese",
-    "Cantonese", "Japanese", "Korean", "Russian", "Italian", "Turkish", "Dutch",
-    "Polish", "Greek", "Hebrew", "Arabic", "Persian (Farsi)", "Thai", "Vietnamese",
-    "Malay", "Swedish", "Danish", "Finnish", "Norwegian", "Hungarian", "Czech",
-    "Slovak", "Romanian", "Ukrainian", "Filipino (Tagalog)", "Swahili"
+    "Hindi",
+    "Bengali",
+    "Telugu",
+    "Marathi",
+    "Tamil",
+    "Urdu",
+    "Gujarati",
+    "Kannada",
+    "Odia",
+    "Punjabi",
+    "Malayalam",
+    "Assamese",
+    "Maithili",
+    "Santali",
+    "Kashmiri",
+    "Konkani",
+    "Sindhi",
+    "Dogri",
+    "Manipuri",
+    "Bodo",
+    "Sanskrit",
+    "Nepali",
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Portuguese",
+    "Chinese",
+    "Cantonese",
+    "Japanese",
+    "Korean",
+    "Russian",
+    "Italian",
+    "Turkish",
+    "Dutch",
+    "Polish",
+    "Greek",
+    "Hebrew",
+    "Arabic",
+    "Persian (Farsi)",
+    "Thai",
+    "Vietnamese",
+    "Malay",
+    "Swedish",
+    "Danish",
+    "Finnish",
+    "Norwegian",
+    "Hungarian",
+    "Czech",
+    "Slovak",
+    "Romanian",
+    "Ukrainian",
+    "Filipino (Tagalog)",
+    "Swahili",
   ];
 
   const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -111,7 +157,7 @@ const UpdateCourse = () => {
   return (
     <div
       style={{
-        backgroundColor:"rgb(124, 169, 174)", 
+        backgroundColor: "rgb(124, 169, 174)",
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -120,10 +166,13 @@ const UpdateCourse = () => {
       }}
     >
       <div style={{ maxWidth: 600, width: "100%" }}>
-        <Typography variant="h5" gutterBottom sx={{textAlign:"center",fontWeight: "bold", marginBottom: "15px",
-                    }}>
-                  Update Course
-                </Typography>
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{ textAlign: "center", fontWeight: "bold", marginBottom: "15px" }}
+        >
+          Update Course
+        </Typography>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -166,21 +215,25 @@ const UpdateCourse = () => {
             </Grid>
 
             <Grid item xs={6}>
-              <FormControl fullWidth variant="filled" sx={{ backgroundColor: "white", borderRadius: "5px" }}>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    name="category"
-                    value={courseDetails.category}
-                    onChange={handleChange}
-                    required
-                  >
-                    {categories.map((category, index) => (
-                      <MenuItem key={index} value={category}>
-                        {category}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+              <FormControl
+                fullWidth
+                variant="filled"
+                sx={{ backgroundColor: "white", borderRadius: "5px" }}
+              >
+                <InputLabel>Category</InputLabel>
+                <Select
+                  name="category"
+                  value={courseDetails.category}
+                  onChange={handleChange}
+                  required
+                >
+                  {categories.map((category, index) => (
+                    <MenuItem key={index} value={category}>
+                      {category}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12}>
@@ -205,7 +258,11 @@ const UpdateCourse = () => {
                 fullWidth
                 disabled={loading}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : "Update Course"}
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Update Course"
+                )}
               </Button>
             </Grid>
           </Grid>

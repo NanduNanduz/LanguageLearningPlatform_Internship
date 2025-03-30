@@ -30,7 +30,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 const Studenthome = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const studentData = location.state?.user;
 
   const [courses, setCourses] = useState([]);
@@ -156,28 +156,29 @@ const Studenthome = () => {
 
   const handleCategoryChange = async (event) => {
     const category = event.target.value;
-    if(category=="All")
-    {
+    if (category == "All") {
       window.location.reload();
     }
 
     setSelectedCategory(category);
     setSearchTerm(""); // Clear previous search term
     setCourses([]); // Clear previous courses before fetching new ones
-  
+
     try {
-      const response = await axios.get(`http://localhost:3000/student/search/category/${category}`);
+      const response = await axios.get(
+        `http://localhost:3000/student/search/category/${category}`
+      );
       setCourses(response.data);
     } catch (error) {
       console.error("Error fetching courses by category:", error);
     }
   };
 
-
-
   const fetchCoursesByName = async (name) => {
     try {
-      const response = await axios.get(`http://localhost:3000/student/search/name/${name}`);
+      const response = await axios.get(
+        `http://localhost:3000/student/search/name/${name}`
+      );
       setCourses(response.data);
     } catch (error) {
       console.error("Error fetching courses by name:", error);
@@ -186,7 +187,9 @@ const Studenthome = () => {
 
   const fetchCoursesByCategory = async (category) => {
     try {
-      const response = await axios.get(`http://localhost:3000/student/search/category/${category}`);
+      const response = await axios.get(
+        `http://localhost:3000/student/search/category/${category}`
+      );
       setCourses(response.data);
     } catch (error) {
       console.error("Error fetching courses by category:", error);
@@ -206,126 +209,141 @@ const Studenthome = () => {
     handleSearch();
   };
 
-const handleEnroll = async (courseId) => {
-  if (!student || !student._id) {
-    alert("Student information is missing. Please try logging in again.");
-    return;
-  }
-
-  try {
-    const response = await axios.post(
-      `http://localhost:3000/student/enroll/${courseId}/${student._id}`
-    );
-
-    if (response.data.sessionId) {
-      // If payment is required, redirect to Stripe payment
-      window.location.href = response.data.url;
-    } else {
-      alert(response.data.message || "Enrolled Successfully!");
+  const handleEnroll = async (courseId) => {
+    if (!student || !student._id) {
+      alert("Student information is missing. Please try logging in again.");
+      return;
     }
-  } catch (error) {
-    console.error("Enrollment failed:", error);
-    alert("Failed to enroll. Try again later.");
-  }
-};
 
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/student/enroll/${courseId}/${student._id}`
+      );
 
+      if (response.data.sessionId) {
+        // If payment is required, redirect to Stripe payment
+        window.location.href = response.data.url;
+      } else {
+        alert(response.data.message || "Enrolled Successfully!");
+      }
+    } catch (error) {
+      console.error("Enrollment failed:", error);
+      alert("Failed to enroll. Try again later.");
+    }
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Top Bar */}
-
-
-
       {/* Main Content */}
       <Container sx={{ flexGrow: 1, padding: 3 }}>
-  <Typography variant="h4" gutterBottom align="center">
-    Available Courses
-  </Typography>
-  <Grid
-    container
-    spacing={3}
-    justifyContent="center"
-    alignItems="center"
-    sx={{ textAlign: "center" }} // Ensure text alignment on small screens
-  >
-    {courses.length > 0 ? (
-      courses.map((course) => (
-        <Grid item key={course._id} xs={12} sm={8} md={3} display="flex" justifyContent="center">
-          <Card
-            sx={{
-              width: "100%",
-              maxWidth: 260,
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: "0.3s",
-              "&:hover": {
-                transform: "scale(1.05)",
-                boxShadow: 6,
-              },
-            }}
-          >
-            {/* Course Thumbnail */}
-            <Box
-              component="img"
-              src={course.thumbnail}
-              alt={course.title}
-              sx={{
-                width: "100%",
-                height: 140,
-                objectFit: "cover",
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-              }}
-            />
-
-            <CardContent sx={{ padding: "12px" }}>
-              {/* Course Title */}
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                {course.title}
-              </Typography>
-
-              {/* Course Description (Shortened) */}
-              <Typography variant="body2" color="textSecondary">
-                {course.description.length > 60
-                  ? `${course.description.substring(0, 60)}...`
-                  : course.description}
-              </Typography>
-            </CardContent>
-
-            <CardActions sx={{ justifyContent: "space-between", paddingBottom: 2 }}>
-              {/* View Course Button */}
-              <Button
-                variant="contained"
-                color="primary"
-                component={Link}
-                to={`/coursePageStudent/${course._id}`}
-                sx={{ borderRadius: 2, fontSize: "0.75rem", padding: "6px 12px" }}
+        <Typography variant="h4" gutterBottom align="center">
+          Available Courses
+        </Typography>
+        <Grid
+          container
+          spacing={3}
+          justifyContent="center"
+          alignItems="center"
+          sx={{ textAlign: "center" }}
+        >
+          {courses.length > 0 ? (
+            courses.map((course) => (
+              <Grid
+                item
+                key={course._id}
+                xs={12}
+                sm={8}
+                md={3}
+                display="flex"
+                justifyContent="center"
               >
-                View
-              </Button>
+                <Card
+                  sx={{
+                    width: "100%",
+                    maxWidth: 260,
+                    borderRadius: 3,
+                    boxShadow: 3,
+                    transition: "0.3s",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      boxShadow: 6,
+                    },
+                  }}
+                >
+                  {/* Course Thumbnail */}
+                  <Box
+                    component="img"
+                    src={course.thumbnail}
+                    alt={course.title}
+                    sx={{
+                      width: "100%",
+                      height: 140,
+                      objectFit: "cover",
+                      borderTopLeftRadius: 12,
+                      borderTopRightRadius: 12,
+                    }}
+                  />
 
-              {/* Enroll Button */}
-              <Button
-                variant="contained"
-                color="success"
-                onClick={() => handleEnroll(course._id)}
-                sx={{ borderRadius: 2, fontSize: "0.75rem", padding: "6px 12px" }}
-              >
-                Enroll
-              </Button>
-            </CardActions>
-          </Card>
+                  <CardContent sx={{ padding: "12px" }}>
+                    {/* Course Title */}
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
+                      {course.title}
+                    </Typography>
+
+                    <Typography variant="body2" color="textSecondary">
+                      {course.description.length > 60
+                        ? `${course.description.substring(0, 60)}...`
+                        : course.description}
+                    </Typography>
+                  </CardContent>
+
+                  <CardActions
+                    sx={{ justifyContent: "space-between", paddingBottom: 2 }}
+                  >
+                    {/* View Course Button */}
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      component={Link}
+                      to={`/coursePageStudent/${course._id}`}
+                      sx={{
+                        borderRadius: 2,
+                        fontSize: "0.75rem",
+                        padding: "6px 12px",
+                      }}
+                    >
+                      View
+                    </Button>
+
+                    {/* Enroll Button */}
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleEnroll(course._id)}
+                      sx={{
+                        borderRadius: 2,
+                        fontSize: "0.75rem",
+                        padding: "6px 12px",
+                      }}
+                    >
+                      Enroll
+                    </Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Typography color="textSecondary" align="center">
+              No courses found.
+            </Typography>
+          )}
         </Grid>
-      ))
-    ) : (
-      <Typography color="textSecondary" align="center">
-        No courses found.
-      </Typography>
-    )}
-  </Grid>
-</Container>
-
+      </Container>
     </Box>
   );
 };

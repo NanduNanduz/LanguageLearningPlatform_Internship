@@ -15,7 +15,6 @@ import { Link, useLocation } from "react-router-dom";
 
 const EnrolledCourses = () => {
   const location = useLocation();
-  //const student = location.state?.student; // Get student details from state
   const user = location.state?.user || location.state?.student?.currentUser;
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,21 +25,16 @@ const EnrolledCourses = () => {
         const response = await axios.get(
           `http://localhost:3000/student/enrolledCourse/${user?._id}`
         );
-    
         const enrolledData = response.data?.courses || [];
-    
         // Extract course IDs and fetch full course details
         const courseIds = enrolledData.map((item) => item.courseId || item._id);
-    
         const courseDetailsPromises = courseIds.map((id) =>
           axios.get(`http://localhost:3000/instructor/courseItems/${id}`)
         );
-    
         const courseResponses = await Promise.all(courseDetailsPromises);
-    
         // Extract the actual course data
         const fullCourses = courseResponses.map((res) => res.data.course);
-    
+
         setEnrolledCourses(fullCourses);
       } catch (error) {
         console.error("Error fetching enrolled courses:", error);
@@ -48,10 +42,10 @@ const EnrolledCourses = () => {
         setLoading(false);
       }
     };
-    
+
     if (user?._id) {
       fetchEnrolledCourses();
-    }    
+    }
   }, [user]);
 
   return (

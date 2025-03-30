@@ -14,7 +14,7 @@ import {
 import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3000", {
-  withCredentials: true, // Enable credentials for CORS
+  withCredentials: true,
 });
 
 // Function to generate a random color based on the username
@@ -43,14 +43,14 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const token = sessionStorage.getItem("logintoken");
-      
+
       if (!token) {
         setError("User not authenticated. Please log in.");
         return;
       }
 
       const response = await axios.get(
-        "http://localhost:3000/student/notifications", // Make sure this endpoint exists
+        "http://localhost:3000/student/notifications",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -69,7 +69,9 @@ const Notifications = () => {
 
   return (
     <Container maxWidth="md">
-      <Box sx={{ mt: 4, backgroundColor: "#f5f5f5", padding: 2, borderRadius: 2 }}>
+      <Box
+        sx={{ mt: 4, backgroundColor: "#f5f5f5", padding: 2, borderRadius: 2 }}
+      >
         <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
           Notifications 🔔
         </Typography>
@@ -82,15 +84,22 @@ const Notifications = () => {
 
         <List>
           {notifications.length === 0 ? (
-            <Typography color="textSecondary" sx={{ textAlign: "center", mt: 2 }}>
+            <Typography
+              color="textSecondary"
+              sx={{ textAlign: "center", mt: 2 }}
+            >
               No notifications yet.
             </Typography>
           ) : (
             notifications.map((notification) => (
               <React.Fragment key={notification._id}>
-                <ListItem sx={{ backgroundColor: "#fff", borderRadius: 2, mb: 1 }}>
+                <ListItem
+                  sx={{ backgroundColor: "#fff", borderRadius: 2, mb: 1 }}
+                >
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: getRandomColor(notification.user?.name) }}>
+                    <Avatar
+                      sx={{ bgcolor: getRandomColor(notification.user?.name) }}
+                    >
                       {notification.user?.name?.charAt(0).toUpperCase() || "A"}
                     </Avatar>
                   </ListItemAvatar>

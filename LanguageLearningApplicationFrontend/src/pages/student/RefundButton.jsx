@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Button, CircularProgress, Snackbar, Alert, Box, Typography } from '@mui/material';
-import MoneyOffIcon from '@mui/icons-material/MoneyOff';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  Box,
+  Typography,
+} from "@mui/material";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
+import axios from "axios";
 
 const RefundButton = ({ userId, courseId }) => {
   const [paymentId, setPaymentId] = useState(null);
@@ -9,11 +16,10 @@ const RefundButton = ({ userId, courseId }) => {
   const [isRequesting, setIsRequesting] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'info'
+    message: "",
+    severity: "info",
   });
 
-  // Fetch payment ID when component mounts
   useEffect(() => {
     const fetchPaymentId = async () => {
       try {
@@ -21,17 +27,17 @@ const RefundButton = ({ userId, courseId }) => {
         const response = await axios.get(
           `http://localhost:3000/student/find/${userId}/${courseId}`,
           {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-        
+
         if (response.data.success) {
           setPaymentId(response.data.payment._id);
         } else {
           setSnackbar({
             open: true,
             message: "Payment record not found",
-            severity: "error"
+            severity: "error",
           });
         }
       } catch (error) {
@@ -39,7 +45,7 @@ const RefundButton = ({ userId, courseId }) => {
         setSnackbar({
           open: true,
           message: "Failed to load payment information",
-          severity: "error"
+          severity: "error",
         });
       } finally {
         setIsLoading(false);
@@ -51,29 +57,29 @@ const RefundButton = ({ userId, courseId }) => {
 
   const handleRequestRefund = async () => {
     if (!paymentId) return;
-    
+
     setIsRequesting(true);
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.put(
         `http://localhost:3000/student/${paymentId}/request-refund`,
-        {}, // Optional: Add refund reason here
+        {},
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       setSnackbar({
         open: true,
         message: "Refund requested successfully!",
-        severity: "success"
+        severity: "success",
       });
     } catch (error) {
       console.error("Refund request failed:", error);
       setSnackbar({
         open: true,
         message: error.response?.data?.message || "Failed to request refund",
-        severity: "error"
+        severity: "error",
       });
     } finally {
       setIsRequesting(false);
@@ -88,7 +94,9 @@ const RefundButton = ({ userId, courseId }) => {
         <Button
           variant="outlined"
           color="error"
-          startIcon={isRequesting ? <CircularProgress size={20} /> : <MoneyOffIcon />}
+          startIcon={
+            isRequesting ? <CircularProgress size={20} /> : <MoneyOffIcon />
+          }
           onClick={handleRequestRefund}
           disabled={isRequesting}
         >
@@ -103,11 +111,9 @@ const RefundButton = ({ userId, courseId }) => {
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       >
-        <Alert severity={snackbar.severity}>
-          {snackbar.message}
-        </Alert>
+        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );

@@ -41,7 +41,10 @@ const Login = ({ setCurrentUser, onClose }) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', formData);
+      const response = await axios.post(
+        "http://localhost:3000/auth/login",
+        formData
+      );
       const { role, blocked } = response.data.user;
 
       if (blocked === "yes") {
@@ -51,7 +54,7 @@ const Login = ({ setCurrentUser, onClose }) => {
 
       sessionStorage.setItem("logintoken", response.data.token);
       sessionStorage.setItem("user", JSON.stringify(response.data.user));
-      
+
       if (setCurrentUser) {
         setCurrentUser(response.data.user);
       }
@@ -103,7 +106,10 @@ const Login = ({ setCurrentUser, onClose }) => {
 
   const handleSendMail = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/auth/reset-password', {email: formData.email});
+      const response = await axios.post(
+        "http://localhost:3000/auth/reset-password",
+        { email: formData.email }
+      );
       alert("OTP sent to your E-mail");
       setForgotOpen(false);
       setOtpOpen(true);
@@ -118,7 +124,7 @@ const Login = ({ setCurrentUser, onClose }) => {
       await axios.post("http://localhost:3000/auth/newPass", {
         email: formData.email,
         newPassword: newpassword,
-        newConfirmPassword: confirmPassword
+        newConfirmPassword: confirmPassword,
       });
       alert("Password reset successful");
       setResetOpen(false);

@@ -43,7 +43,12 @@ const Signup = ({ onClose }) => {
   const handleSubmit = async () => {
     setErrorMessage("");
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
       setErrorMessage("All fields are required.");
       return;
     }
@@ -58,7 +63,8 @@ const Signup = ({ onClose }) => {
       alert("Signup Success");
       navigate("/");
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Signup failed. Please try again.";
+      const errorMsg =
+        error.response?.data?.message || "Signup failed. Please try again.";
       setErrorMessage(errorMsg);
     }
   };
@@ -74,7 +80,6 @@ const Signup = ({ onClose }) => {
             sx={{
               background:
                 "linear-gradient(135deg,rgb(132, 192, 173) 0%,rgb(62, 121, 128) 100%)",
-              // backgroundColor: " #4e9fa8",
               color: "white",
               display: "flex",
               alignItems: "center",
@@ -126,7 +131,11 @@ const Signup = ({ onClose }) => {
                     "&:hover": { border: "2px  solid rgb(51, 101, 107)" },
                   }}
                 >
-                  <Typography variant="h6" fontWeight="bold" color="rgb(51, 101, 107)">
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color="rgb(51, 101, 107)"
+                  >
                     🎓 I'm a Student
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
@@ -148,7 +157,11 @@ const Signup = ({ onClose }) => {
                     "&:hover": { border: "2px solid rgb(51, 101, 107)" },
                   }}
                 >
-                  <Typography variant="h6" fontWeight="bold" color=" rgb(51, 101, 107) ">
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color=" rgb(51, 101, 107) "
+                  >
                     📚 I'm an Instructor
                   </Typography>
                   <Typography variant="body2" color="textSecondary">

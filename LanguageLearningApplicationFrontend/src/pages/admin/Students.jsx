@@ -33,7 +33,7 @@ const Students = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openBlockDialog, setOpenBlockDialog] = useState(false);
-  const [actionType, setActionType] = useState(""); // 'block' or 'unblock'
+  const [actionType, setActionType] = useState("");
 
   useEffect(() => {
     fetchStudents();
@@ -76,7 +76,6 @@ const Students = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    
   };
 
   const handleDeleteStudent = async () => {
@@ -114,8 +113,6 @@ const Students = () => {
           maxWidth="lg"
           sx={{ flexGrow: 1, padding: 3, backgroundColor: "#f4f6f8" }}
         >
-         
-
           <TableContainer
             component={Paper}
             elevation={3}

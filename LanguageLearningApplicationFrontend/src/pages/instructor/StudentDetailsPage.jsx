@@ -50,7 +50,6 @@ const StudentDetailsPage = () => {
       </Box>
     );
   if (error) return <Typography color="error">{error}</Typography>;
-
   // Extract only the course details relevant to the instructor's course
   const enrolledCourse = student.enrolledCourses?.find(
     (course) => course.courseId === courseId
