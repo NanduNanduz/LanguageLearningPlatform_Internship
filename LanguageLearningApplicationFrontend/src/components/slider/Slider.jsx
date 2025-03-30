@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -23,7 +23,7 @@ const Slide = ({ children, slidesToShow, arrowsScroll }) => {
       }
     };
 
-    updateSlides(); // Set initial value
+    updateSlides();
     window.addEventListener("resize", updateSlides);
     return () => window.removeEventListener("resize", updateSlides);
   }, [slidesToShow]);
@@ -35,7 +35,6 @@ const Slide = ({ children, slidesToShow, arrowsScroll }) => {
           modules={[Navigation, Pagination]}
           spaceBetween={20}
           slidesPerView={slides}
-          //navigation={arrowsScroll ? { prevEl: ".custom-prev", nextEl: ".custom-next" } : false}
           navigation={{
             prevEl: prevRef.current,
             nextEl: nextRef.current,
@@ -56,11 +55,12 @@ const Slide = ({ children, slidesToShow, arrowsScroll }) => {
         {/* Custom Navigation Buttons */}
         {arrowsScroll && (
           <>
-            {/* <button className="custom-prev">&#10094;</button>
-            <button className="custom-next">&#10095;</button> */}
-
-          <button ref={prevRef} className="custom-prev">&#10094;</button>
-          <button ref={nextRef} className="custom-next">&#10095;</button>
+            <button ref={prevRef} className="custom-prev">
+              &#10094;
+            </button>
+            <button ref={nextRef} className="custom-next">
+              &#10095;
+            </button>
           </>
         )}
       </div>

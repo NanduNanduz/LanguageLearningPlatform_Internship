@@ -11,5 +11,4 @@ const MainLayout = ({ children }) => {
   );
 };
 
-// Make sure you have this export:
 export default MainLayout;

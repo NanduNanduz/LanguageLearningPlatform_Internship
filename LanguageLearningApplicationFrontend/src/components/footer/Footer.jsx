@@ -1,12 +1,12 @@
-import React from 'react'
-import './Footer.scss'
+import React from "react";
+import "./Footer.scss";
 
 const Footer = () => {
   return (
-    <div className='footer'>
+    <div className="footer">
       <div className="container">
         <div className="top">
-        <div className="item">
+          <div className="item">
             <h2>Languages</h2>
             <span>English</span>
             <span>Spanish</span>
@@ -78,20 +78,20 @@ const Footer = () => {
               <img src="/images/pinterest.png" alt="" />
               <img src="/images/instagram.png" alt="" />
             </div>
-          <div className="link">
-            <img src="/images/language.png" alt="" />
-            <span>English</span>
-          </div>
-          <div className="link">
-            <img src="/images/coin.png" alt="" />
-            <span>USD</span>
-          </div>
-          <img src="/images/accessibility.png" alt="" />
+            <div className="link">
+              <img src="/images/language.png" alt="" />
+              <span>English</span>
+            </div>
+            <div className="link">
+              <img src="/images/coin.png" alt="" />
+              <span>USD</span>
+            </div>
+            <img src="/images/accessibility.png" alt="" />
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;
