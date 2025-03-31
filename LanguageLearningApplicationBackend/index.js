@@ -121,15 +121,13 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log("Request Origin:", origin);
-      
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
+
       if (allowedOrigins.includes(origin)) {
-        return callback(null, origin);
+        return callback(null, true); // ✅ Changed this to true
       }
-      
+
       const msg = `CORS error: ${origin} not allowed`;
       console.log(msg);
       return callback(new Error(msg), false);
@@ -137,7 +135,6 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
   })
 );
 
