@@ -80,33 +80,63 @@ dotenv.config();
 
 const app = express();
 
-// Define allowed origins
+// // Define allowed origins
+// const allowedOrigins = [
+//   "http://localhost:5173", // Local development
+//   "https://language-learning-platform-internship-yiok.vercel.app", // Your frontend
+//   "https://language-learning-platform-internship.vercel.app", // Your backend
+// ];
+
 const allowedOrigins = [
-  "http://localhost:5173", // Local development
-  "https://language-learning-platform-internship-yiok.vercel.app", // Your frontend
-  "https://language-learning-platform-internship.vercel.app", // Your backend
+  "http://localhost:5173",
+  "https://language-learning-platform-internship-yiok.vercel.app",
+  "https://language-learning-platform-internship.vercel.app",
+  "https://language-learning-platform-internship-yiok-1cv9w8nib.vercel.app", // New subdomain
 ];
+
+
 
 // Middleware
 app.use(morgan("dev"));
 
+app.use((req, res, next) => {
+  console.log("🔍 Incoming Request Origin:", req.headers.origin);
+  next();
+});
+
+
 // Enhanced CORS configuration
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       console.log("Request Origin:", origin);
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, origin); // ✅ Set the correct origin dynamically
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
+
+
 app.use(
   cors({
-    origin: (origin, callback) => {
-      console.log("Request Origin:", origin);
+    origin: function (origin, callback) {
+      console.log("🔥 CORS Middleware Received Origin:", origin);
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, origin); // ✅ Set the correct origin dynamically
-      } else {
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, origin); // ✅ Return the correct origin dynamically
       }
+      return callback(new Error("❌ Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
