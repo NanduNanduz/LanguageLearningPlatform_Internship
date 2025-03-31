@@ -81,17 +81,10 @@ dotenv.config();
 const app = express();
 
 // // Define allowed origins
-// const allowedOrigins = [
-//   "http://localhost:5173", // Local development
-//   "https://language-learning-platform-internship-yiok.vercel.app", // Your frontend
-//   "https://language-learning-platform-internship.vercel.app", // Your backend
-// ];
-
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://language-learning-platform-internship-yiok.vercel.app",
-  "https://language-learning-platform-internship.vercel.app",
-  "https://language-learning-platform-internship-yiok-1cv9w8nib.vercel.app", // New subdomain
+  "http://localhost:5173", // Local development
+  "https://language-learning-platform-internship-yiok.vercel.app", // Your frontend
+  "https://language-learning-platform-internship.vercel.app", // Your backend
 ];
 
 
@@ -105,7 +98,7 @@ app.use((req, res, next) => {
 });
 
 
-// Enhanced CORS configuration
+
 // app.use(
 //   cors({
 //     origin: (origin, callback) => {
@@ -123,20 +116,31 @@ app.use((req, res, next) => {
 // );
 
 
+
+// Update your CORS middleware like this:
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log("🔥 CORS Middleware Received Origin:", origin);
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, origin); // ✅ Return the correct origin dynamically
+      console.log("Request Origin:", origin);
+      
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, origin);
       }
-      return callback(new Error("❌ Not allowed by CORS"));
+      
+      const msg = `CORS error: ${origin} not allowed`;
+      console.log(msg);
+      return callback(new Error(msg), false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
