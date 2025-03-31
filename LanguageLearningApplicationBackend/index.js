@@ -93,11 +93,13 @@ app.use(morgan("dev"));
 // Enhanced CORS configuration
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
+      console.log("Request Origin:", origin);
       if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
+        callback(null, origin); // ✅ Set the correct origin dynamically
+      } else {
+        callback(new Error("Not allowed by CORS"));
       }
-      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
