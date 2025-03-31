@@ -12,7 +12,7 @@ const PaymentSuccess = () => {
     const verifyPayment = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/verify-payment?session_id=${session_id}`
+          `${import.meta.env.VITE_API_URL}/student/verify-payment?session_id=${session_id}`
         );
         alert(response.data.message); // "Payment verified, enrolled successfully!"
         navigate("/studenthome"); // Redirect to the student dashboard

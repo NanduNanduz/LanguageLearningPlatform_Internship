@@ -41,7 +41,7 @@ const AdminTransactions = () => {
 
   const fetchTransactions = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3000/admin/payments");
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/admin/payments`);
       setTransactions(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -51,7 +51,7 @@ const AdminTransactions = () => {
   const fetchRefundRequests = async () => {
     try {
       const { data } = await axios.get(
-        "http://localhost:3000/admin/payments/refund-requests"
+        `${import.meta.env.VITE_API_URL}/admin/payments/refund-requests`
       );
       setRefundRequests(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -71,7 +71,7 @@ const AdminTransactions = () => {
   const processRefund = async (id, action) => {
     try {
       await axios.post(
-        `http://localhost:3000/admin/payments/process-refund/${id}`,
+        `${import.meta.env.VITE_API_URL}/admin/payments/process-refund/${id}`,
         { action, reason: rejectionReason }
       );
       fetchTransactions();

@@ -42,7 +42,7 @@ const Login = ({ setCurrentUser, onClose }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/auth/login",
+        `${import.meta.env.VITE_API_URL}/auth/login`,
         formData
       );
       const { role, blocked } = response.data.user;
@@ -92,7 +92,7 @@ const Login = ({ setCurrentUser, onClose }) => {
   const handleOtpSubmit = async () => {
     try {
       const enteredOtp = otp.join("");
-      await axios.post("http://localhost:3000/auth/verifyOtp", {
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/verifyOtp`, {
         email: formData.email,
         otp: enteredOtp,
       });
@@ -107,7 +107,7 @@ const Login = ({ setCurrentUser, onClose }) => {
   const handleSendMail = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/auth/reset-password",
+        `${import.meta.env.VITE_API_URL}/auth/reset-password`,
         { email: formData.email }
       );
       alert("OTP sent to your E-mail");
@@ -121,7 +121,7 @@ const Login = ({ setCurrentUser, onClose }) => {
 
   const handleResetPassword = async () => {
     try {
-      await axios.post("http://localhost:3000/auth/newPass", {
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/newPass`, {
         email: formData.email,
         newPassword: newpassword,
         newConfirmPassword: confirmPassword,

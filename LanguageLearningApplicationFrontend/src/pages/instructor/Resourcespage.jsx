@@ -68,7 +68,7 @@ const ResourcesPage = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `http://localhost:3000/instructor/video-resources/${courseId}`,
+        `${import.meta.env.VITE_API_URL}/instructor/video-resources/${courseId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

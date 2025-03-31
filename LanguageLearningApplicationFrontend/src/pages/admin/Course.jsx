@@ -28,7 +28,9 @@ const Course = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/admin/courses");
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/admin/courses`
+      );
       setCourses(response.data);
     } catch (error) {
       console.error("Error fetching courses:", error);
@@ -37,7 +39,9 @@ const Course = () => {
 
   const handleApprove = async (id) => {
     try {
-      await axios.put(`http://localhost:3000/admin/approve-course/${id}`);
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/admin/approve-course/${id}`
+      );
       fetchCourses();
     } catch (error) {
       console.error("Error approving course:", error);
@@ -46,7 +50,9 @@ const Course = () => {
 
   const handleReject = async (id) => {
     try {
-      await axios.put(`http://localhost:3000/admin/reject-course/${id}`);
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/admin/reject-course/${id}`
+      );
       fetchCourses();
     } catch (error) {
       console.error("Error rejecting course:", error);

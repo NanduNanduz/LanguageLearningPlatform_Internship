@@ -20,7 +20,7 @@ const CourseDetails = () => {
     const fetchCourseDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/admin/courseDetails/${courseId}`
+          `${import.meta.env.VITE_API_URL}/admin/courseDetails/${courseId}`
         );
         setCourse(response.data);
       } catch (error) {

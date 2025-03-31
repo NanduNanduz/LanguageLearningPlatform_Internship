@@ -40,7 +40,7 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
   const fetchProfilePicture = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/user/profile/${userId}`
+        `${import.meta.env.VITE_API_URL}/user/profile/${userId}`
       );
       setProfilePicture(response.data.user?.profilePicture || null);
     } catch (error) {
@@ -51,7 +51,7 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
   const fetchNotifications = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/notifications/${userId}`
+        `${import.meta.env.VITE_API_URL}/notifications/${userId}`
       );
       setNotificationCount(response.data.count || 0);
     } catch (error) {

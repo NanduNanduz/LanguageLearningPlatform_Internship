@@ -69,7 +69,7 @@ const QuizzPage = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `http://localhost:3000/instructor/createQuiz/${courseId}`,
+        `${import.meta.env.VITE_API_URL}/instructor/createQuiz/${courseId}`,
         formData
       );
 

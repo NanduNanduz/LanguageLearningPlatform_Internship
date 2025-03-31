@@ -42,7 +42,7 @@ const Students = () => {
   const fetchStudents = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/student/all-students"
+        `${import.meta.env.VITE_API_URL}/student/all-students`
       );
       setStudents(response.data);
     } catch (error) {
@@ -53,7 +53,9 @@ const Students = () => {
   const toggleBlockStatus = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/admin/block-student/${selectedStudent._id}`
+        `${import.meta.env.VITE_API_URL}/admin/block-student/${
+          selectedStudent._id
+        }`
       );
 
       setStudents(
@@ -81,7 +83,9 @@ const Students = () => {
   const handleDeleteStudent = async () => {
     try {
       await axios.delete(
-        `http://localhost:3000/admin/delete-student/${selectedStudent._id}`
+        `${import.meta.env.VITE_API_URL}/admin/delete-student/${
+          selectedStudent._id
+        }`
       );
       setStudents(
         students.filter((student) => student._id !== selectedStudent._id)

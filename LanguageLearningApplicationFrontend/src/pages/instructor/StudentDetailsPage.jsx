@@ -24,7 +24,7 @@ const StudentDetailsPage = () => {
     const fetchStudentDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/studentDetails/${studentId}`
+          `${import.meta.env.VITE_API_URL}/student/studentDetails/${studentId}`
         );
         if (response.data) {
           setStudent(response.data);

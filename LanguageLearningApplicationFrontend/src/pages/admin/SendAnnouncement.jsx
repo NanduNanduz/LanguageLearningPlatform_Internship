@@ -21,7 +21,7 @@ const SendAnnouncement = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:3000/admin/sendAnnouncement",
+        `${import.meta.env.VITE_API_URL}/admin/sendAnnouncement`,
         { title, message },
         {
           headers: { Authorization: `Bearer ${token}` },

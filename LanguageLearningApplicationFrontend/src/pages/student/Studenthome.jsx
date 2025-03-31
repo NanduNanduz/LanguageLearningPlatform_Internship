@@ -113,7 +113,7 @@ const Studenthome = () => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/student/approved-courses"
+          `${import.meta.env.VITE_API_URL}/student/approved-courses`
         );
         setCourses(response.data?.courses || []);
       } catch (error) {
@@ -124,7 +124,7 @@ const Studenthome = () => {
     const fetchProfileDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/user/profile/${student?._id}`
+          `${import.meta.env.VITE_API_URL}/user/profile/${student?._id}`
         );
         setProfilePicture(response.data.user?.profilePicture || null);
       } catch (error) {
@@ -166,7 +166,7 @@ const Studenthome = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/student/search/category/${category}`
+        `${import.meta.env.VITE_API_URL}/student/search/category/${category}`
       );
       setCourses(response.data);
     } catch (error) {
@@ -177,7 +177,7 @@ const Studenthome = () => {
   const fetchCoursesByName = async (name) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/student/search/name/${name}`
+        `${import.meta.env.VITE_API_URL}/student/search/name/${name}`
       );
       setCourses(response.data);
     } catch (error) {
@@ -188,7 +188,7 @@ const Studenthome = () => {
   const fetchCoursesByCategory = async (category) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/student/search/category/${category}`
+        `${import.meta.env.VITE_API_URL}/student/search/category/${category}`
       );
       setCourses(response.data);
     } catch (error) {
@@ -217,7 +217,7 @@ const Studenthome = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3000/student/enroll/${courseId}/${student._id}`
+        `${import.meta.env.VITE_API_URL}/student/enroll/${courseId}/${student._id}`
       );
 
       if (response.data.sessionId) {

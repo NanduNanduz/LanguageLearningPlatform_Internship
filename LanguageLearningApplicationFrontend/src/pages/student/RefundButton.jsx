@@ -25,7 +25,7 @@ const RefundButton = ({ userId, courseId }) => {
       try {
         const token = sessionStorage.getItem("logintoken");
         const response = await axios.get(
-          `http://localhost:3000/student/find/${userId}/${courseId}`,
+          `${import.meta.env.VITE_API_URL}/student/find/${userId}/${courseId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -62,7 +62,7 @@ const RefundButton = ({ userId, courseId }) => {
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.put(
-        `http://localhost:3000/student/${paymentId}/request-refund`,
+        `${import.meta.env.VITE_API_URL}/student/${paymentId}/request-refund`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },

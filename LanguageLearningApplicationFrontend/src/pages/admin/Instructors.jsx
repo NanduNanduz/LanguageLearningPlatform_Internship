@@ -41,7 +41,7 @@ const Instructors = () => {
   const fetchInstructors = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/instructor/all-Instructors"
+        `${import.meta.env.VITE_API_URL}/instructor/all-Instructors`
       );
       setInstructors(response.data);
     } catch (error) {
@@ -52,7 +52,9 @@ const Instructors = () => {
   const toggleBlockStatus = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/admin/block-instructor/${selectedInstructor._id}`
+        `${import.meta.env.VITE_API_URL}/admin/block-instructor/${
+          selectedInstructor._id
+        }`
       );
 
       setInstructors(
@@ -82,7 +84,9 @@ const Instructors = () => {
   const deleteInstructor = async () => {
     try {
       await axios.delete(
-        `http://localhost:3000/admin/delete-instructor/${selectedInstructor._id}`
+        `${import.meta.env.VITE_API_URL}/admin/delete-instructor/${
+          selectedInstructor._id
+        }`
       );
       setInstructors(
         instructors.filter((inst) => inst._id !== selectedInstructor._id)

@@ -23,13 +23,13 @@ const EnrolledCourses = () => {
     const fetchEnrolledCourses = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/enrolledCourse/${user?._id}`
+          `${import.meta.env.VITE_API_URL}/student/enrolledCourse/${user?._id}`
         );
         const enrolledData = response.data?.courses || [];
         // Extract course IDs and fetch full course details
         const courseIds = enrolledData.map((item) => item.courseId || item._id);
         const courseDetailsPromises = courseIds.map((id) =>
-          axios.get(`http://localhost:3000/instructor/courseItems/${id}`)
+          axios.get(`${import.meta.env.VITE_API_URL}/instructor/courseItems/${id}`)
         );
         const courseResponses = await Promise.all(courseDetailsPromises);
         // Extract the actual course data

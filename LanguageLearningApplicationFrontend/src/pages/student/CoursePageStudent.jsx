@@ -37,8 +37,12 @@ const CoursePageStudent = () => {
       try {
         setLoading(true);
         const [courseRes, reviewsRes] = await Promise.all([
-          axios.get(`http://localhost:3000/instructor/courseItems/${courseId}`),
-          axios.get(`http://localhost:3000/student/reviews/${courseId}`),
+          axios.get(
+            `${import.meta.env.VITE_API_URL}/instructor/courseItems/${courseId}`
+          ),
+          axios.get(
+            `${import.meta.env.VITE_API_URL}/student/reviews/${courseId}`
+          ),
         ]);
 
         setCourse(courseRes.data.course);

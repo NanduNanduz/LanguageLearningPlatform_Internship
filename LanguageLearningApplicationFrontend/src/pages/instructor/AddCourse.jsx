@@ -162,7 +162,7 @@ const AddCourse = () => {
       });
 
       const response = await axios.post(
-        `http://localhost:3000/instructor/createCourse/${userId}`,
+        `${import.meta.env.VITE_API_URL}/instructor/createCourse/${userId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

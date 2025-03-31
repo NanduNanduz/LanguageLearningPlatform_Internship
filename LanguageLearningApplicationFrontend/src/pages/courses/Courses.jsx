@@ -24,7 +24,7 @@ const Courses = () => {
     queryKey: ["courses", category, sort, priceFilter],
     queryFn: async () => {
       const res = await axios.get(
-        "http://localhost:3000/student/approved-courses"
+        `${import.meta.env.VITE_API_URL}/student/approved-courses`
       );
       return res.data;
     },

@@ -28,7 +28,7 @@ const InstructorHome = () => {
     const fetchCourseDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/instructor/courseDetails/${instructor?._id}`
+          `${import.meta.env.VITE_API_URL}/instructor/courseDetails/${instructor?._id}`
         );
         setCourseDetails(response.data?.courses || []);
       } catch (error) {
@@ -44,7 +44,7 @@ const InstructorHome = () => {
   const handleDelete = async (courseId) => {
     try {
       await axios.delete(
-        `http://localhost:3000/instructor/delete-course/${courseId}`
+        `${import.meta.env.VITE_API_URL}/instructor/delete-course/${courseId}`
       );
       setCourseDetails(
         courseDetails.filter((course) => course._id !== courseId)

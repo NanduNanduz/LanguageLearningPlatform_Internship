@@ -19,7 +19,7 @@ const CourseCard = ({ item }) => {
       setError(null);
       try {
         const response = await axios.get(
-          `http://localhost:3000/users/${item.userId}`
+          `${import.meta.env.VITE_API_URL}/users/${item.userId}`
         );
         setInstructorData(response.data);
       } catch (err) {
@@ -53,7 +53,7 @@ const CourseCard = ({ item }) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3000/student/enroll/${item._id}/${user._id}`
+        `${import.meta.env.VITE_API_URL}/student/enroll/${item._id}/${user._id}`
       );
 
       if (response.data.sessionId) {

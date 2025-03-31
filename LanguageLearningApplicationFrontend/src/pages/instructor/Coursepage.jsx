@@ -80,7 +80,7 @@ const CoursePage = () => {
       try {
         const token = sessionStorage.getItem("logintoken");
         const response = await axios.get(
-          `http://localhost:3000/instructor/${courseId}/questions`,
+          `${import.meta.env.VITE_API_URL}/instructor/${courseId}/questions`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setQuestions(response.data);
@@ -101,7 +101,7 @@ const CoursePage = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/reviews/${courseId}`
+          `${import.meta.env.VITE_API_URL}/student/reviews/${courseId}`
         );
         setReviews(response.data.reviews);
       } catch (error) {
@@ -118,7 +118,7 @@ const CoursePage = () => {
     const fetchCourseDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/instructor/courseItems/${courseId}`
+          `${import.meta.env.VITE_API_URL}/instructor/courseItems/${courseId}`
         );
         if (response.data.success) {
           setCourse(response.data.course);
@@ -141,7 +141,7 @@ const CoursePage = () => {
     setQuizLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:3000/instructor/quiz/${courseId}`
+        `${import.meta.env.VITE_API_URL}/instructor/quiz/${courseId}`
       );
 
       if (response.data.success) {
@@ -169,7 +169,7 @@ const CoursePage = () => {
   const handleDeleteVideo = async (videoId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3000/instructor/delete-video/${courseId}/${videoId}`
+        `${import.meta.env.VITE_API_URL}/instructor/delete-video/${courseId}/${videoId}`
       );
 
       if (response.data.success) {
@@ -195,7 +195,7 @@ const CoursePage = () => {
   const handleUpdateVideoTitle = async (videoId) => {
     try {
       await axios.put(
-        `http://localhost:3000/instructor/updateVideo/${courseId}/${videoId}`,
+        `${import.meta.env.VITE_API_URL}/instructor/updateVideo/${courseId}/${videoId}`,
         {
           newVideoTitle,
         }
@@ -218,7 +218,7 @@ const CoursePage = () => {
   const fetchEnrolledStudents = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/instructor/enrolled-students/${courseId}`
+        `${import.meta.env.VITE_API_URL}/instructor/enrolled-students/${courseId}`
       );
       if (response.data.success) {
         setStudents(response.data.enrolledStudents);
@@ -233,7 +233,7 @@ const CoursePage = () => {
   const handleDeleteResource = async (courseId, resourceId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3000/instructor/course/${courseId}/resource/${resourceId}`
+        `${import.meta.env.VITE_API_URL}/instructor/course/${courseId}/resource/${resourceId}`
       );
 
       setCourse((prevCourse) => ({
@@ -283,7 +283,7 @@ const CoursePage = () => {
   const handleUpdateQuestion = async (quizId, questionId) => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/instructor/editQuestion/${quizId}/${questionId}`,
+        `${import.meta.env.VITE_API_URL}/instructor/editQuestion/${quizId}/${questionId}`,
         editFormData
       );
 
@@ -325,7 +325,7 @@ const CoursePage = () => {
   const handleDeleteQuestion = async (quizId, questionId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:3000/instructor/deleteQuestion/${quizId}/${questionId}`
+        `${import.meta.env.VITE_API_URL}/instructor/deleteQuestion/${quizId}/${questionId}`
       );
 
       if (response.data.success) {
@@ -390,7 +390,7 @@ const CoursePage = () => {
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.post(
-        `http://localhost:3000/instructor/${courseId}/questions/${questionId}/answers`,
+        `${import.meta.env.VITE_API_URL}/instructor/${courseId}/questions/${questionId}/answers`,
         { answer: newAnswer },
         { headers: { Authorization: `Bearer ${token}` } }
       );

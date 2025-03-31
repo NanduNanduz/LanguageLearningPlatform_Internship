@@ -46,7 +46,7 @@ const InstructorProfile = () => {
   const fetchProfile = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/user/profile/${user._id}`
+        `${import.meta.env.VITE_API_URL}/user/profile/${user._id}`
       );
       setProfile(response.data.user);
       setPreviewImage(
@@ -93,7 +93,7 @@ const InstructorProfile = () => {
       }
 
       await axios.put(
-        `http://localhost:3000/user/updateUser/${user._id}`,
+        `${import.meta.env.VITE_API_URL}/user/updateUser/${user._id}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

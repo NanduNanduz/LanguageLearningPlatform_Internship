@@ -50,7 +50,7 @@ const Notifications = () => {
       }
 
       const response = await axios.get(
-        "http://localhost:3000/student/notifications",
+        `${import.meta.env.VITE_API_URL}/student/notifications`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

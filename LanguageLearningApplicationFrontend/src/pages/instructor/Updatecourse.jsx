@@ -93,7 +93,7 @@ const UpdateCourse = () => {
     const fetchCourseDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/instructor/courseItems/${courseId}`
+          `${import.meta.env.VITE_API_URL}/instructor/courseItems/${courseId}`
         );
         const course = response.data.course;
 
@@ -137,7 +137,7 @@ const UpdateCourse = () => {
       }
 
       await axios.put(
-        `http://localhost:3000/instructor/editCourse/${courseId}`,
+        `${import.meta.env.VITE_API_URL}/instructor/editCourse/${courseId}`,
         formData,
         {
           headers: {

@@ -82,7 +82,7 @@ const StudentCoursePage = () => {
       try {
         const token = sessionStorage.getItem("logintoken");
         const response = await axios.get(
-          `http://localhost:3000/student/eligibility/${userId}/${courseId}`,
+          `${import.meta.env.VITE_API_URL}/student/eligibility/${userId}/${courseId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -113,7 +113,7 @@ const StudentCoursePage = () => {
       try {
         const token = sessionStorage.getItem("logintoken");
         const response = await axios.get(
-          `http://localhost:3000/student/${courseId}/questions`,
+          `${import.meta.env.VITE_API_URL}/student/${courseId}/questions`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -139,7 +139,7 @@ const StudentCoursePage = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/student/reviews/${courseId}`
+          `${import.meta.env.VITE_API_URL}/student/reviews/${courseId}`
         );
         setReviews(response.data.reviews);
       } catch (error) {
@@ -157,22 +157,22 @@ const StudentCoursePage = () => {
       setLoading(true);
       try {
         const courseResponse = await axios.get(
-          `http://localhost:3000/instructor/courseItems/${courseId}`
+          `${import.meta.env.VITE_API_URL}/instructor/courseItems/${courseId}`
         );
         setCourse(courseResponse.data.course);
 
         const quizResponse = await axios.get(
-          `http://localhost:3000/instructor/quiz/${courseId}`
+          `${import.meta.env.VITE_API_URL}/instructor/quiz/${courseId}`
         );
         setQuizzes(quizResponse.data.quizzes || []);
 
         const quizResult = await axios.get(
-          `http://localhost:3000/student/quizResults/${userId}/${courseId}`
+          `${import.meta.env.VITE_API_URL}/student/quizResults/${userId}/${courseId}`
         );
         setQuizResults(quizResult.data.quizScores);
 
         const progressResponse = await axios.get(
-          `http://localhost:3000/student/${userId}/progress/${courseId}`
+          `${import.meta.env.VITE_API_URL}/student/${userId}/progress/${courseId}`
         );
 
         const progressData = progressResponse.data;
@@ -193,7 +193,7 @@ const StudentCoursePage = () => {
   const fetchQuizzes = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/instructor/quiz/${courseId}`
+        `${import.meta.env.VITE_API_URL}/instructor/quiz/${courseId}`
       );
       setQuizzes(response.data.quizzes || []);
     } catch (error) {
@@ -219,7 +219,7 @@ const StudentCoursePage = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/student/submitquiz", {
+      await axios.post(`${import.meta.env.VITE_API_URL}/student/submitquiz`, {
         userId,
         quizId,
         selectedAnswers: Object.values(selectedAnswers[quizId]),
@@ -252,7 +252,7 @@ const StudentCoursePage = () => {
 
     try {
       await axios.post(
-        `http://localhost:3000/student/upload/${userId}/${courseId}`,
+        `${import.meta.env.VITE_API_URL}/student/upload/${userId}/${courseId}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -271,7 +271,7 @@ const StudentCoursePage = () => {
       const userId = user._id;
 
       const response = await axios.post(
-        "http://localhost:3000/student/submit-review",
+        `${import.meta.env.VITE_API_URL}/student/submit-review`,
         {
           studentId: userId,
           courseId: courseId,
@@ -300,7 +300,7 @@ const StudentCoursePage = () => {
   const handleDownloadCertificate = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/instructor/issueCertificate/${userId}/${courseId}`
+        `${import.meta.env.VITE_API_URL}/instructor/issueCertificate/${userId}/${courseId}`
       );
 
       if (response.data.success) {
@@ -324,7 +324,7 @@ const StudentCoursePage = () => {
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.post(
-        `http://localhost:3000/student/${userId}/${courseId}/request-refund`,
+        `${import.meta.env.VITE_API_URL}/student/${userId}/${courseId}/request-refund`,
         { reason: refundReason },
         {
           headers: {
@@ -372,7 +372,7 @@ const StudentCoursePage = () => {
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.post(
-        `http://localhost:3000/student/${courseId}/questions`,
+        `${import.meta.env.VITE_API_URL}/student/${courseId}/questions`,
         { question: newQuestion },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -388,7 +388,7 @@ const StudentCoursePage = () => {
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.post(
-        `http://localhost:3000/student/${courseId}/questions/${questionId}/answers`,
+        `${import.meta.env.VITE_API_URL}/student/${courseId}/questions/${questionId}/answers`,
         { answer: newAnswer },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -407,7 +407,7 @@ const StudentCoursePage = () => {
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.post(
-        `http://localhost:3000/student/answers/${answerId}/upvote`,
+        `${import.meta.env.VITE_API_URL}/student/answers/${answerId}/upvote`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -424,7 +424,7 @@ const StudentCoursePage = () => {
     try {
       const token = sessionStorage.getItem("logintoken");
       const response = await axios.put(
-        `http://localhost:3000/student/questions/${questionId}/resolve`,
+        `${import.meta.env.VITE_API_URL}/student/questions/${questionId}/resolve`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -572,7 +572,7 @@ const StudentCoursePage = () => {
 
                   try {
                     await axios.post(
-                      "http://localhost:3000/student/updateProgress",
+                      `${import.meta.env.VITE_API_URL}/student/updateProgress`,
                       {
                         userId,
                         courseId,
