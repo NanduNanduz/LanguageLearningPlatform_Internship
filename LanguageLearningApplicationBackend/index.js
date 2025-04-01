@@ -82,7 +82,7 @@ const app = express();
 
 // // Define allowed origins
 const allowedOrigins = [
-  "http://localhost:5173", // Local development
+  // "http://localhost:5173", // Local development
   "https://language-learning-platform-internship-yiok.vercel.app", // Your frontend
   "https://language-learning-platform-internship.vercel.app", // Your backend
 ];

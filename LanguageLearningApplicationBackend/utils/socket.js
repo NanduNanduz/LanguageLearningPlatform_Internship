@@ -30,7 +30,7 @@ const setupSocket = (server) => {
   const io = new Server(server, {
     cors: {
       origin: [
-        "http://localhost:5173",
+        // "http://localhost:5173",
         "https://language-learning-platform-internship-yiok.vercel.app",
         "https://language-learning-platform-internship.vercel.app",
       ],
