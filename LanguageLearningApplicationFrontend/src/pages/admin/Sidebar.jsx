@@ -50,7 +50,7 @@ const Sidebar = () => {
 
       <List>
         <ListItem button component={Link} to="/adminDashboard">
-          <ListItemIcon sx={{ color: "#4e9fa8" }}>
+          <ListItemIcon sx={{ color: " #4e9fa8" }}>
             <DashboardIcon />
           </ListItemIcon>
           <ListItemText primary="Dashboard" sx={{ color: "black" }} />
