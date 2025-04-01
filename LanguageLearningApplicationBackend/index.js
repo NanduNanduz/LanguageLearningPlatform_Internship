@@ -87,13 +87,27 @@ const allowedOrigins = [
   "https://language-learning-platform-internship.vercel.app", // Your backend
 ];
 
-
+// 2. Nuclear CORS option - most reliable for Vercel
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Length', 'X-Request-Id']
+};
 
 // Middleware
 app.use(morgan("dev"));
 
+// 3. Apply CORS globally FIRST
+app.use(cors(corsOptions));
+
+// 4. Explicit OPTIONS handler for all routes
+app.options('*', cors(corsOptions));
+
+// 5. Add debug headers to every response
 app.use((req, res, next) => {
-  console.log("🔍 Incoming Request Origin:", req.headers.origin);
+  res.header('X-CORS-Debug', `Origin: ${req.headers.origin || 'none'}`);
   next();
 });
 
