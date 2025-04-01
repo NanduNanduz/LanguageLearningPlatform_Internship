@@ -37,12 +37,12 @@ const Sidebar = () => {
           justifyContent: "center",
           alignItems: "center",
           padding: "16px",
-          backgroundColor: "rgb(48, 50, 57)",
+          backgroundColor: " #dadad6",
         }}
       >
         <Typography
           variant="h6"
-          sx={{ fontWeight: "bold", letterSpacing: "1px", color: "#4e9fa8" }}
+          sx={{ fontWeight: "bold", letterSpacing: "1px", color: " #4e9fa8" }}
         >
           Fluencia
         </Typography>
